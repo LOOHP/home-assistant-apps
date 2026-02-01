@@ -1,0 +1,19 @@
+name: Network Optimizer Speedtest
+version: "1.1.7"
+slug: network-optimizer-speedtest
+description: OpenSpeedTest service for Network Optimizer
+arch:
+- amd64
+- aarch64
+- armv7
+- armhf
+startup: services
+boot: auto
+init: false
+
+ports:
+  3000/tcp: 3005
+ports_description:
+  3000/tcp: OpenSpeedTest web UI
+
+image: ghcr.io/ozark-connect/speedtest
