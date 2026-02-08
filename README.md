@@ -7,4 +7,5 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 **For the initial password, check the addon's log tab instead of using the command.**
 <br><br>
 ### TimeTree ICS Host
-Periodically export and host your Timetree Calendar. Exporting is done using [TimeTree-Exporter](https://github.com/eoleedi/TimeTree-Exporter).
+Periodically export and host your Timetree Calendar. Exporting is done using [TimeTree-Exporter](https://github.com/eoleedi/TimeTree-Exporter).<br>
+After that, you can use the [Remote Calendar Integration](https://www.home-assistant.io/integrations/remote_calendar/) to link to it, or do whatever you want with it. 
