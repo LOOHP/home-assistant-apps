@@ -1,0 +1,39 @@
+name: "TimeTree ICS Host"
+version: "1.0.0"
+description: "Periodically export and host (locally) the TimeTree ics"
+slug: "timetree-ics-host"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+  - armhf
+startup: services
+boot: auto
+init: false
+
+map:
+  - config:rw
+
+host_network: true
+
+options:
+  interval_minutes: 15
+  output_path: "/config/timetree/timetree.ics"
+
+  timetree_email: ""
+  timetree_password: ""
+  calendar_code: ""
+
+  listen_ip: "127.0.0.1"
+  listen_port: 8088
+
+schema:
+  interval_minutes: int(1,1440)
+  output_path: str
+
+  timetree_email: str
+  timetree_password: password
+  calendar_code: str
+
+  listen_ip: str
+  listen_port: int(1,65535)
