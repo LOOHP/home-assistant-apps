@@ -1,7 +1,8 @@
-name: "TimeTree ICS Host"
+name: TimeTree ICS Host
 version: "1.0.0"
-description: "Periodically export and host (locally) the TimeTree ics"
-slug: "timetree-ics-host"
+slug: timetree-ics-host
+description: Periodically export and host (locally) the TimeTree ics
+url: "https://github.com/LOOHP/home-assistant-apps"
 arch:
   - amd64
   - aarch64

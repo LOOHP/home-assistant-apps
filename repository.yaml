@@ -1,4 +1,4 @@
 # https://developers.home-assistant.io/docs/apps/repository#repository-configuration
-name: LOOHP's Home Assistant Apps Repository
+name: LOOHP's Home Assistant Apps
 url: 'https://github.com/LOOHP/home-assistant-apps'
 maintainer: LOOHP

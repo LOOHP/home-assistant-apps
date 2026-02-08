@@ -2,6 +2,7 @@ name: Network Optimizer Speedtest
 version: "1.3.6"
 slug: network-optimizer-speedtest
 description: OpenSpeedTest service for Network Optimizer
+url: "https://github.com/LOOHP/home-assistant-apps"
 arch:
 - amd64
 - aarch64
