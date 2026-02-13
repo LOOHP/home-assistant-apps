@@ -13,14 +13,6 @@ SEMVER_RE = re.compile(r"^v?\d+\.\d+\.\d+([\-+].+)?$")
 
 
 def parse_image(image: str) -> Tuple[str, str]:
-    """
-    Parse:
-      ghcr.io/owner/repo
-      ghcr.io/owner/repo:tag
-      owner/repo
-
-    Returns: (registry, repository)
-    """
     image = image.strip()
 
     # Remove digest
@@ -38,9 +30,6 @@ def parse_image(image: str) -> Tuple[str, str]:
 
 
 def parse_www_authenticate(header: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """
-    Parse WWW-Authenticate header
-    """
     realm = service = scope = None
     for key, value in re.findall(r'(\w+)="([^"]+)"', header or ""):
         if key == "realm":
@@ -53,9 +42,6 @@ def parse_www_authenticate(header: str) -> Tuple[Optional[str], Optional[str], O
 
 
 def get_bearer_token(www_auth: str) -> Optional[str]:
-    """
-    Retrieve bearer token from GHCR challenge
-    """
     realm, service, scope = parse_www_authenticate(www_auth)
     if not realm:
         return None
@@ -80,11 +66,13 @@ def get_bearer_token(www_auth: str) -> Optional[str]:
 
 
 def list_ghcr_tags(repository: str) -> List[str]:
-    url = f"https://ghcr.io/v2/{repository}/tags/list"
+    base_url = f"https://ghcr.io/v2/{repository}/tags/list"
 
-    r = requests.get(url, timeout=20)
-    if r.status_code == 200:
-        return (r.json() or {}).get("tags") or []
+    def do_get(url: str, *, headers=None, params=None):
+        return requests.get(url, headers=headers, params=params, timeout=20)
+
+    r = do_get(base_url, params={"n": 1000})
+    headers = {}
 
     if r.status_code == 401:
         bearer = get_bearer_token(r.headers.get("WWW-Authenticate", ""))
@@ -93,18 +81,34 @@ def list_ghcr_tags(repository: str) -> List[str]:
                 f"Authentication required for {repository}. "
                 f"Set GHCR_USERNAME and GHCR_TOKEN for private repos."
             )
+        headers = {"Authorization": f"Bearer {bearer}"}
+        r = do_get(base_url, headers=headers, params={"n": 1000})
 
-        r2 = requests.get(
-            url,
-            headers={"Authorization": f"Bearer {bearer}"},
-            timeout=20,
-        )
-        if r2.status_code == 200:
-            return (r2.json() or {}).get("tags") or []
+    if r.status_code != 200:
+        raise RuntimeError(f"Failed to list tags for {repository}: {r.text[:200]}")
 
-        raise RuntimeError(f"Auth retry failed for {repository}: {r2.text[:200]}")
+    tags: List[str] = []
+    while True:
+        payload = r.json() or {}
+        tags.extend(payload.get("tags") or [])
 
-    raise RuntimeError(f"Failed to list tags for {repository}: {r.text[:200]}")
+        link = r.headers.get("Link", "")
+        m = re.search(r'<([^>]+)>;\s*rel="next"', link)
+        if not m:
+            break
+
+        next_url = m.group(1)
+        r = do_get(next_url, headers=headers)
+        if r.status_code != 200:
+            raise RuntimeError(f"Pagination failed for {repository}: {r.text[:200]}")
+
+    seen = set()
+    out = []
+    for t in tags:
+        if t not in seen:
+            seen.add(t)
+            out.append(t)
+    return out
 
 
 def latest_semver(tags: List[str]) -> Optional[str]:
