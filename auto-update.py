@@ -15,11 +15,9 @@ SEMVER_RE = re.compile(r"^v?\d+\.\d+\.\d+([\-+].+)?$")
 def parse_image(image: str) -> Tuple[str, str]:
     image = image.strip()
 
-    # Remove digest
     if "@" in image:
         image = image.split("@", 1)[0]
 
-    # Remove tag
     if ":" in image and image.count(":") == 1 and "/" in image.split(":")[0]:
         image = image.rsplit(":", 1)[0]
 
