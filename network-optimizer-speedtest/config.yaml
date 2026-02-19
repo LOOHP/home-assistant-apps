@@ -1,5 +1,5 @@
 name: Network Optimizer Speedtest
-version: "1.8.1"
+version: "1.8.2"
 slug: network-optimizer-speedtest
 description: OpenSpeedTest service for Network Optimizer
 url: "https://github.com/LOOHP/home-assistant-apps"
