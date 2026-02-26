@@ -5,4 +5,4 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 **For the initial password, check the addon's log tab instead of using the command.**
 <br><br>
 ***
-<br><br>
+<br>
