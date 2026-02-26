@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/app-logo-v2.png" alt="Network Optimizer" width="200">
+  <img src="https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/app-logo-v2.png" alt="Network Optimizer" width="200">
 </p>
 
 # Network Optimizer for UniFi
@@ -58,11 +58,11 @@ Deploy on Proxmox with a single command. Run this on your Proxmox VE host:
 bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
 ```
 
-The interactive script creates a Debian 12 LXC container with Docker pre-configured. See [Proxmox Guide](scripts/proxmox/README.md) for details.
+The interactive script creates a Debian 12 LXC container with Docker pre-configured. See [Proxmox Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/scripts/proxmox/README.md) for details.
 
 ## New: macOS Native Installation
 
-Install natively on macOS for maximum speed test performance (Docker Desktop limits network throughput for speed testing). See [macOS Installation Guide](docs/MACOS-INSTALLATION.md) for full instructions.
+Install natively on macOS for maximum speed test performance (Docker Desktop limits network throughput for speed testing). See [macOS Installation Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docs/MACOS-INSTALLATION.md) for full instructions.
 
 ## New: Windows Installer
 
@@ -72,7 +72,7 @@ Download the MSI installer from [GitHub Releases](https://github.com/Ozark-Conne
 
 Test LAN speeds from any device on your network - phones, tablets, laptops - without SSH access. Run browser-based speed tests powered by [OpenSpeedTest™](https://openspeedtest.com) or use iperf3 clients; results are automatically collected and displayed with device identification, network path visualization, and performance metrics. With HTTPS enabled, browser tests can collect location data (with permission) to build a Speed / Coverage Map showing real-world performance across your property or campus.
 
-![Speed / Coverage Map](docs/images/speed-coverage-map.png)
+![Speed / Coverage Map](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/speed-coverage-map.png)
 
 ---
 
@@ -110,19 +110,19 @@ Network Optimizer runs iperf3 tests between your gateway and network devices, au
 
 Test history lets you track performance over time with these relevant data in order to identify and characterize any changes to performance.
 
-![LAN Speed Test](docs/images/lan-speed-test.png)
+![LAN Speed Test](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/lan-speed-test.png)
 
 ### Client Speed Testing
 
-Test LAN speeds from any device without SSH access. Open a browser on your phone, tablet, or laptop and run a speed test; results are automatically recorded with device identification. For CLI users, the bundled iperf3 server accepts client connections and logs results. See [Client Speed Testing](docker/DEPLOYMENT.md#client-speed-testing-optional) in the deployment guide.
+Test LAN speeds from any device without SSH access. Open a browser on your phone, tablet, or laptop and run a speed test; results are automatically recorded with device identification. For CLI users, the bundled iperf3 server accepts client connections and logs results. See [Client Speed Testing](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#client-speed-testing-optional) in the deployment guide.
 
-![Client Speed Test with Network Path](docs/images/client-speed-test-trace.png)
+![Client Speed Test with Network Path](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/client-speed-test-trace.png)
 
 ### Cellular Modem Monitoring
 
 If you're running a U-LTE or U5G-Max for backup (or primary) connectivity, you can monitor signal quality from the dashboard: RSRP, RSRQ, SNR, cell tower info, and connection status. Supports multiple modems with easy navigation between them.
 
-![Cellular Stats Demo](docs/images/cellular-stats.gif)
+![Cellular Stats Demo](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/cellular-stats.gif)
 
 ### UPnP Inspector
 
@@ -153,19 +153,19 @@ Most features work with just API access. SSH is only needed for speed testing an
 | LAN Speed Test | Yes - Gateway SSH and/or Device SSH |
 | Adaptive SQM | Yes - Gateway SSH |
 
-To enable SSH, see [SSH Configuration](docker/DEPLOYMENT.md#unifi-ssh-configuration) in the Deployment Guide. SSH must be configured via the UniFi web interface (not the mobile app).
+To enable SSH, see [SSH Configuration](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#unifi-ssh-configuration) in the Deployment Guide. SSH must be configured via the UniFi web interface (not the mobile app).
 
 ## Installation
 
 | Platform | Method | Guide |
 |----------|--------|-------|
-| Linux Server | Docker (recommended) | [Deployment Guide](docker/DEPLOYMENT.md#1-linux--docker-recommended) |
-| Proxmox VE | LXC one-liner | [Proxmox Guide](scripts/proxmox/README.md) |
-| Synology/QNAP/Unraid | Docker | [NAS Deployment](docker/DEPLOYMENT.md#3-nas-deployment-docker) |
-| Home Assistant | Add-ons | [Home Assistant](docker/DEPLOYMENT.md#5-home-assistant) |
+| Linux Server | Docker (recommended) | [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#1-linux--docker-recommended) |
+| Proxmox VE | LXC one-liner | [Proxmox Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/scripts/proxmox/README.md) |
+| Synology/QNAP/Unraid | Docker | [NAS Deployment](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#3-nas-deployment-docker) |
+| Home Assistant | Add-ons | [Home Assistant](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#5-home-assistant) |
 | Windows | Installer (recommended) | [Download from Releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases) |
-| macOS | Native (best performance) | [macOS Installation](docs/MACOS-INSTALLATION.md) |
-| Linux | Native (no Docker) | [Linux Native](docker/NATIVE-DEPLOYMENT.md#linux-deployment) |
+| macOS | Native (best performance) | [macOS Installation](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docs/MACOS-INSTALLATION.md) |
+| Linux | Native (no Docker) | [Linux Native](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/NATIVE-DEPLOYMENT.md#linux-deployment) |
 
 Docker Desktop on macOS and Windows limits network throughput for speed testing. For accurate multi-gigabit measurements, use native deployment.
 
@@ -215,7 +215,7 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOp
 2. Create a **Local Access Only** account on your controller (Ubiquiti SSO won't work):
    - Quick: Super Admin role
    - Restricted: Network View Only, Protect View Only, User Management None
-   - See the in-app setup guide or [detailed instructions](docker/DEPLOYMENT.md#unifi-account)
+   - See the in-app setup guide or [detailed instructions](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#unifi-account)
 3. Click Connect to authenticate
 4. Navigate to Audit to run your first security scan
 
