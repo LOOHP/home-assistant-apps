@@ -4,7 +4,7 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 **This module does not work unless you also install the main network optimizer app.**
 <br><br>
 ***
-<br><br>
+<br>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/app-logo-v2.png" alt="Network Optimizer" width="200">
