@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import base64
 import os
+import posixpath
 import re
 from pathlib import Path
 from typing import List, Optional, Tuple
+from urllib.parse import urlparse
 
 import requests
 from packaging.version import InvalidVersion, Version
@@ -190,6 +192,69 @@ def github_get_release_body(repo_full: str, version: str) -> Optional[Tuple[str,
     return None
 
 
+def is_relative_url(u: str) -> bool:
+    u = (u or "").strip()
+    if not u:
+        return False
+    if u.startswith(("#", "mailto:", "tel:", "data:")):
+        return False
+    p = urlparse(u)
+    if p.scheme or p.netloc:
+        return False
+    return not u.startswith("/")
+
+
+def resolve_repo_path(base_file_path: str, rel: str) -> str:
+    base_dir = posixpath.dirname(base_file_path)
+    joined = posixpath.normpath(posixpath.join(base_dir, rel))
+    return joined.lstrip("./")
+
+
+def rewrite_relative_urls(md: str, repo_full: str, ref: str, source_path: str) -> str:
+    raw_base = f"https://raw.githubusercontent.com/{repo_full}/{ref}/"
+    blob_base = f"https://github.com/{repo_full}/blob/{ref}/"
+
+    def to_raw(rel: str) -> str:
+        return raw_base + resolve_repo_path(source_path, rel)
+
+    def to_blob(rel: str) -> str:
+        return blob_base + resolve_repo_path(source_path, rel)
+
+    def repl_img(m: re.Match) -> str:
+        url = m.group(2)
+        if is_relative_url(url):
+            url = to_raw(url)
+        return f'{m.group(1)}"{url}"'
+
+    md = re.sub(r'(<img[^>]*?\ssrc=)"([^"]+)"', repl_img, md, flags=re.I)
+
+    def repl_a(m: re.Match) -> str:
+        url = m.group(2)
+        if is_relative_url(url):
+            url = to_blob(url)
+        return f'{m.group(1)}"{url}"'
+
+    md = re.sub(r'(<a[^>]*?\shref=)"([^"]+)"', repl_a, md, flags=re.I)
+
+    def repl_md_img(m: re.Match) -> str:
+        alt, url, tail = m.group(1), m.group(2), m.group(3) or ""
+        if is_relative_url(url):
+            url = to_raw(url)
+        return f"![{alt}]({url}{tail})"
+
+    md = re.sub(r"!\[([^\]]*)\]\((\S+?)(\s+\".*?\")?\)", repl_md_img, md)
+
+    def repl_md_link(m: re.Match) -> str:
+        text, url, tail = m.group(1), m.group(2), m.group(3) or ""
+        if is_relative_url(url):
+            url = to_blob(url)
+        return f"[{text}]({url}{tail})"
+
+    md = re.sub(r"(?<!!)\[([^\]]+)\]\((\S+?)(\s+\".*?\")?\)", repl_md_link, md)
+
+    return md
+
+
 def write_if_changed(dst: Path, content: str) -> bool:
     current = dst.read_text() if dst.exists() else None
     if current == content:
@@ -221,7 +286,8 @@ def sync_upstream_docs(addon_dir: Path, repo_full: str, version_for_release_fall
         branch,
     )
     if readme is not None:
-        _, text = readme
+        src_path, text = readme
+        text = rewrite_relative_urls(text, repo_full, branch, src_path)
         if write_if_changed(addon_dir / "README.md", text):
             print(f"README    {addon_dir/'README.md'} updated from {repo_full}@{branch}")
             changed = True
@@ -247,7 +313,8 @@ def sync_upstream_docs(addon_dir: Path, repo_full: str, version_for_release_fall
     )
 
     if changelog is not None:
-        _, text = changelog
+        src_path, text = changelog
+        text = rewrite_relative_urls(text, repo_full, branch, src_path)
         if write_if_changed(addon_dir / "CHANGELOG.md", text):
             print(f"CHANGELOG {addon_dir/'CHANGELOG.md'} updated from {repo_full}@{branch}")
             changed = True
