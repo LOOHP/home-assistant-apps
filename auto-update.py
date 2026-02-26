@@ -272,6 +272,18 @@ def prepend_release_notes(dst: Path, version: str, body_md: str) -> bool:
     return True
 
 
+def apply_local_header(addon_dir: Path, content: str) -> str:
+    header_path = addon_dir / "HEADER.md"
+    if not header_path.exists():
+        return content
+    header = header_path.read_text()
+    if not header.endswith("\n"):
+        header += "\n"
+    if content and not content.startswith("\n") and not header.endswith("\n\n"):
+        header += "\n"
+    return header + content
+
+
 def sync_upstream_docs(addon_dir: Path, repo_full: str, version_for_release_fallback: str) -> bool:
     branch = github_default_branch(repo_full)
     if not branch:
@@ -288,6 +300,7 @@ def sync_upstream_docs(addon_dir: Path, repo_full: str, version_for_release_fall
     if readme is not None:
         src_path, text = readme
         text = rewrite_relative_urls(text, repo_full, branch, src_path)
+        text = apply_local_header(addon_dir, text)
         if write_if_changed(addon_dir / "README.md", text):
             print(f"README    {addon_dir/'README.md'} updated from {repo_full}@{branch}")
             changed = True
