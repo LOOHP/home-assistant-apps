@@ -3,6 +3,7 @@ version: "1.10.7"
 slug: network-optimizer
 description: Run Ozark-Connect Network Optimizer
 url: "https://github.com/LOOHP/home-assistant-apps"
+repo: "https://github.com/Ozark-Connect/NetworkOptimizer"
 arch:
 - amd64
 - aarch64
