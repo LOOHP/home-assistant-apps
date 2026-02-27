@@ -1,3 +1,60 @@
+## 1.11.0
+
+v1.11.0 adds WAN data usage tracking with billing cycle alerts - useful if you're on a metered connection like Starlink, cellular, or a capped ISP plan.
+
+## What's New
+
+For users upgrading from v1.10.0, here's what you missed in the v1.10.x patches:
+
+- **HTTPS reverse proxy** (v1.10.5) - Automatic Let's Encrypt certificates via Traefik. The Windows MSI includes an opt-in feature; Docker users can use the companion [NetworkOptimizer-Proxy](https://github.com/Ozark-Connect/NetworkOptimizer-Proxy) repo. Per-hostname TLS forces HTTP/1.1 for speed tests while keeping HTTP/2 for the app.
+- **Threat search** (v1.10.4) - Search the full threat database by IP, CIDR, country, ASN, or org name
+- **Service names for targeted ports** (v1.10.7) - The threat dashboard now shows service names (SSH, RDP, MSSQL, Docker API, etc.) for 60+ commonly targeted ports, with proper ICMP/GRE protocol handling
+- **MITRE ATT&CK techniques** (v1.10.2) - CrowdSec CTI enrichment surfaces MITRE ATT&CK technique mappings in IP drilldowns
+- **Noise filters suppress alerts** (v1.10.6) - Noise filters now suppress alert notifications for matching patterns, not just dashboard views. Attack pattern detections (brute force, DDoS, exploit campaigns) also trigger alerts with stable dedup to prevent repeat notifications
+- **Adaptive SQM: WAN link speed cap and cellular profile** (v1.10.9) - Rates are now capped at the physical WAN port's link speed, with an editable baseline latency, a research-based 7-day cellular congestion profile, and auto-detection for Starlink/LTE/5G/Fiber/DSL
+- **RADIUS/802.1X port security** (v1.10.4) - Audit recognizes RADIUS MAC Authentication and 802.1X port profiles, eliminating false "No MAC" warnings
+- **Zone-based firewall isolation** (v1.10.3) - Audit recognizes custom firewall zones with block rules as proper network isolation
+- **LAG aggregate speed** (v1.10.4) - Path visualization shows combined LAG bandwidth (e.g., 2x10G = 20G)
+- **U7-Mesh and UCG-Industrial** (v1.10.9) - Added to the product database with device icons
+
+## WAN Data Usage Tracking (Under Alerts & Schedule)
+
+Track bandwidth consumption per WAN interface against your ISP's data cap. Useful for Starlink, cellular hotspots, or any metered connection where going over means throttling or overage charges.
+
+- **Billing cycle awareness** - Configure your billing day (1-28) and the tracker calculates usage within the current cycle, rolling over automatically each month
+- **Data cap alerts** - Set a cap in GB and a warning threshold (default 80%). Get alert notifications when you're approaching or exceeding your limit - one alert per cycle, not spam
+- **Gateway reboot handling** - When the gateway reboots mid-cycle, the tracker uses uptime to determine that the raw byte counters represent all usage since boot, so you don't lose data
+- **Usage adjustment** - If you enable tracking mid-cycle, enter how much data was already used. Negative values work too if the tracker overcounts. Resets automatically each billing cycle
+- **Per-WAN configuration** - Each WAN gets its own cap, billing day, and tracking toggle. Supports multi-WAN setups
+
+## Security Audit
+
+- **802.1X ports with curated VLAN lists** - Ports secured with 802.1X/RADIUS that have a curated set of tagged VLANs (for dynamic VLAN assignment) are no longer flagged as "Excessive Tagged VLANs". Ports with "Allow All" are still flagged as informational.
+- **Hardware acceleration + NetFlow** - The "Hardware Acceleration disabled" recommendation is now suppressed when NetFlow is enabled, since UniFi requires offloading to be off for NetFlow to work.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.10.9
 
 Adaptive SQM improvements and new device support. See [v1.10.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.10.0) for what's new in v1.10.0+
