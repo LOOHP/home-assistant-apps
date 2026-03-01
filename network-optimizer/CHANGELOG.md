@@ -1,3 +1,40 @@
+## 1.11.2
+
+More audit accuracy improvements and UI fixes. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
+
+## Security Audit
+
+- **Protect cameras now reliably detected for VLAN checks** - The camera VLAN rule previously relied on port names to identify cameras, so it only worked when ports were named something camera-related. Now detects them via the Protect API regardless of port naming, with a fallback for cameras that have no port data at all.
+- **Cloudflare IP restriction on port forwards** - Port forwards restricted to Cloudflare IP ranges are now downgraded from Critical to Info since they're properly locked down. Other IP restrictions get Recommended severity with actionable steps to switch to Cloudflare. Issue descriptions now deep-link to the Threat Intelligence drilldown for the specific port.
+- **DNS false-positive fix for non-default management VLANs** - Device DNS validation now checks each device's own subnet gateway rather than assuming VLAN 1. Admin-configured DHCP DNS servers (Pi-hole, AdGuard Home) are also accepted as valid targets.
+
+## Fixes
+
+- **Notes auto-save on paste** - Notes fields (speed test details, UPnP inspector) now save on paste and drag-and-drop, not just typing. Also saves immediately when the field loses focus.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.1
 
 More improvements to WAN data usage tracking and audit accuracy. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
