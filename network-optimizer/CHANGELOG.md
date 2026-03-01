@@ -1,3 +1,46 @@
+## 1.11.1
+
+More improvements to WAN data usage tracking and audit accuracy. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
+
+## WAN Data Usage
+
+- **Smarter baseline tracking** - Changing your billing day now recalculates the baseline automatically instead of using a stale value
+- **Mid-cycle guidance** - When enabling tracking partway through a billing cycle, you'll see contextual hints about what to expect
+- **Local timezone billing boundaries** - Billing cycle rollovers now use your local timezone instead of UTC
+
+## Wi-Fi Optimizer
+
+- **Channel width display** - Client cards now show the negotiated channel width (20/40/80/160/320 MHz) alongside the channel number
+- **Wide channel width rule** - Wider channels raise the noise floor and reduce co-channel separation. Recommends stepping down from 320 to 160 MHz on 6 GHz, and from 160 to 80 MHz on 5 GHz when clients have weak signal.
+
+## Security Audit
+
+- **Smart speakers covered by media players setting** - Google Home, Amazon Echo, Sonos, and other smart speakers are now suppressed by "Allow all media players on main network" - previously only Apple HomePods were covered
+- **Security/Management networks exempt from third-party DNS requirement** - If you run Pi-hole or AdGuard on most networks but leave your camera and management VLANs on gateway DNS, the audit no longer flags that as inconsistent. DNAT coverage is still checked for these networks since cameras are notorious for hardcoding their own DNS.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.0
 
 v1.11.0 adds WAN data usage tracking with billing cycle alerts - useful if you're on a metered connection like Starlink, cellular, or a capped ISP plan.
