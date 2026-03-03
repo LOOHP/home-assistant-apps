@@ -1,3 +1,36 @@
+## 1.11.3
+
+More audit accuracy improvements. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
+
+## Security Audit
+
+- **802.1X multi_host mode now recognized as secured** - Ports using 802.1X multi_host mode (authenticates the first MAC, then allows subsequent devices) are now correctly treated as secured. Previously only "auto" and "mac_based" modes were recognized, so multi_host ports were incorrectly flagged as unprotected in the audit and port security stats.
+
+- **"Allow All" vs manually selecting all VLANs** - The excessive tagged VLANs rule now distinguishes between the blanket "Allow All" forwarding mode (which automatically includes any future VLANs) and manually selecting every VLAN in "Customize" mode (a deliberate choice that won't auto-include new VLANs). Previously both were treated the same, which could flag intentionally configured ports.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.2
 
 More audit accuracy improvements and UI fixes. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
