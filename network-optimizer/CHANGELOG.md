@@ -1,3 +1,42 @@
+## 1.11.4
+
+More fixes and a new notification channel. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
+
+## Notifications
+
+- **ntfy.sh support** - You can now send alerts to [ntfy.sh](https://ntfy.sh) as a notification channel. Supports markdown messages, priority mapping, emoji tags, and both Bearer token and Basic auth. Great lightweight option if you don't want to set up a full webhook integration.
+
+## Security Audit
+
+- **Fixed false positives on ports staged for new WAN connections** - Ports being prepped for a future WAN connection could get flagged as unused because the forwarding mode field isn't present on WAN-assigned ports. Now correctly detects WAN assignment via `ethernet_overrides` on the device and skips these ports.
+
+## Fixes
+
+- **Notes cursor no longer jumps to end while typing** - Fixed the textarea/input cursor resetting to the end of the text during auto-save. Notes also now sync across detail and table views immediately.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.3
 
 More audit accuracy improvements. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
