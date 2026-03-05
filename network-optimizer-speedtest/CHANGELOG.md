@@ -1,3 +1,43 @@
+## 1.11.5
+
+More fixes and improvements. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+
+
+## Security Audit
+
+- **Fixed false positive inter-VLAN isolation warnings on legacy firewalls** - Legacy (pre-zone-based) "Allow Established/Related" rules were being treated as if they allowed all traffic, potentially eclipsing block rules below them. The parser now correctly reads connection state fields so these rules only match established/related connections, not new ones.
+
+## Proxmox Installer
+
+- **Traefik HTTPS reverse proxy option** - The Proxmox LXC installer now offers an optional Traefik setup that auto-provisions Let's Encrypt certificates via Cloudflare DNS-01. This enables geo location tagging and solves the HTTP/1.1 speed test requirement without manual reverse proxy setup.
+- **VLAN tag support** - The installer now prompts for an optional VLAN tag when the bridge is VLAN-aware, preventing install failures when the default untagged VLAN doesn't have internet access.
+
+## Fixes
+
+- **Schedule form layout improvements** - Better alignment and sizing of form fields on mobile and desktop for the Alerts/Schedule page.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.4
 
 More fixes and a new notification channel. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+.
