@@ -1,3 +1,46 @@
+## 1.11.6
+
+Fixes and enhancements for the security audit and alerts system. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.
+
+## Device Fingerprint
+
+- **Media and Gaming network types** - New purpose types for entertainment networks (streaming, theater, A/V) and game console networks. Previously, Media auto-classified as IoT and Gaming as Home, which caused false-positive isolation findings when intentional allow rules existed. Trust hierarchy: Guest can access Media but not Trusted/IoT networks; Gaming has Home-level trust so consoles get UPnP access.
+- **Correct device placement for Media and Gaming** - Streaming devices and smart TVs on a Media network are correctly placed (no audit finding), since Media is isolated like IoT. Game consoles on Gaming are also accepted.
+
+## Security Audit
+
+- **Fixed false-positive isolation issues on pre-zone-based firewall setups** - A recent change assigned "ANY" matching targets to firewall rules with empty source/dest fields, which caused infrastructure rules (Allow Established/Related, Drop Invalid State) to eclipse the real inter-VLAN block rule. Fixed at three layers: parser, evaluator, and VLAN analyzer.
+
+## Alerts & Schedule
+
+- **Audit severity no longer inflated by system issues** - System-category issues (e.g., fingerprint DB unavailable) are now excluded from critical counts, so a score-100 audit won't trigger Error-severity alerts.
+- **Schedule error handling isolated** - A DB update failure after a successful task no longer triggers a false "task failed" alert.
+- **Console reconnection before scheduled audits** - Prevents fingerprint cache failures on long schedule intervals where the session goes stale.
+- **Source links on all alerts** - Alerts now link back to their source page (e.g., a specific speed test result or audit finding) with "View" buttons in the UI and links in all notification channels.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.5
 
 More fixes and improvements. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.0+
