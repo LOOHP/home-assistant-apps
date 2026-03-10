@@ -1,3 +1,51 @@
+## 1.11.7
+
+Wi-Fi heatmap accuracy improvements, hourly scheduling, and a LAG speed detection fix. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.
+
+## Alerts & Schedule
+
+- **Hourly speed test scheduling** - Schedule intervals now go as low as every 1 hour (previously 6 hours minimum). New options: 1, 2, and 4 hour intervals for audit, WAN, and LAN speed test schedules.
+
+## Wi-Fi Heatmaps
+
+- **Elevation 0 antenna data for 2D heatmaps** - Floor plan heatmaps now use extracted Elevation 0 deg cut data for more accurate horizontal coverage shapes. Extracted from Ubiquiti polar plot images for U7-Pro-XGS, U7-Outdoor, U7-Pro-Outdoor, U7-Mesh, E7, E7-Audience (narrow/wide), and E7-Campus - including all EU variants. More APs coming soon.
+- **Antenna pattern orientation fixes** - Fixed ceiling, desktop, and wall mount orientation transforms. Ceiling mount uses 180 rotation + LR mirror, desktop uses 180 rotation, and mesh APs skip transforms that were incorrectly flipping their patterns.
+- **50% higher heatmap resolution** - Grid resolution increased from 400x500 to 600x750 for sharper coverage visualization.
+- **U7-Mesh antenna data** - Added to the antenna pattern catalog with 2.4 and 5 GHz patterns (omni 6 dBi + directional 10 dBi on 5 GHz).
+- **E7 AP spec corrections** - Fixed 2.4 GHz gain (4 to 5 dBi) and TX power values for 5 GHz and 6 GHz bands to match the actual tech specs.
+
+## LAN Speed Test
+
+- **LAG speed detection in reversed paths** - When building network paths from gateway to server, the wrong port was used for speed lookups on LAG setups - checking a 2.5G downlink port instead of the 20G LAG uplink. Fixed all three reversed server chain loops.
+
+## Fixes
+
+- **MailKit bumped to 4.15.1** - Fixes CVE-2026-30227 (CRLF injection in SMTP).
+- **Proxmox install prompt clarified** - The password prompt now explains the auto-generation behavior.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.6
 
 Fixes and enhancements for the security audit and alerts system. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.
