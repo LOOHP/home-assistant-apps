@@ -1,3 +1,44 @@
+## 1.11.8
+
+Quality of life improvements for speed testing and scheduling. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.
+
+## LAN Speed Test
+
+- **Per-device iperf3 overrides** - You can now set custom parallel streams (-P) and duration (-t) per device, overriding the global defaults. Useful when specific devices need different test parameters. The progress bar also scales to the effective duration now.
+- **SQM status in trace tooltips** - WAN hop icons and link connectors in the speed test trace now show whether Smart Queues (SQM) is enabled or disabled on hover.
+
+## Alerts & Schedule
+
+- **Edit scheduled tests** - Schedule cards now have an Edit button that shows the form inline with current settings populated. Save updates in place (preserving execution history).
+- **Next run time shown immediately** - New schedules now display "Next run: in Xh Ym" right after creation, instead of waiting for the first execution to complete.
+
+## Fixes
+
+- **iperf3 override validation** - Per-device parallel streams clamped to 1-16 and duration to 1-300s, enforced at input, save, and runtime layers. Out-of-range values snap to bounds on blur.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.7
 
 Wi-Fi heatmap accuracy improvements, hourly scheduling, and a LAG speed detection fix. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.
