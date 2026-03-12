@@ -1,3 +1,73 @@
+## 1.12.0
+
+v1.12.0 brings interactive Wi-Fi Optimizer drill-downs, smarter CrowdSec threat intelligence, and RF propagation modeling to cut false interference warnings.
+
+## What's New
+
+For users upgrading from v1.11.0, here's what you missed in the v1.11.x patches:
+
+- **ntfy.sh notifications** (v1.11.4) - Push notifications via ntfy.sh with markdown, priority mapping, and auth support
+- **Hourly speed test scheduling** (v1.11.7) - Schedule speed tests at 1, 2, or 4 hour intervals
+- **Per-device iperf3 overrides** (v1.11.8) - Custom parallel streams and duration per device
+- **Editable scheduled tests** (v1.11.8) - Edit existing schedules inline with current settings populated
+- **Wi-Fi heatmap improvements** (v1.11.7) - Elevation 0 antenna data for 2D heatmaps, orientation fixes, 50% higher resolution, U7-Mesh support
+- **Media and Gaming network types** (v1.11.6) - New purpose types with proper trust hierarchy and device placement
+- **Protect camera VLAN detection** (v1.11.2) - Cameras detected via Protect API for reliable VLAN audit checks
+- **802.1X multi_host mode** (v1.11.3) - Recognized as a secured port mode
+- **Traefik HTTPS for Proxmox** (v1.11.5) - Let's Encrypt via Cloudflare DNS-01 during install
+
+## Wi-Fi Optimizer
+
+- **Click-to-filter channel chips** - Click any channel chip in RF Environment to filter the view. Click AP rows in Channel Analysis to select channel details. Active filters show a blue ring.
+- **Clickable AP card radio rows** - Band, channel, utilization, EIRP, and client count cells navigate directly to the relevant tab with filters pre-applied. Deep-linkable URLs with query params.
+- **EIRP display** - Each radio row now shows transmit power in dBm.
+- **Vendor in neighboring networks** - OUI manufacturer name column in the Neighboring Networks table.
+- **Propagation-modeled interference filtering** - Co-channel and high power overlap rules now use ITU-R P.1238 indoor path loss modeling, eliminating false positives for multi-building deployments.
+- **Collapsible health issue groups** - Issue categories collapse with count badges and chevrons for easier scanning.
+
+## Client Stats
+
+- **AP and band filters** - Filter the client list by access point and band using dropdown and pill controls.
+- **Filter preservation** - AP and band filters persist when navigating to client detail and back.
+
+## Threat Dashboard
+
+- **Auto-enrich threat IPs** - CrowdSec CTI data loads automatically on page load, using up to half the daily quota.
+- **Smarter rate limiting** - Burst throttles (transient 429s) no longer trigger unnecessary 1-hour lockouts. Daily quota exhaustion handled separately.
+- **Background CTI hydration** - Enrichment runs in the background instead of blocking page load.
+- **Benign reputation badge** - Known scanners like ONYPHE show a "benign" badge instead of "unknown".
+- **Sensitive value redaction** - API keys and passwords redacted in system settings logs.
+
+## Alerts & Schedule
+
+- **WAN schedule reconciliation** - WAN speed test schedules auto-correct when UniFi reassigns WAN groups, using 2-of-3 field matching.
+- **Smart chart grouping** - Custom WAN names group by name alone; generic names (WAN, WAN2) include the group to distinguish interfaces.
+- **Schedule drift fix** - Next run time now anchors to the scheduled slot, not task completion time.
+- **Stale WAN name sync** - Data Usage WAN names update when renamed in UniFi Console.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.11.8
 
 Quality of life improvements for speed testing and scheduling. See [v1.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.11.0) for what's new in v1.11.
