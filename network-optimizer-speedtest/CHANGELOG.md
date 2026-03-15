@@ -1,3 +1,50 @@
+## 1.12.3
+
+More path trace and mobile UX fixes. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
+
+## Speed Test
+
+- **Mesh overhead factor corrected** - Adjusted from 55% overhead to 45%, which better reflects real-world mesh backhaul performance.
+- **Smarter mesh bottleneck detection** - Now uses only the mesh-specific port speed when determining if mesh is the bottleneck, instead of mixing in the client wireless link speed from the other side of the hop.
+- **Mesh speed capping** - When mesh is the bottleneck, directional max speeds are now capped to the mesh link's TX/RX rates instead of the client's faster direct Wi-Fi rates.
+- **Signal bars on path trace** - Wireless links now show color-coded signal strength bars (band-aware) instead of a generic emoji, with signal tooltips on the client hop.
+- **Port speed fallback for APs** - When an AP has no port table data, the path tracer now falls back to the other device's port speed for the same physical link, so wired hop speeds are no longer missing.
+- **WAN hop shows network name** - WAN hops now display the configured network name (e.g., "AT&T Fiber") instead of a generic "WAN" label.
+- **Client name fallback** - Client hops now properly fall back to hostname when the display name is empty.
+- **Mobile path trace fixes** - Speed labels, notes, and bottleneck warnings display correctly on narrow screens.
+
+## Mobile UX
+
+- **Fixed bottom tab bar** - Tabs and time filter on Client Performance are now pinned to the bottom of the screen, always accessible without scrolling back up.
+- **Auto-hide navigation** - Top bar hides after inactivity on Client Performance, giving more screen real estate.
+- **Compact speed test table** - Results table fits on mobile without horizontal scrolling.
+- **General layout and spacing fixes** across speed test results and device tables.
+- **Fixed touch scroll locking** - Scrolling on device cards and other content no longer gets blocked by touch event handling. Increased scroll-up threshold so the nav bar doesn't pop back up too easily.
+- **Horizontal scroll on tables and tabs** - All table and tab containers now allow proper horizontal scrolling on mobile.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.2
 
 More path trace and mobile UX fixes. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
