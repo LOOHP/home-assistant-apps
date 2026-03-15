@@ -1,3 +1,55 @@
+## 1.12.1
+
+Big Wi-Fi Optimizer release - a new network-wide channel recommendation engine, band-aware signal classification, mesh backhaul stats, and better mobile UX. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
+
+## Wi-Fi Optimizer
+
+- **Network-wide channel recommendation engine** - Analyzes interference graphs, RF scan data, historical radio stats, and mesh constraints to recommend optimal channel assignments across all APs. Uses propagation-modeled pairwise AP weights, greedy + local search with random restarts, and per-channel historical stress scoring.
+- **Band-aware signal strength classification** - Signal quality thresholds now adjust by band based on noise floor differences (2.4 GHz is tightest, 6 GHz most lenient). A 6 GHz client at -75 dBm is no longer flagged as weak. Applied across Client Performance, Client Timeline, Airtime Fairness, and health rules.
+- **Mesh backhaul stats on AP cards** - Mesh child APs show uplink signal and TX/RX rates; parent APs show per-child downlink stats from the parent's perspective.
+- **AP lock indicators** - Lock icon with tooltip in the client list and "AP Locked" badge on the client detail page when a client has a fixed AP assignment.
+- **DFS channel fixes** - Wide channel widths (80/160 MHz) now check the full bonding group for DFS channels, not just the primary. At 160 MHz where DFS avoidance is impossible, falls back to Include DFS with an explanatory notice.
+- **Corrected AP catalog EIRP values** - Updated TX power and antenna gain for U7-Pro, U7-Pro-Max, U7-Pro-XG, U6-Enterprise, U6-Pro, U6-Mesh, U6-Mesh-Pro, U6-IW, U6-Extender, U6+, U7-IW, and U7-LR from spec sheets.
+- **Channel recommendation deduplication** - Channels in the same bonding group (e.g., 149/153/157/161 at 80 MHz) are now treated as one option, preventing false "optimization" between co-channel assignments.
+- **Mesh hop analysis fix** - Filters out 6 Mbps idle Wi-Fi management frame rate that was skewing mesh backhaul speed measurements.
+- **Wi-Fi 4 protocol display** - Fixed "ng", "na", "a", "b", "g" radio protocols not resolving to their Wi-Fi generation names on Client Performance.
+
+## Adaptive SQM
+
+- **Fiber-aware safety cap** - Fiber connections now use a 98% safety cap instead of 95%, since the WAN link speed already constrains max throughput and the extra headroom was leaving performance on the table.
+
+## Mobile
+
+- **Redesigned mobile navigation** - Auto-hide nav bar on scroll down, show on scroll up with depth shadow. Sticky top bar, collapsible client identity bar, and proper fragment navigation handling.
+
+## Fixes
+
+- **Client info backfill** - Speed test path analysis now backfills missing client details when the UniFi API lookup fails.
+- **Schedule drift for non-anchored tasks** - Next run time now truncates to minute boundaries, preventing sub-minute drift from accumulating across Security Audit runs.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.0
 
 v1.12.0 brings interactive Wi-Fi Optimizer drill-downs, smarter CrowdSec threat intelligence, and RF propagation modeling to cut false interference warnings.
