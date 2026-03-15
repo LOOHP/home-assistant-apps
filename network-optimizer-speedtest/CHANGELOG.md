@@ -1,3 +1,44 @@
+## 1.12.4
+
+More PWA and mobile polish. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
+
+## PWA / Mobile
+
+- **Pull-to-refresh on mobile** - Pull down on any page to refresh data without a full page reload. Uses smart page-specific refresh callbacks so only the data reloads, not the whole app. Adaptive resistance so short pages are easy to pull and long scrollable pages don't trigger accidentally.
+- **PWA install banner** - Dashboard shows a dismissible prompt encouraging mobile users to install the app to their home screen. Links to a dedicated install page with browser-aware instructions for iOS and Android, including guidance for unsupported browsers like Brave on iOS.
+
+## Wi-Fi Optimizer
+
+- **Channel recommendation disclaimer** - Added a note clarifying that UniFi neighbor scan data may not reflect all nearby networks, so channel recommendations should be taken as guidance rather than gospel.
+
+## Fixes
+
+- **Audit PDF no longer traps PWA users** - Downloading a PDF audit report in PWA standalone mode used to navigate away with no back button. Now uses a direct blob download that keeps you in the app.
+- **Pull-to-refresh arrow polish** - Fixed arrowhead clipping, centering, and scaling so the pull indicator looks clean across devices.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.3
 
 More path trace and mobile UX fixes. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
