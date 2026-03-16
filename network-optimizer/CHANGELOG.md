@@ -1,3 +1,51 @@
+## 1.12.5
+
+Adaptive SQM performance tuning for high-speed connections, plus speed test fixes. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
+
+## Adaptive SQM
+
+This is a big one for anyone running SQM on a gig connection (or anything above 300 Mbps, really).
+
+Stock UniFi SQM uses a 4 MB fq_codel memory limit, which is fine for slower connections but way too small for gigabit speeds. During heavy multi-stream downloads (think Steam updates, backups, multiple devices streaming), the queue runs out of memory and starts dropping packets indiscriminately from all flows - including traffic from other devices that aren't even part of the download. Testing showed ~10,000 indiscriminate packet drops per bufferbloat test at stock settings, causing 2.5-4.4% packet loss across all devices.
+
+Adaptive SQM now scales fq_codel memory_limit based on your connection speed: 4 MB (stock) up to 300 Mbps, a linear ramp from 4 MB to 8 MB between 300-750 Mbps, and a flat 8 MB above 750 Mbps. HTB burst is tuned to 5 KB. Combined with shaping headroom below line rate (95% safety cap for fiber), this eliminated downstream packet drops entirely while improving bufferbloat from +1.9 ms (stock) to +0.83 ms (A+ grade) at identical shaping rates.
+
+Upload support was also added - your configured upload speed is now applied as the upstream tc rate, and Adaptive SQM tunes the upstream interface's burst and memory parameters to match. This reduces upstream packet drops and CPU contention that was quietly degrading downstream performance.
+
+What you'll notice: other devices stay responsive during heavy downloads, bufferbloat stays under 1 ms, and you don't have to configure anything. The tuning applies automatically based on your connection speed.
+
+## LAN Speed Test
+
+- **Accurate goodput measurement** - The iperf3 parser now uses sum_received instead of sum_sent, which gives you the actual throughput that made it across the wire.
+- **Windows SSH speed tests fixed** - Speed tests from Windows installations now work correctly (was a shell compatibility issue with pwsh).
+
+## Fixes
+
+- **Console unreachable banner** - Fixed false "console unreachable" warnings and tightened up connection validation.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.4
 
 More PWA and mobile polish. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
