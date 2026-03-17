@@ -1,3 +1,41 @@
+## 1.12.6
+
+More improvements to channel recommendations and Adaptive SQM. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
+
+## Channel Recommendations
+
+- **Neighbor triangulation** - APs now pool neighbor observations across the site. An AP on channel 36 can learn about channel 149 neighbors from another AP that's already there. Uses the propagation model to estimate each neighbor's impact based on RF proximity, giving the optimizer a fuller picture of the RF environment when recommending channel changes.
+- **Uncertainty handling for unobserved channels** - Channels with no direct neighbor data are treated conservatively. The optimizer won't assume an unobserved channel is interference-free just because no AP has checked it yet. Calibrated against real-world testing where triangulated estimates were ~3x lower than actual measured load.
+- **Smarter per-AP move thresholds** - APs with low interference scores (below 2.0) are left alone. Channel moves also require both meaningful absolute improvement (1.0+) and relative improvement (30%+) to prevent chasing small gains that aren't worth the disruption.
+- **Fix: stress scaling for arriving APs** - The stress penalty now correctly accounts for APs moving onto a channel, not just those leaving. Previously could understate interference when swapping co-channel pairs.
+
+## Adaptive SQM
+
+- **Fix: tc class ID parsing for hex values** - SQM scripts now correctly handle tc class IDs 10+ which Linux represents in hex (1:a, 1:b, etc.). Previously these classes weren't updated during rate changes.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.5
 
 Adaptive SQM performance tuning for high-speed connections, plus speed test fixes. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
