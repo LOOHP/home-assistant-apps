@@ -1,3 +1,48 @@
+## 1.12.7
+
+More audit accuracy fixes, especially around DNS and 802.1X. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
+
+## Security Audit
+
+- **DNS audit false positive fixes** - Inverted source address rules (e.g., "not 192.168.1.220") were incorrectly flagged as single-IP DNAT coverage. These rules cover all networks except one IP, which is effectively full coverage. Also fixed handling of firewall address/port groups and `invert_address` in DNAT analysis.
+- **VLAN isolation no longer flags DNS-only rules** - Cross-VLAN rules limited to port 53 (UDP or TCP+UDP) are now exempt from isolation bypass warnings, since Pi-hole cross-VLAN access is legitimate.
+- **DNS IP consistency check** - Networks using a different third-party DNS IP than the majority now get flagged, helping catch misconfigurations. Gateway IPs and Corporate networks are excluded to avoid false positives.
+- **Pi-hole/AdGuard Home detection improvements** - The management endpoint setting now accepts a full URL (e.g., `https://pihole.local`) in addition to a port number, for users behind a reverse proxy. Internal probing also skips SSL cert validation since container-internal certs aren't trusted.
+- **Multi-CIDR firewall group coverage** - DNAT analysis now checks all CIDRs from firewall address groups instead of just the first, fixing false "Partial DNAT Coverage" warnings for multi-subnet groups.
+- **802.1X port placement fixed** - Camera and IoT VLAN rules now use the client's effective network ID for 802.1X/RADIUS-secured ports instead of the unauthenticated VLAN config. Ports with no connected client are skipped since the RADIUS-assigned VLAN can't be determined.
+
+## Config Optimizer
+
+- **Co-channel interference scaled for dense deployments** - When a floor plan is set up and APs outnumber the non-overlapping channels for the band, co-channel warnings downgrade to Info severity since some overlap is unavoidable.
+
+## Fixes
+
+- **Third-party DNS detector no longer false-positives on malformed JSON** - Previously, a JSON parse failure could trigger a false "detected" result if the response body happened to contain the string "dns".
+- **Settings validation** - Invalid DNS endpoint input now shows validation feedback instead of silently failing.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.6
 
 More improvements to channel recommendations and Adaptive SQM. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
