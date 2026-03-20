@@ -1,3 +1,57 @@
+## 1.13.0
+
+v1.13.0 adds WAN Steering - load balance traffic across multiple WANs without leaving failover mode - and private WAN speed testing from any client on your network.
+
+## What's New
+
+For users upgrading from v1.12.0, here's what you missed in the v1.12.x patches:
+
+- **Network-wide channel recommendation engine** (v1.12.1) - Analyzes interference graphs, RF scan data, and mesh constraints to recommend optimal channel assignments across all APs. Uses propagation-modeled weights, greedy + local search, and per-channel historical stress scoring.
+- **Band-aware signal strength classification** (v1.12.1) - Signal quality thresholds adjust by band based on noise floor differences. A 6 GHz client at -75 dBm is no longer flagged as weak.
+- **Mesh backhaul stats on AP cards** (v1.12.1) - Mesh APs show uplink signal and TX/RX rates; parent APs show per-child downlink stats.
+- **Adaptive SQM performance tuning** (v1.12.5) - Scaled fq_codel memory, HTB burst tuning, and upstream shaping. Eliminates indiscriminate packet drops during heavy multi-stream downloads on gigabit connections.
+- **Pull-to-refresh on mobile** (v1.12.4) - Pull down on any page to refresh data. Smart page-specific callbacks so only data reloads.
+- **PWA install banner** (v1.12.4) - Dashboard prompts mobile users to install the app, with browser-aware instructions for iOS and Android.
+- **Neighbor triangulation for channel recommendations** (v1.12.6) - APs pool neighbor observations across the site using the propagation model to estimate each neighbor's RF impact.
+- **DNS audit and 802.1X accuracy improvements** (v1.12.7) - Fixed false positives around inverted source rules, multi-CIDR groups, Pi-hole cross-VLAN rules, and RADIUS-assigned VLANs.
+
+## WAN Steering
+
+Load balance the traffic you choose across multiple WANs - without leaving failover mode. Send your Steam downloads, Xbox updates, and OS patches across every link you're paying for, while gaming and video calls stay on your fastest WAN. Includes health-check failover and automatic rule recovery after gateway reprovisioning.
+
+- **Traffic rules** - Match by source/destination IP, CIDR, range, MAC, protocol, and port, then assign to a target WAN with configurable probability.
+- **Gateway daemon** - A Go daemon deployed directly to your gateway via SSH. Manages iptables mangle rules, runs per-WAN health checks with hysteresis, and reconciles rules automatically. Clean shutdown tears down all iptables changes.
+- **Auto-discovery** - WAN interfaces detected automatically from the UniFi API and gateway routing tables. Boot persistence via `on_boot.d`.
+
+## Client WAN Speed Test
+
+- **Private external speed test server** - Host your own OpenSpeedTest instance on a VPS or cloud server and test real-world WAN speed from any client on your network. Results post back automatically with full path analysis.
+- **Path trace with WAN hop** - Results show the full path from WAN through gateway, switches, and APs to the client. WiFi rate tooltips and efficiency calculations adjust for the WAN direction.
+- **Standalone deploy script** - One-liner setup for the external server, downloads only the necessary files from GitHub.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.12.7
 
 More audit accuracy fixes, especially around DNS and 802.1X. See [v1.12.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.12.0) for what's new in v1.12.0+
