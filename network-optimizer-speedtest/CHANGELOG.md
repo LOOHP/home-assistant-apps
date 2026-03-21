@@ -1,3 +1,38 @@
+## 1.13.1
+
+Fixes for WAN Steering boot persistence and a security audit false positive. See [v1.13.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.13.0) for what's new in v1.13.0+
+
+## WAN Steering
+
+- **Gateway boot persistence fixed** - the daemon failed to start after gateway reboot due to iptables lock contention with UniFi's own startup. Now uses `-w` flag to wait for the lock, and the boot script runs in a background subshell so it doesn't block other on_boot.d scripts.
+
+## Security Audit
+
+- **Fixed false positive on MAC-scoped firewall rules** - rules with a specific source MAC (like VoIP devices) were incorrectly flagged as "broad" even though the MAC narrows them to a single device. Also fixed the same gap for rules with specific destination IPs.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.13.0
 
 v1.13.0 adds WAN Steering - load balance traffic across multiple WANs without leaving failover mode - and private WAN speed testing from any client on your network.
