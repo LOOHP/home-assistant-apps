@@ -1,3 +1,46 @@
+## 1.13.2
+
+Fixes channel recommendations that could make interference worse, plus a DNS audit false positive. See [v1.13.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.13.0) for what's new in v1.13.0+
+
+## Wi-Fi Optimizer
+
+- **Channel recommendation engine overhaul** - The optimizer plans network-wide channel swaps, but per-AP filtering could veto some moves while approving others into the same channel, actually making things worse. Now re-validates all moves against the actual final plan, guards unchanged APs from degradation, and falls back to safe individual moves when the global plan collapses.
+
+- **More accurate stress scaling** - Historical stress penalties were being zeroed out when internal co-channel APs moved away, ignoring external neighbor interference that doesn't go away. Stress now properly accounts for the external interference fraction.
+
+- **Accurate recommended scores** - All APs now show scores reflecting the actual recommended plan, not the optimizer's ideal that may have been partially vetoed.
+
+## Security Audit
+
+- **Fix false positive DNS IP mismatch for dual Pi-hole setups** - Networks using the same pair of DNS IPs (e.g., two Pi-holes for HA) were incorrectly flagged as having inconsistent DNS. The analyzer now compares per-network IP sets instead of individual IPs.
+
+## Fixes
+
+- **Fix xtables lock contention on boot** - WAN Steering reconciler now uses `iptables-save` for rule checks instead of individual `iptables -C` calls, avoiding lock contention during startup.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.13.1
 
 Fixes for WAN Steering boot persistence and a security audit false positive. See [v1.13.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.13.0) for what's new in v1.13.0+
