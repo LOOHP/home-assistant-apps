@@ -1,3 +1,63 @@
+## 1.14.0
+
+v1.14.0 adds a customizable dashboard layout and live WiFiman signal polling for the Client Performance Dashboard.
+
+## What's New
+
+For users upgrading from v1.13.0, here's what you missed in the v1.13.x patches:
+
+- **Wi-Fi Optimizer channel recommendation fixes** (v1.13.1) - Fixed several edge cases where partial plan vetoes, external interference, and per-AP fallbacks could produce worse recommendations than the current state.
+- **DNS audit accuracy** (v1.13.2) - Fixed false positive DNS IP mismatch for dual Pi-hole setups.
+- **Adaptive SQM boot reliability** (v1.13.2) - Fixed boot script blocking udm-boot and xtables lock contention during startup.
+- **Broad firewall rule accuracy** (v1.13.2) - Fixed false positives for MAC-based source rules and destination-IP-scoped rules.
+
+## Customizable Dashboard
+
+- **Edit Layout mode** - Reorder, hide, show, resize (half/full width), and stack dashboard cards. Your layout is saved per-instance and survives updates.
+- **Wi-Fi Optimizer card** - New dashboard card showing your site-wide Wi-Fi health score and top issues at a glance.
+- **Wi-Fi Health stat** - New quick stat in the stats row showing your overall Wi-Fi health score.
+- **Unsaved changes warning** - Navigating away from edit mode prompts to confirm, so you don't lose changes.
+
+## Client Performance Dashboard
+
+- **Live WiFiman signal polling** - When WiFiman is enabled in UniFi Network (Settings -> WiFi -> WiFiman Support, on by default), the Client Performance Dashboard polls at 1-second intervals for live signal, channel, band, and link rate updates. Falls back to 5-second stat/sta polling when WiFiman isn't available.
+- **LTTB chart downsampling** - Signal and speed charts now use Largest-Triangle-Three-Buckets downsampling for smooth, responsive charts even with thousands of data points.
+- **WiFiman-enriched speed test snapshots** - Speed test path analysis uses WiFiman data for more accurate band, channel, and rate reporting during tests.
+
+## Security Audit
+
+- **Server network MAC restriction handling** - Server-purpose networks skip MAC restriction audits (VMs and containers make per-port MAC restriction impractical). Recommends 802.1X Multi-Host mode when the switch supports it.
+- **DNS mismatch severity** - Lowered to Informational for isolation VLANs where DNS differences are expected by design.
+
+## Fixes
+
+- **Stale SQM status** - TC Monitor cache now expires after 3 consecutive poll failures instead of showing stale data indefinitely.
+- **Alert rule editing** - Fixed EF Core tracking conflict when toggling then editing an alert rule in the same session.
+- **SSH troubleshooting tooltip** - Improved CyberSecure IDS/IPS guidance with Detection Exclusions option and link to full troubleshooting docs.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.13.2
 
 Fixes channel recommendations that could make interference worse, plus a DNS audit false positive. See [v1.13.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.13.0) for what's new in v1.13.0+
