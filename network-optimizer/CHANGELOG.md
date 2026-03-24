@@ -1,3 +1,49 @@
+## 1.14.1
+
+Accuracy improvements for WAN speed testing, especially on congested links. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## What's New in v1.14.0+
+
+- **Customizable Dashboard** - Reorder, hide, show, resize, and stack dashboard cards. Your layout is saved per-instance and survives updates.
+- **Live WiFiman signal polling** - Client Performance Dashboard polls at 1-second intervals for live signal, channel, band, and link rate updates when WiFiman is enabled.
+- **Wi-Fi Optimizer dashboard card** - New card showing site-wide Wi-Fi health score and top issues at a glance.
+- **Server network MAC restriction handling** - Server-purpose networks skip MAC restriction audits. Recommends 802.1X Multi-Host mode when supported.
+
+## WAN Speed Test
+
+- **100 MB download chunks** - Speed test servers were returning 200 KB per HTTP response, wasting ~90% of time on round-trips on high-latency links. Now requests 100 MB chunks, matching Ubiquiti's ui-speed behavior. On a congested GPON link (18 ms RTT), download went from ~565 Mbps to ~812 Mbps. No change on clean connections.
+- **TCP warmup before measurement** - Connections now ramp for 2 seconds before sampling begins, so TCP slow-start and window scaling don't drag down the reported average.
+- **Longer measurement window** - Bumped from 6 to 8 seconds for more steady-state data.
+- **More streams in normal mode** - Default streams increased from 16 to 20 for better link saturation without needing Max Load.
+- **Improved progress bar timing** - Progress animation now matches the actual test timeline (~23 seconds).
+
+## Fixes
+
+- **Schedule toggle not saving** - Toggling a schedule's enabled state could silently fail when a background task was running, due to an EF Core entity tracking conflict. Same fix as the alert rule toggle in v1.14.0.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.0
 
 v1.14.0 adds a customizable dashboard layout and live WiFiman signal polling for the Client Performance Dashboard.
