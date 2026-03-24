@@ -1,3 +1,40 @@
+## 1.14.2
+
+New tabbed WAN History charts for latency, loaded latency, and jitter. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## WAN Speed Test
+
+- **Tabbed WAN History charts** - The Speed History section is now "WAN History" with four tabs: Speed, Latency, Loaded Latency, and Jitter. All tabs share the same time slider and WAN filter badges. Loaded Latency shows base, loaded-down, and loaded-up series with distinct dash patterns so you can see bufferbloat at a glance.
+
+- **Smoother progress bar** - Fixed the progress bar jumping backwards during gateway WAN speed tests, and trimmed about 2 seconds from the animation to better match actual test duration.
+
+## Adaptive SQM
+
+- **WAN Steering included in installers** - The wansteer gateway binary was missing from both Windows MSI and macOS native installers, so deploying WAN Steering would fail with "binary not found". Now included in both.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.1
 
 Accuracy improvements for WAN speed testing, especially on congested links. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
