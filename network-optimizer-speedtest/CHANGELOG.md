@@ -1,3 +1,45 @@
+## 1.14.3
+
+More polish for the dashboard and Wi-Fi Optimizer. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## Wi-Fi Optimizer
+
+- **Disabled and AFC band display** - Bands available on an AP but without an assigned channel now show as "Disabled" instead of blank stats. 6 GHz radios on AFC-enabled APs show "AFC" status.
+- **Relaxed 2.4 GHz signal thresholds** - Shifted classification thresholds ~5 dB lower to better reflect real-world 2.4 GHz performance at range. A client at -70 dBm on 2.4 GHz now shows "fair" instead of "weak".
+
+## Speed Tests
+
+- **Test again button** - Speed test results now have a "Test again" button that re-runs the same test with the same settings, then scrolls to the progress area.
+- **WAN History empty state** - The WAN History table now shows a helpful message when no results exist or current filters match nothing.
+
+## Dashboard
+
+- **Collapsible issue groups** - WiFi and Audit issue lists on the dashboard now group by category with collapsible headers when there are more than 3 issues. Keeps the dashboard compact without hiding information.
+- **Layout and styling fixes** - Tightened gauge spacing, fixed alert group badge positioning, improved mobile layout for SQM cards and WiFi issue rows.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.2
 
 New tabbed WAN History charts for latency, loaded latency, and jitter. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
