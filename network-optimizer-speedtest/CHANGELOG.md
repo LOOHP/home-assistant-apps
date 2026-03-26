@@ -1,3 +1,46 @@
+## 1.14.4
+
+More fixes for WAN Steering, Adaptive SQM, and the security audit. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## WAN Steering
+
+- **Fix kernel race condition on Cloud Gateway Fiber** - Conntrack deletions during failover or config reloads could trigger kernel errors on IPQ9574 devices with SFE enabled. Now flushes the SFE cache first to prevent the race.
+
+## Adaptive SQM
+
+- **Reduce excessive kernel warnings on Cloud Gateway Fiber** - The minimum class rate was generating thousands of harmless "quantum is small" warnings, putting unnecessary write pressure on eMMC storage. Adjusted to eliminate the warnings with no change in traffic shaping behavior.
+
+## Wi-Fi Optimizer
+
+- **Smarter high TX retry detection** - A single client with high retries usually means a client-specific problem, not a systemic AP issue. Now requires at least 2 affected clients before raising an alert, and scales severity: Warning for 2-9 clients, Critical for 10+.
+
+## Security Audit
+
+- **Fix false positive subnet mismatch alerts** - The subnet mismatch check could use a stale IP from a previous VLAN config as a fallback. Now uses the most recent known IP, which avoids false positives when devices move between VLANs.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.3
 
 More polish for the dashboard and Wi-Fi Optimizer. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
