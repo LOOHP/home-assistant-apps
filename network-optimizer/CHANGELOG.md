@@ -1,3 +1,48 @@
+## 1.14.5
+
+More fixes for speed test tracing and the security audit. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## Speed Tests
+
+- **Link Aggregation in path trace** - Connector tooltip now shows "Link Aggregation: 2x 10 Gbps" when a link between switches uses LAG, so you can see aggregate capacity at a glance
+- **Fixed gateway link speed in path trace** - Path traces involving the gateway could show the WAN port speed instead of the actual LAN link speed. For example, a 10 Gbps LAN link to the gateway would incorrectly show as 5 Gbps if the WAN port ran at that speed
+
+## Security Audit
+
+- **Fixed WAN DNS detection** - The "No DNS on WAN1" message could appear even when static DNS was configured. Now falls back to the network configuration API when the device port table doesn't populate the DNS array
+- **Inactive port security gap** - Ports that were down but recently used (within the unused port grace period) weren't being flagged by either the unused port rule or the MAC restriction rule. Now flagged with context-aware advice: disable if no longer needed, or add a MAC restriction if still in use
+
+## Wi-Fi Optimizer
+
+- **Weak Signal count fix** - The stat card count now uses the same band-aware signal thresholds as the recommendations list, so the numbers match
+
+## Adaptive SQM
+
+- **Reduced gateway eMMC writes** - Replaced the SQM watchdog systemd timer with a cron job to reduce write cycles on the gateway's flash storage
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.4
 
 More fixes for WAN Steering, Adaptive SQM, and the security audit. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
