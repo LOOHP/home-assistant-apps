@@ -1,3 +1,38 @@
+## 1.14.6
+
+Fixes for the Wi-Fi Optimizer. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## Wi-Fi Optimizer
+
+- **RF-aware load imbalance detection** - The "Significant Load Imbalance" health check now uses the Signal Map's propagation model to determine if APs are in separate coverage zones. If they're far apart and clients on the busy AP have strong signal, the warning is suppressed since load steering wouldn't help. Users without APs placed on the Signal Map get a hint to enable this.
+
+- **Gateway-only consoles no longer appear as APs** - UDM-Pro, UDM-SE, UDM-Pro-Max, and EFG were incorrectly showing up in the AP list because the UniFi API reports phantom radio entries for these devices. They're now filtered out. Gateways with real Wi-Fi (UDM, UDR, UX, Dream Wall) are unaffected.
+
+- **Fixed duplicate AP name in load imbalance message** - When two APs had the same client count, the health check could display the same AP name for both sides of the comparison (e.g., "AP-1 has 8 clients while AP-1 has only 8").
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.5
 
 More fixes for speed test tracing and the security audit. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
