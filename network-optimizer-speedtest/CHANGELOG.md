@@ -1,3 +1,46 @@
+## 1.14.8
+
+More fixes for WAN Steering and Adaptive SQM. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## WAN Steering
+
+- **WAN stability detection and backoff** - When WAN interfaces flap (gateway reboots, GPON stick swaps, ISP outages), wansteer now detects rapid state changes and enters a backoff mode that suppresses SFE/conntrack flushes. This prevents a race condition with the gateway's own failover engine that was causing kernel errors and packet drops on SFP+ ports. Includes a 30-second startup grace period to let interfaces stabilize after boot.
+- **SFE flush coalescing** - Minimum 10-second interval between SFE cache flushes prevents redundant flush pile-up during rapid state changes.
+- **Reconciler drift fix** - The reconciliation cycle no longer false-detects rule drift when a WAN is down, eliminating unnecessary SFE flushes every 30 seconds during WAN outages.
+- **Version display and mismatch warning** - The daemon status card now shows the deployed binary version. When the app detects the binary is outdated, a warning prompts you to redeploy. The warning clears immediately after a successful deploy, with a spinner while the new binary initializes.
+- **Status metrics fix** - Uptime, active rules, and other daemon metrics were not displaying due to a parsing issue. Fixed.
+
+## Adaptive SQM
+
+- **Deploy with all WANs disabled** - You can now deploy with all WANs disabled to cleanly remove SQM from the gateway.
+
+## Fixes
+
+- **Client Performance nav link** - The sidebar link is now hidden when you're already on the Client Performance page.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.7
 
 More fixes for WAN Steering and Adaptive SQM. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
