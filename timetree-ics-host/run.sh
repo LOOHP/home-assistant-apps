@@ -38,43 +38,68 @@ run_export() {
 
   python3 - "$tmp_path" <<'PY'
 import re
-from datetime import datetime, timedelta
 import sys
+from datetime import datetime, timedelta
 
 path = sys.argv[1]
 
-with open(path) as f:
+with open(path, "r", encoding="utf-8") as f:
     text = f.read()
 
-def fix(match):
+def parse_date(s):
+    return datetime.strptime(s, "%Y%m%d").date()
+
+def fmt_date(d):
+    return d.strftime("%Y%m%d")
+
+def fix_until_for_timed(block: str) -> str:
+    # Timed DTSTART => UNTIL must be DATE-TIME
+    def repl(m):
+        val = m.group(1)
+        if re.fullmatch(r"\d{8}", val):
+            return f"UNTIL={val}T235959Z"
+        return m.group(0)
+    return re.sub(r'UNTIL=(\d{8}(?:T\d{6}Z)?)', repl, block)
+
+def fix_until_for_allday(block: str) -> str:
+    # All-day DTSTART => UNTIL must be DATE only
+    def repl(m):
+        val = m.group(1)
+        if re.fullmatch(r"\d{8}T\d{6}Z", val):
+            return f"UNTIL={val[:8]}"
+        return m.group(0)
+    return re.sub(r'UNTIL=(\d{8}(?:T\d{6}Z)?)', repl, block)
+
+def fix_vevent(match):
     block = match.group(0)
 
-    # detect all-day event (DATE without time)
-    if not re.search(r'^DTSTART:\d{8}$', block, re.M):
-        return block
+    # All-day event in exporter 0.7.0 format: DTSTART:YYYYMMDD
+    is_all_day = bool(re.search(r'^DTSTART:\d{8}$', block, re.M))
 
-    m = re.search(r'^DTEND:(\d{8})$', block, re.M)
-    if not m:
-        return block
+    if is_all_day:
+        m = re.search(r'^DTEND:(\d{8})$', block, re.M)
+        if m:
+            end = parse_date(m.group(1)) + timedelta(days=1)
+            block = re.sub(
+                r'^DTEND:\d{8}$',
+                f'DTEND:{fmt_date(end)}',
+                block,
+                flags=re.M
+            )
+        block = fix_until_for_allday(block)
+    else:
+        block = fix_until_for_timed(block)
 
-    end = datetime.strptime(m.group(1), "%Y%m%d")
-    end += timedelta(days=1)
-
-    return re.sub(
-        r'^DTEND:\d{8}$',
-        "DTEND:" + end.strftime("%Y%m%d"),
-        block,
-        flags=re.M
-    )
+    return block
 
 text = re.sub(
     r'BEGIN:VEVENT.*?END:VEVENT',
-    fix,
+    fix_vevent,
     text,
     flags=re.S
 )
 
-with open(path, "w") as f:
+with open(path, "w", encoding="utf-8", newline="") as f:
     f.write(text)
 PY
 
