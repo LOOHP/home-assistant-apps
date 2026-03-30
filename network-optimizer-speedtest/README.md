@@ -13,7 +13,7 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 # Network Optimizer for UniFi
 
 [![GitHub Release](https://img.shields.io/github/v/release/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/releases)
-[![Docker Pulls](https://img.shields.io/badge/docker_pulls-110k-blue?logo=docker)](https://github.com/orgs/Ozark-Connect/packages?repo_name=NetworkOptimizer)
+[![Docker Pulls](https://img.shields.io/badge/docker_pulls-135k-blue?logo=docker)](https://github.com/orgs/Ozark-Connect/packages?repo_name=NetworkOptimizer)
 [![Windows Downloads](https://img.shields.io/github/downloads/Ozark-Connect/NetworkOptimizer/total?label=windows%20downloads)](https://github.com/Ozark-Connect/NetworkOptimizer/releases)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/commits)
 [![GitHub Stars](https://img.shields.io/github/stars/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/stargazers)
@@ -52,42 +52,6 @@ Delivery channels support email (SMTP with STARTTLS), Discord, Slack, Microsoft 
 
 A per-device analytics dashboard for any client on your network. Pick a device and get live signal monitoring, speed test history with download/upload trends, latency and jitter charts, network path visualization showing every hop and bottleneck link, and a connection timeline tracking AP roams and disconnects. Walk around with the page open on your phone (over HTTPS) and it builds a GPS-based signal heatmap of your actual coverage. Three tabs - Speed, Signal, and Connection - give you everything you need to troubleshoot why a device is slow or unstable.
 
-## New: Signal Map
-
-Draw your building layout, place APs, and see a real-time RF propagation heatmap. The floor plan editor supports wall materials (drywall, concrete, glass, etc.), multi-floor buildings with cross-floor signal propagation, and per-AP antenna patterns pulled from your UniFi controller. Simulate TX power and antenna mode changes to see how they'd affect coverage before touching your actual config. Add planned APs to simulate coverage before buying or mounting hardware.
-
-## New: WAN Speed Test
-
-Test your internet connection speed directly from the server using Cloudflare's speed infrastructure. Measures download, upload, and loaded latency (bufferbloat detection) with per-WAN connection tracking. Results are displayed in a time-series chart with filter badges for multi-WAN setups, so you can compare providers over time.
-
-## New: Wi-Fi Optimizer
-
-Site health scoring, RF environment analysis, channel optimization, client stats, roaming tracking, band steering, and airtime fairness across twelve analysis tabs. All recommendations include specific UniFi UI paths for applying changes.​​​​​​​​​​​​​​​​
-
-## New: Proxmox LXC Installation
-
-Deploy on Proxmox with a single command. Run this on your Proxmox VE host:
-
-```bash
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
-```
-
-The interactive script creates a Debian LXC container with Docker pre-configured, and can optionally set up a Traefik HTTPS proxy with automatic Let's Encrypt certificates. See [Proxmox Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/scripts/proxmox/README.md) for details.
-
-## New: macOS Native Installation
-
-Install natively on macOS for maximum speed test performance (Docker Desktop limits network throughput for speed testing). See [macOS Installation Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docs/MACOS-INSTALLATION.md) for full instructions.
-
-## New: Windows Installer
-
-Download the MSI installer from [GitHub Releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases) for one-click installation on Windows. Includes automatic service setup, bundled iperf3, OpenSpeedTest for browser-based speed tests, and runs at system startup.
-
-## New: Client-Based LAN Speed Testing
-
-Test LAN speeds from any device on your network - phones, tablets, laptops - without SSH access. Run browser-based speed tests powered by [OpenSpeedTest™](https://openspeedtest.com) or use iperf3 clients; results are automatically collected and displayed with device identification, network path visualization, and performance metrics. With HTTPS enabled, browser tests can collect location data (with permission) to build a Speed / Coverage Map showing real-world performance across your property or campus.
-
-![Speed / Coverage Map](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/speed-coverage-map.png)
-
 ---
 
 You've set up VLANs, configured firewall rules, maybe even deployed a Pi-hole for DNS filtering. The UniFi controller gives you all this power, but it never actually tells you whether your configuration is any good. Are your firewall rules doing what you think they're doing? Is that IoT VLAN actually isolated, or did you miss something? When a device bypasses your DNS settings and phones home directly, would you even know?
@@ -96,15 +60,17 @@ Network Optimizer answers those questions. It connects to your UniFi controller,
 
 ## Main Features
 
-### Wi-Fi Optimizer
+### Wi-Fi Optimizer & Signal Map
 
-This feature brings comprehensive wireless network analysis to Network Optimizer. Twelve tabs cover everything from a 0-100 site health score and RF environment scanning to per-client signal history, roaming event timelines, and airtime fairness breakdowns. Channel recommendations use overlap-aware scoring against the full channel span at your AP’s configured width, pull available channels from the UniFi API so suggestions match what your country and hardware actually support, and filter to Preferred Scanning Channels on 6 GHz.
+Site health scoring, RF environment analysis, client stats, roaming tracking, band steering, and airtime fairness across twelve analysis tabs. The Channel Recommendation engine models pairwise AP interference using signal propagation, live RF scan data, and triangulated neighbor networks, then factors in historical channel stress (utilization, interference, TX retries) to find the lowest-interference channel assignment across your entire network. It respects mesh uplink constraints, DFS preferences, and regulatory channel availability, and validates every recommended move against improvement thresholds so it won’t suggest changes that aren’t worth the disruption.
 
-On the client side, you get a sortable, searchable table view with online/offline filtering, per-client signal and roaming history, and band-segmented Wi-Fi generation breakdowns showing exactly where your airtime is going. Environmental correlation heatmaps surface interference patterns by time of day and day of week, and every recommendation includes the specific UniFi Network UI navigation path to apply the change - no guessing which settings page to dig through.​​​​​​​​​​​​​​​​
+On the client side, you get a sortable, searchable table view with online/offline filtering, per-client signal and roaming history, and band-segmented Wi-Fi generation breakdowns showing exactly where your airtime is going. Environmental correlation heatmaps surface interference patterns by time of day and day of week, and every recommendation includes the specific UniFi Network UI navigation path to apply the change.
+
+Signal Map lets you draw your building layout, place APs, and see a real-time RF propagation heatmap. Supports wall materials (drywall, concrete, glass, etc.), multi-floor buildings with cross-floor signal propagation, and per-AP antenna patterns pulled from your controller. Simulate TX power and antenna mode changes to see how they’d affect coverage before touching your actual config. Add planned APs to simulate coverage before buying or mounting hardware.
 
 ### Security Auditing
 
-The audit engine runs 63 security checks across five categories and scores your network 0-100. This isn't a checkbox audit that just confirms you have a firewall; it actually analyzes what your rules do and whether they're doing it correctly.
+The audit engine runs 83 security checks across five categories and scores your network 0-100. This isn't a checkbox audit that just confirms you have a firewall; it actually analyzes what your rules do and whether they're doing it correctly.
 
 Firewall analysis catches the subtle stuff: rules that shadow each other, allow rules that subvert your deny rules, allow rules that punch holes through your network isolation. VLAN security checks whether your IoT devices and cameras are actually on the networks you intended (using UniFi fingerprints, MAC OUI lookup, and port naming patterns). DNS security validates your DoH configuration, checks for bypass routes (including DoT, DoQ, and HTTP/3 DoH bypass), and verifies that your WAN interface DNS settings match what you configured. Port security looks at MAC restrictions, port isolation, and whether you've left unused ports enabled. UPnP analysis flags enabled UPnP, exposed privileged ports, and static port forwards you may have forgotten about.
 
@@ -122,6 +88,12 @@ If you're on cable, DSL, or cellular, you know bufferbloat. That lag spike when 
 
 Network Optimizer handles this automatically. It supports dual-WAN with independent configuration per interface, connection profiles tuned for DOCSIS, fiber, wireless, Starlink, and cellular (each has different characteristics that matter). Scheduled speedtests adjust your rates based on actual measured performance. Latency monitoring backs off when congestion appears. One-click deployment pushes the configuration to your UDM or UCG gateway with persistence through reboots.
 
+### WAN Speed Testing
+
+Test your internet connection speed directly from the server. Measures download, upload, latency, loaded latency (bufferbloat detection), and jitter with full history and per-WAN connection tracking. Results are plotted in time-series charts filterable by connection, so you can compare providers and track performance over time across multi-WAN setups.
+
+Also includes a standalone OpenSpeedTest server you can host on a VPS or remote machine, so you can run WAN speed tests against your own private infrastructure instead of relying on third-party speed test services. If you're that kind of nerd.
+
 ### LAN Speed Testing
 
 Ever wonder if that new switch is actually delivering 10 gigabit speeds? Or whether the cable run to the shop is the bottleneck?
@@ -137,6 +109,10 @@ Test history lets you track performance over time with these relevant data in or
 Test LAN speeds from any device without SSH access. Open a browser on your phone, tablet, or laptop and run a speed test; results are automatically recorded with device identification. For CLI users, the bundled iperf3 server accepts client connections and logs results. See [Client Speed Testing](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#client-speed-testing-optional) in the deployment guide.
 
 ![Client Speed Test with Network Path](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/client-speed-test-trace.png)
+
+With HTTPS enabled, browser tests can collect location data (with permission) to build a Speed / Coverage Map showing real-world performance across your property or campus.
+
+![Speed / Coverage Map](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/speed-coverage-map.png)
 
 ### Cellular Modem Monitoring
 
