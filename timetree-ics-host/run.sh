@@ -54,39 +54,51 @@ def parse_date(s):
 def fmt_date(d):
     return d.strftime("%Y%m%d")
 
+def fix_until(block: str, is_all_day: bool) -> str:
+    def repl(m):
+        value = m.group(1)
+        if is_all_day:
+            if len(value) == 8:
+                return f"UNTIL={value}"
+            if len(value) == 16 and value.endswith("Z"):
+                return f"UNTIL={value[:8]}"
+            return m.group(0)
+        else:
+            if len(value) == 8:
+                return f"UNTIL={value}T235959Z"
+            return f"UNTIL={value}"
+    return re.sub(r'UNTIL=([0-9]{8}(?:T[0-9]{6}Z)?)', repl, block)
+
 def fix_vevent(block: str) -> str:
-    m_start = re.search(r'^DTSTART;VALUE=DATE:(\d{8})$', block, re.M)
-    if not m_start:
-        block = re.sub(
-            r'UNTIL=(\d{8})(?=;|:|$)',
-            r'UNTIL=\1T235959Z',
-            block,
-        )
-        return block
+    is_all_day = bool(re.search(r'^DTSTART;VALUE=DATE:\d{8}$', block, re.M))
 
-    start = parse_date(m_start.group(1))
-    m_end = re.search(r'^DTEND;VALUE=DATE:(\d{8})$', block, re.M)
+    if is_all_day:
+        m_start = re.search(r'^DTSTART;VALUE=DATE:(\d{8})$', block, re.M)
+        start = parse_date(m_start.group(1))
 
-    if m_end:
-        end = parse_date(m_end.group(1))
-        fixed_end = end + timedelta(days=1)
-        block = re.sub(
-            r'^DTEND;VALUE=DATE:\d{8}$',
-            f'DTEND;VALUE=DATE:{fmt_date(fixed_end)}',
-            block,
-            flags=re.M,
-        )
-    else:
-        fixed_end = start + timedelta(days=1)
-        block = re.sub(
-            r'^(DTSTART;VALUE=DATE:\d{8})$',
-            r'\1' + newline + f'DTEND;VALUE=DATE:{fmt_date(fixed_end)}',
-            block,
-            count=1,
-            flags=re.M,
-        )
+        m_end = re.search(r'^DTEND;VALUE=DATE:(\d{8})$', block, re.M)
+        if m_end:
+            end = parse_date(m_end.group(1))
+            fixed_end = end + timedelta(days=1)
+            block = re.sub(
+                r'^DTEND;VALUE=DATE:\d{8}$',
+                f'DTEND;VALUE=DATE:{fmt_date(fixed_end)}',
+                block,
+                flags=re.M,
+            )
+        else:
+            fixed_end = start + timedelta(days=1)
+            block = re.sub(
+                r'^(DTSTART;VALUE=DATE:\d{8})$',
+                r'\1' + newline + f'DTEND;VALUE=DATE:{fmt_date(fixed_end)}',
+                block,
+                count=1,
+                flags=re.M,
+            )
 
-    return block
+        return fix_until(block, is_all_day=True)
+
+    return fix_until(block, is_all_day=False)
 
 text = re.sub(
     r'BEGIN:VEVENT\r?\n.*?END:VEVENT',
