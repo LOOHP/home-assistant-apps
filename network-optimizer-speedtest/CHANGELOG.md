@@ -1,3 +1,38 @@
+## 1.14.9
+
+More fixes for Adaptive SQM and WAN Steering. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## Adaptive SQM
+
+- **Fixed "No WAN Connections Detected" after session expiry** - When the UniFi session expired, several API methods didn't re-authenticate automatically, causing the SQM page to show no WAN interfaces and lock you out of configuration. Now all API paths handle expired sessions the same way - re-authenticate and retry transparently.
+
+## WAN Steering
+
+- **Fixed Active Rules stat card** - Was showing the raw iptables rule count instead of the number of active traffic classes, which was confusing.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.8
 
 More fixes for WAN Steering and Adaptive SQM. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
