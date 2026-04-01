@@ -1,3 +1,50 @@
+## 1.14.10
+
+More Wi-Fi Optimizer improvements. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## Wi-Fi Optimizer
+
+### Signal Map
+
+- **Signal-adjusted heatmap** - Toggle the "Signal Data" button to overlay real client signal measurements on the propagation map, per AP-client connection. Each AP's model is calibrated against measured data, revealing problem spots, obstructions, and more accurately reflecting RF propagation where you have the data for it.
+- **Signal data time filter** - Filter signal data markers by time range so you can focus on recent measurements or look at historical data.
+- **Band persistence** - The selected band is remembered across sessions so you don't have to reselect it each time.
+
+### Roaming
+
+- **Deterministic roaming topology layout** - APs in the roaming topology diagram are now sorted by name, so the layout is consistent across page loads.
+
+## Speed Test Map
+
+- **LAN speed test results in AP popup** - AP markers on the speed test map now show recent LAN speed test results for that AP.
+
+## Settings
+
+- **SSH setup guide improvements** - Fixed mobile app SSH navigation paths and clarified SSH setup instructions.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.9
 
 More fixes for Adaptive SQM and WAN Steering. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
