@@ -1,3 +1,39 @@
+## 1.14.11
+
+More Adaptive SQM refinements - connection type profiles, congestion tuning, and smarter latency response. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
+
+## Adaptive SQM
+
+- **GPON and XGS-PON profiles** - FTTH is now split into separate GPON and XGS-PON connection types with tailored congestion schedules. GPON dips to 96.5% during streaming prime time, while XGS-PON's 10G headroom means it barely needs to dip at all (98%). Auto-detection maps common fiber service names to the right profile.
+- **Congestion severity slider** - New user-tunable slider (0.75x to 1.25x) that scales the magnitude of congestion schedule dips. Higher values make shaping more aggressive during peak hours, lower values soften the schedule.
+- **Editable latency threshold** - The latency threshold is now an editable field instead of a fixed default. Only persists to the database when you override it, so future profile default changes are picked up automatically.
+- **Non-linear latency response** - Latency adjustments now use an (n+1)^0.7 curve instead of linear scaling. Mild spikes (1-2 deviations) get a gentle nudge while sustained congestion (4+ deviations) still triggers aggressive shaping. GPON/XGS-PON default threshold lowered to 1.0 ms since fiber latency is clean enough to detect mild congestion.
+- **Safety cap is now baseline-proportional** - For fiber types, the safety cap scales with the congestion schedule instead of being a flat ceiling. This eliminates the dead zone where latency spikes were detected but produced no visible rate change.
+- **1-minute ping adjustment interval** - Down from 5 minutes for faster response to changing conditions.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.10
 
 More Wi-Fi Optimizer improvements. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
