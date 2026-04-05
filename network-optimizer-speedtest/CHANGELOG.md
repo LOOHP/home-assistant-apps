@@ -1,3 +1,54 @@
+## 1.15.0
+
+v1.15.0 adds API key authentication for UniFi consoles and a bunch of improvements since v1.14.0.
+
+## What's New
+
+For users upgrading from v1.14.0, here's what landed in the v1.14.x patches:
+
+- **WAN speed test accuracy overhaul** - 100 MB download chunks, TCP warmup, and more streams. Accuracy on congested links improved dramatically (565 Mbps to 812 Mbps on one test link). Plus tabbed WAN History charts for Speed, Latency, Loaded Latency, and Jitter.
+- **Signal-adjusted heatmap** - Overlay real client signal measurements on the Signal Map and calibrate per-AP propagation models against measured data. Reveals obstructions and dead spots your model alone might miss.
+- **Adaptive SQM GPON/XGS-PON profiles** - Separate congestion profiles for fiber types, congestion severity slider, editable latency threshold, and a non-linear latency response curve that's gentle on mild spikes but aggressive on sustained congestion. Ping adjustments now run every 1 minute instead of every 5, verified with no impact to gateway performance or packet routing.
+- **WAN stability detection** - Wansteer detects WAN flapping and enters backoff mode to prevent kernel errors during failover. Plus SFE flush coalescing and reconciler drift fixes.
+- **RF-aware load imbalance** - Load imbalance health checks use the Signal Map's propagation model to suppress false positives for APs in separate coverage zones.
+- **Gateway-only consoles filtered** - UDM-Pro, UDM-SE, UDM-Pro-Max, and EFG no longer show phantom radio entries in the AP list.
+
+## Settings
+
+- **Network API Key authentication** - Connect to your UniFi Console using an API key instead of username and password. Generated in UniFi Network under Integrations -> Create New API Key. The key is encrypted at rest and never exposed in logs or the UI. Useful for sites where you don't necessarily want to create a Local Admin, or when you're using UniFi Fabrics which no longer lets you create Local Admin users.
+
+## Client Speed Test
+
+- **Personal best tracking** - Beat your highest download speed and you might see something fun.
+- **Note for WAN speed test users** - If you run an [External WAN Speed Test Server](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md#external-wan-speed-test-server-optional), update it too so the client-side UI picks up the new features.
+
+## Wi-Fi Optimizer
+
+- **Roaming failure deep links** - Health score roaming failure issues now link directly to the affected AP pair in the Roaming tab, so you can investigate without hunting for it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.14.11
 
 More Adaptive SQM refinements - connection type profiles, congestion tuning, and smarter latency response. See [v1.14.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.14.0) for what's new in v1.14.0+
