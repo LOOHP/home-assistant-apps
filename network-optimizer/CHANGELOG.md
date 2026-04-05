@@ -1,3 +1,41 @@
+## 1.15.1
+
+Quick follow-up to v1.15.0. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+.
+
+## External WAN Speed Test Server
+
+- **Settings-driven deploy** - Configure the external server in Settings once, and a ready-to-copy deploy command appears with everything pre-filled. No more double configuration.
+- **Deploy script overhaul** - Interactive mode with guided prompts, `--update` mode for pulling new files without reconfiguring, and downloads via tarball instead of a brittle file list. Works on Linux and macOS.
+- **Server ID linking** - Auto-generated identifier ties deployed containers to speed test results, foundation for multi-server support down the road.
+- **Accurate HTTPS guidance** - Chrome and Edge enforce Private Network Access restrictions; Firefox and Safari don't. All warnings and docs updated to reflect tested browser behavior. Links to NetworkOptimizer-Proxy which has the WAN route pre-configured.
+
+## Fixes
+
+- **Card spacing on Settings and Security Audit** - Cards now have consistent spacing matching the Dashboard layout.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.0
 
 v1.15.0 adds API key authentication for UniFi consoles and a bunch of improvements since v1.14.0.
