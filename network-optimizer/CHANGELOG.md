@@ -1,3 +1,34 @@
+## 1.15.2
+
+Quick patch for a dependency security update. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+.
+
+## Security
+
+- **Upgraded Scriban templating library** - Updated from 5.12.0/6.5.2 to 7.0.6, addressing multiple known vulnerabilities. Scriban is used internally for alert notification templates.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.1
 
 Quick follow-up to v1.15.0. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+.
