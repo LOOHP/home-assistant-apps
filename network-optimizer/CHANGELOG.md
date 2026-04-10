@@ -1,3 +1,42 @@
+## 1.15.3
+
+More fixes and improvements for Adaptive SQM and gateway compatibility. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
+
+## Adaptive SQM
+
+- **GPON/XGS-PON afternoon relief window** - Congestion profiles now model the 3-5 PM commute gap where usage dips before the evening streaming peak. Baselines also interpolate between hours at 15-minute intervals for smoother rate transitions instead of stepping hourly.
+
+- **Gateway netcat compatibility** - SQM deploy now installs `netcat-openbsd` on gateways that only have the busybox version (e.g., UXG-Fiber). Busybox nc lacks the `-q` flag needed for clean connection teardown on the TC monitor endpoint.
+
+## Fixes
+
+- **UniFi OS Server boolean parsing** - UniFi OS Server returns some network config fields as strings ("true") instead of native booleans, which broke device discovery, AP fetching, wireless clients, and WAN interface detection. Added a flexible converter to handle both formats.
+
+- **Hardware Acceleration severity** - Upgraded from Info to Recommendation with a clearer description about the SFE fast forwarding path impact.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.2
 
 Quick patch for a dependency security update. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+.
