@@ -1,3 +1,42 @@
+## 1.15.6
+
+One fix this release: the speedtest container now boots cleanly on kernels that don't have the BBR TCP module loaded. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
+
+## Fixes
+
+- **Speedtest container fails to start on kernels without BBR** - The speedtest container previously tried to enable BBR congestion control via Docker compose sysctls, which hard-failed `docker compose up` on hosts whose kernel doesn't ship the `tcp_bbr` module (Synology, QNAP, some Proxmox / LXC setups). The sysctl is gone, and the container now inherits whatever CC the host has configured. If bbr is loaded and set as the default on the host, speedtests still use it; the entrypoint prints the current CC and, if applicable, shows the exact host-side command to enable bbr (`modprobe tcp_bbr` or `sysctl -w net.ipv4.tcp_congestion_control=bbr`).
+
+  **If you hit this error, grab the latest compose file and upgrade:**
+  ```bash
+  curl -o docker-compose.yml https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docker/docker-compose.prod.yml
+  docker compose pull && docker compose up -d
+  ```
+
+  (macOS with port mapping instead of host networking: `curl -O https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docker/docker-compose.macos.yml && docker compose -f docker-compose.macos.yml pull && docker compose -f docker-compose.macos.yml up -d`)
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.5
 
 More small fixes and a speed-test tuning improvement. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+.
