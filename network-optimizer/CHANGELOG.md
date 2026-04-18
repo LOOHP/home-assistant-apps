@@ -1,3 +1,42 @@
+## 1.15.5
+
+More small fixes and a speed-test tuning improvement. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+.
+
+## WAN Speed Test
+
+- **Higher single-stream throughput on high-RTT links** - Raised TCP autotuning ceilings to 32 MB in the speedtest container and enabled BBR congestion control. Previously the container's bridge namespace started at kernel defaults, capping single-stream throughput around 225 Mbps on 100 ms RTT paths regardless of real link capacity. Measurements now reflect link capacity instead of being bound by cubic's loss-driven cwnd halving.
+
+## Client Performance
+
+- **Signal Map defaults to the client's band** - The Signal Map in Client Performance used to always default to 5 GHz, so Wi-Fi 6E clients on 6 GHz showed no map points until you manually switched the band. It now follows the connected client's band automatically and updates on roam. You can still override it from the dropdown.
+
+## Fixes
+
+- **Config Optimizer, Device SSH Test, and Adaptive SQM failing on some controllers** - Some UniFi Consoles return int fields in the network config response (`ipv6_ra_valid_lifetime`, `upload_kilobits_per_second`, etc.) as strings instead of numbers, which broke deserialization of the whole network config and cascaded into Config Optimizer, Device SSH Test, and Adaptive SQM's WAN rate detection. Every int field on the network config and the nested WAN provider capabilities object now accepts strings, empty strings, and nulls without throwing.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.4
 
 Quick follow-up to v1.15.3 - replaced the SQM monitor's netcat HTTP server with busybox httpd to fix a long-standing race condition. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
