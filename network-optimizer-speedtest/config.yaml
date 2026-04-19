@@ -13,9 +13,6 @@ startup: services
 boot: auto
 init: false
 
-ingress: true
-ingress_port: 3000
-
 ports:
   3000/tcp: 3005
 ports_description:
