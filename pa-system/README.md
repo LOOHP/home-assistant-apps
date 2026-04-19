@@ -7,7 +7,6 @@ This add-on hosts the PA System web UI inside Home Assistant through ingress and
 The add-on UI now only needs these main settings:
 
 - `home_assistant_ip`: the LAN IP your speakers can reach, for example `192.168.1.3`
-- `app_port`: the listener port for the MP3 stream, default `8099`
 - `ha_token`: a Home Assistant long-lived access token
 - `targets_json`: your media player target list
 
