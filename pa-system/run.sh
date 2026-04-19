@@ -20,7 +20,7 @@ fi
 
 export HA_BASE_URL="http://homeassistant:8123"
 export APP_HOST="0.0.0.0"
-export APP_BASE_URL="http://${home_assistant_ip}:${app_port}"
+export APP_BASE_URL="http://${home_assistant_ip}:8099"
 export HA_TOKEN="$ha_token"
 export LOG_LEVEL="$log_level"
 export TARGETS_JSON="$targets_json"
