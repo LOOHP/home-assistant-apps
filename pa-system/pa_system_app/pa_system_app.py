@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 # =========================
 HA_BASE_URL = os.getenv("HA_BASE_URL", "http://homeassistant:8123").rstrip("/")
 APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
-APP_PORT = 8099
+APP_PORT = int("8099")
 APP_BASE_URL = os.getenv('APP_BASE_URL', f"http://{os.getenv('HOME_ASSISTANT_IP', '127.0.0.1')}:{APP_PORT}").rstrip('/')
 HA_TOKEN = os.getenv("HA_TOKEN", "")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "info")
