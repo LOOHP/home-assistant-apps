@@ -34,15 +34,9 @@ options:
         "kind": "speaker"
       },
       {
-        "id": "audio_bedroom_s",
-        "name": "Audio Bedroom (S)",
-        "entity_id": "media_player.audio_bedroom_s",
-        "kind": "speaker"
-      },
-      {
-        "id": "audio_bedroom_l",
-        "name": "Audio Bedroom (L)",
-        "entity_id": "media_player.audio_bedroom_l",
+        "id": "audio_bedroom",
+        "name": "Audio Bedroom",
+        "entity_id": "media_player.audio_bedroom",
         "kind": "speaker"
       }
     ]
