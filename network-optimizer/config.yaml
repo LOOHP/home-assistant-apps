@@ -15,6 +15,9 @@ init: false
 
 host_network: true
 
+ingress: true
+ingress_port: 8042
+
 map:
 - type: share
   path: /app/data
