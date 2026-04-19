@@ -36,14 +36,5 @@ The add-on generates the other URLs automatically:
 - The sidebar UI uses Home Assistant ingress paths, so the frontend uses relative API and WebSocket URLs and does not need a separate UI base URL.
 - The add-on uses `ffmpeg` to transcode browser WebM audio into MP3 for live playback.
 
-## Latency tuning
-
-This build applies lower-latency defaults for voice announcements:
-- browser audio chunks reduced from 250 ms to 100 ms
-- ffmpeg output flushing made more aggressive
-- mono 24 kHz 48 kbps MP3 for lower buffering and faster startup
-
-If you want even lower latency, the next thing to test is reducing the browser chunk size further, but that may raise CPU/network overhead.
-
 ## Attribution
 <a href="https://www.flaticon.com/free-icons/pa-system" title="pa system icons">Icon created by IconBaandar</a>
