@@ -1,5 +1,5 @@
 name: PA System
-version: "1.0.5"
+version: "1.0.6"
 slug: pa_system
 panel_icon: mdi:bullhorn
 panel_title: PA System
@@ -22,7 +22,6 @@ map:
     read_only: false
 options:
   home_assistant_ip: "192.168.1.3"
-  app_port: 8099
   ha_token: ""
   log_level: "info"
   targets_json: |
@@ -42,7 +41,6 @@ options:
     ]
 schema:
   home_assistant_ip: str
-  app_port: port
   ha_token: password
   log_level: list(trace|debug|info|warning|error|critical)
   targets_json: str
