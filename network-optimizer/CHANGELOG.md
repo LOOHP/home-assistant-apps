@@ -1,3 +1,40 @@
+## 1.15.7
+
+More fixes for Adaptive SQM. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
+
+## Adaptive SQM
+
+- **Fixed shaping rate double-discount on connections near line rate** - GPON and XGS-PON connections provisioned just under physical link speed (e.g. 965 Mbps on a 1 GbE link) were being shaped 25+ Mbps lower than the UI displayed. The safety cap was being applied to a pre-clamped AbsoluteMax, stacking three ceilings multiplicatively. Link speed is now applied as a final clamp instead, so the congestion range displayed in the UI matches what gets deployed.
+
+- **Reverted burst tuning to stock 1500b** - The scaled burst sizing (up to 5 KB) creates bursty HTB send patterns that increase fq_codel queue depth variance, showing up as latency jitter under load. Reverted to stock pending per-connection configurability.
+
+- **Speedtest probe now runs 5% above line rate** - The TC rate set during the speedtest measurement is now always safely above physical line rate, so the probe runs truly unshaped. The UI parameter has been renamed from "Absolute Max" to "Speedtest Probe Rate" to reflect what it actually does.
+
+- **Smart Queues validation now tolerates 1 Mbps difference** - UniFi Network EA/RC has a bug where Smart Queues breaks unless the rate is set to interface speed minus 1. The pre-deploy validation now accepts this.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.6
 
 One fix this release: the speedtest container now boots cleanly on kernels that don't have the BBR TCP module loaded. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
