@@ -1,3 +1,45 @@
+## 1.15.8
+
+More fixes for WAN speed testing. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
+
+## WAN Speed Test
+
+- **Disabled WANs no longer attributed in speed tests** - If you had a secondary WAN that was disabled in UniFi, speed tests could still tag results with both WANs when download speeds exceeded the configured ISP rate. Now verifies which WANs are actually active on the gateway before attributing.
+- **Speed-based multi-WAN detection less trigger-happy** - Added 25% tolerance so ISP overprovisioning and burst headroom don't falsely trigger multi-WAN attribution.
+- **Fixed WAN name showing as "WAN1"** - A service registration bug caused WAN identification to silently fail on server-based speed tests, leaving the WAN name blank (displayed as "WAN1" in the UI).
+
+## All Speed Tests
+
+- **Filter-to-device toggle** - Click the funnel icon next to any device name in speed test history tables to filter results to just that device. Works on LAN Speed Test, Client Speed Test, and Client WAN Speed Test pages.
+- **Map time range no longer filters the results table** - Changing the map's time range filter was incorrectly filtering the history table above it. Now only affects the map pins.
+
+## Security
+
+- **NuGet package updates** - Resolves known vulnerabilities in MailKit and System.Security.Cryptography.Xml (transitive via EF Core).
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.7
 
 More fixes for Adaptive SQM. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
