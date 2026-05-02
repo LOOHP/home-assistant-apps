@@ -1,3 +1,40 @@
+## 1.15.9
+
+More Adaptive SQM and WAN Steering fixes. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
+
+## Adaptive SQM
+
+- **WAN link speed override** - You can now override the auto-detected WAN port speed in the SQM config. Useful when your SFP supports a higher speed than the gateway reports (e.g., a 2.5 G SFP showing as 1 G). The override is used as the shaping ceiling.
+- **Tighter speedtest probe rate** - The probe rate during speed tests is now 3% above your max shaping rate instead of 5% above line rate, so TC stays transparent without overshooting your actual link speed.
+- **Dynamic burst sizing restored** - HTB burst now scales with your shaping rate again (1500-5000 bytes), eliminating drop_overmemory events at higher speeds.
+
+## WAN Steering
+
+- **VLAN-tagged and GRE interfaces now discovered** - WAN Steering wasn't picking up firewall marks for VLAN-tagged WANs (like `eth4.100`) or GRE tunnels from LTE/5G modems. These WANs showed up in the UI but couldn't actually steer traffic.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.8
 
 More fixes for WAN speed testing. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
