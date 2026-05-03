@@ -1,3 +1,42 @@
+## 1.15.10
+
+More fixes for speed test path analysis, IPv6 support, and device classification. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
+
+## Speed Tests
+
+- **CPU-bound disclaimer for device speed tests** - When iperf3 results to an AP or cellular modem are 25%+ below the link's line rate, the path analysis now shows a "results limited by device CPU, not network" disclaimer - the same one already used for gateway tests. Previously this only triggered for high-end APs exceeding 4.4 Gbps.
+
+- **Bottleneck description now names the correct device** - The bottleneck label (e.g., "2.5 Gbps link at Switch Main (port 3)") was incorrectly attributing the port to the target device instead of the upstream switch or gateway. Now tracks which device actually owns each port, so the description always names the right one.
+
+## Fixes
+
+- **IPv6 ULA addresses recognized as local** - Users with IPv6 Unique Local Addresses (fc00::/7, typically fd00::/8) had their local hosts misclassified as public WAN IPs, affecting path analysis, geo enrichment, DNS detection, and threat filtering.
+
+- **UNAS no longer misidentified as Protect camera** - The UniFi NAS (UNAS) was being flagged as a security camera needing Security VLAN placement because its model name (e.g., "UNAS-Pro") matched the "Pro" camera pattern.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.15.9
 
 More Adaptive SQM and WAN Steering fixes. See [v1.15.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.15.0) for what's new in v1.15.0+
