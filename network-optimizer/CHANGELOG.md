@@ -1,3 +1,66 @@
+## 1.16.1
+
+Two fixes for Performance Tweaks.
+
+- **SFP compatibility note for GPON sticks** - Added a warning on the SFP+ 2.5G SGMII+ Patch card noting that Zyxel PMG3000-D20B support is being tested, and that other GPON sticks may not negotiate 2.5G cleanly with the UniFi host. Feel free to try the patch, but be prepared to remove it if the link doesn't stabilize.
+- **Fixed CRLF in perf tweak scripts on Windows** - Shell scripts embedded in the Windows MSI could be deployed with Windows line endings, breaking execution on the gateway. Scripts are now normalized to Unix line endings before deploying.
+
+## What's New
+
+For users upgrading from v1.15.0, here's what landed in the v1.15.x patches:
+
+- **External WAN Speed Test Server** - Settings-driven deployment with a ready-to-copy deploy command, interactive deploy script with `--update` mode, and accurate HTTPS browser guidance.
+- **SQM monitor reliability** - Replaced netcat HTTP server with busybox httpd, fixing a race condition that caused ~30 watchdog restarts per hour and hammered eMMC.
+- **GPON/XGS-PON afternoon relief** - Congestion profiles model the 3-5 PM commute gap, and baselines interpolate at 15-minute intervals for smoother rate transitions.
+- **WAN speed test throughput** - Raised TCP autotuning ceilings and enabled BBR congestion control in the speedtest container, fixing single-stream throughput caps on high-RTT links.
+- **WAN link speed override** - Override auto-detected WAN port speed in SQM config for SFPs that report lower than actual.
+- **VLAN-tagged and GRE WAN interfaces** - WAN Steering now discovers WANs on VLAN-tagged interfaces and GRE tunnels from LTE/5G modems.
+- **Filter-to-device toggle** - Click the funnel icon next to any device in speed test history tables to filter results to that device.
+- **UniFi OS Server compatibility** - Fixed string-typed integers in network config responses that broke Config Optimizer, Device SSH Test, and Adaptive SQM on some consoles.
+- **Speedtest container BBR fallback** - Container now boots cleanly on kernels without the BBR module (Synology, QNAP, some Proxmox/LXC).
+
+## Performance Tweaks
+
+- **New gateway optimization system** - Deploy and monitor optimizations on UCG-Fiber, UXG-Fiber, and UCG-Max directly from the UI. Four tweaks: fan control PID tuning for earlier fan engagement, MongoDB offload from eMMC to NVMe SSD with automated backup, journald volatile logging with syslog-ng eMMC route disabling, and SFP+ 2.5G SGMII+/HSGMII kernel patch for GPON ONT modules. Each tweak knows which gateway models it supports.
+- **On-demand health checks and safe deploy** - SSH-based health checks show fan speeds, CPU temps, bind mounts, SFP registers, and eMMC routes. Deploy confirmation with backup verification and warranty acknowledgment. Boot script version checking with one-click updates. Firmware gating through 5.1.10.
+- **Removal and cleanup** - Every tweak has a proper removal path with confirmation: SDB stock reset for fan control, clean MongoDB SSD-to-eMMC migration, config restoration for journald/syslog-ng, and kernel module unload for SFP.
+
+## Config Optimizer
+
+- **Flow Control consistency check** - Flags individual switch ports and port profiles that have Flow Control explicitly disabled when the global setting is enabled. Helps catch accidental overrides that can cause packet loss on trunk links.
+
+## Adaptive SQM
+
+- **Configurable speedtest boot delay** - Optional per-WAN delay before the first speedtest after gateway boot. Useful for connections that take time to stabilize after a reboot - Starlink, cellular modems, GPON/XGS-PON SFP ONTs that need time to negotiate with the OLT.
+
+## Security Audit
+
+- **Improved UNAS detection** - UNAS devices share Ubiquiti OUI prefixes with Protect cameras, which made the MAC-based detector misclassify them. Now uses the V2 device API's drive_devices array to positively identify NAS devices at highest detection priority.
+- **Cloudflare IP list tolerance** - Users who add a few personal management IPs alongside Cloudflare ranges in a port forward restriction were getting a misleading "consider restricting to Cloudflare IPs" recommendation. Now tolerates up to 10 individual host IPs without losing the "properly restricted" classification.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.0
 
 v1.16.0 introduces the Performance Tweaks system - deploy and monitor gateway optimizations directly from the UI. Plus Flow Control consistency checking, configurable SQM boot delays, and improved device classification.
