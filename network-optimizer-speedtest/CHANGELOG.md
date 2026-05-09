@@ -1,3 +1,36 @@
+## 1.16.3
+
+Patch release for Performance Tweaks. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## Performance Tweaks
+
+- **Fixed SSD usage display on UniFi OS v5.1+** - The MongoDB SSD status check used a path pattern that only matched old-style `/volume1` mounts, not the `/volume/<uuid>/` structure introduced in UniFi OS 5.1.
+- **SFP+ tweak count no longer inflated** - Port 6 and Port 7 SFP+ patches are mutually exclusive for now, so the Active Tweaks counter counts them as a single slot instead of showing 2.
+- **Clarified firmware/reset survival table** - Factory reset row now accurately states that boot scripts and custom modules will be wiped, with SSD data depending on reset options. OS upgrade action points to the status indicators rather than a manual CLI check. Table scrolls horizontally on mobile.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.2
 
 Two additions - SFP+ Port 6 support for Performance Tweaks and a udm-boot safety check for WAN Steering. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+.
