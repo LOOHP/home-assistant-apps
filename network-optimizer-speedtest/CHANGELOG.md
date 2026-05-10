@@ -1,3 +1,38 @@
+## 1.16.4
+
+More fixes for the SFP SGMII+ patch and Client Performance page. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## Performance Tweaks
+
+- **GPON stick pre-flight instructions** - The SFP tweak cards now include a compatibility dialog with step-by-step instructions for sticks that won't negotiate 2.5 G cleanly with the UniFi host. Includes Zyxel PMG3000-D20B-specific commands for configuring auto-negotiation and persisting across reboots.
+
+## Client Performance
+
+- **Retry button actually retries** - The Retry button on "Device Not Found" and "Device Offline" screens now does a full page reload so it picks up your current IP. Previously it would retry within the same session, which couldn't detect a new IP after switching networks (e.g., from cellular to Wi-Fi).
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.3
 
 Patch release for Performance Tweaks. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
