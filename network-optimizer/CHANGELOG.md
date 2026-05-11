@@ -1,3 +1,40 @@
+## 1.16.5
+
+More SFP tweaks improvements and a Wi-Fi Optimizer fix. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## SFP Tweaks
+
+- **Boot scripts wait for carrier before loading module** - SFPs like the Zyxel PMG3000 need ~15 seconds after boot to configure their SerDes for 2.5 G auto-negotiation. The boot scripts now wait up to 90 seconds for a 1 G link before loading the SGMII+ module, avoiding a race condition that could leave the link down. If no link appears (e.g., the SFP is hard-locked at 2.5 G), the module loads anyway. The script also backgrounds itself so it doesn't block other on_boot.d scripts.
+- **Carrier wait status in UI** - After deploying or rebooting, the tweak card now shows an informational note explaining the link wait period instead of immediately showing an error state.
+- **Zyxel frame size corrected** - Updated the `onu lanpcs` command in the Zyxel compatibility instructions to use frame size 9990 instead of 1518.
+
+## Wi-Fi Optimizer
+
+- **Channel Issues tab shows full details** - Issue entries on the Channel Issues tab now show their detail text, matching the behavior of the main audit issues list.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.4
 
 More fixes for the SFP SGMII+ patch and Client Performance page. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
