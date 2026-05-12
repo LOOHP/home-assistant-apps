@@ -1,3 +1,36 @@
+## 1.16.6
+
+More Zyxel GPON stick compatibility fixes. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## SFP Tweaks
+
+- **Recommend V2.50 firmware for Zyxel PMG3000-D20B** - The V1.00 firmware branch has an incomplete auto-negotiation state machine that can fail to converge at 2.5 G after host reboots. V2.50 fixes this and defaults to 2.5 G out of the box - no manual SFP configuration needed. The compatibility dialog now leads with this recommendation and links to the community firmware archive.
+- **Fix Zyxel lanpcs command parameters** - Corrected the `onu lanpcs` command for V1.00 users who can't upgrade (parameter and frame size fixes based on firmware RE findings). The V1.00 workaround is still available but collapsed by default.
+- **General GPON stick guidance** - Added a note that firmware upgrades may help other Lantiq and Realtek-based sticks with similar auto-negotiation issues.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.5
 
 More SFP tweaks improvements and a Wi-Fi Optimizer fix. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
