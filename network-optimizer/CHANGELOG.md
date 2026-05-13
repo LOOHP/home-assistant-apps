@@ -1,3 +1,39 @@
+## 1.16.7
+
+More device support updates. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## Product Catalog
+
+- **UDM-Beast support** - Added the new Dream Machine Beast (14-port, 25 Gbps rack console) to the product database with device icon
+- **7 additional new products** - Added EAV-24-PoE, EAVAGG, EAVBRIDGE, ENVR-Core, U-AirWire, and gen2 hardware revisions for USW-Lite-16-PoE and USW-24-PoE from Ubiquiti's latest public.json catalog
+
+## Performance Tweaks
+
+- **Firmware gate bumped to UniFi OS 5.1.11** - PerfTweaks deployment now supported on the latest firmware
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.6
 
 More Zyxel GPON stick compatibility fixes. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
