@@ -1,3 +1,43 @@
+## 1.16.8
+
+More fixes and improvements. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## Security Audit
+
+- **Cellular WAN DNS false positive fixed** - The DNS audit no longer flags cellular WAN interfaces (U5G, LTE modems) for missing static DNS. UniFi doesn't allow DNS configuration on cellular WANs, so the warning was a false positive.
+
+## Wi-Fi Optimizer
+
+- **Roaming Assistant reads SSID-level settings** - Newer UniFi Network versions moved Roaming Assistant from per-AP radio settings to per-SSID WLAN config. The optimizer now checks SSID-level settings first, with a fallback to per-AP for older controller versions. Supports both 5 GHz and 6 GHz bands.
+
+## Fixes
+
+- **IPv6 binding support** - The app now binds to both IPv4 and IPv6 interfaces instead of IPv4 only. Users on IPv6-only or dual-stack networks can now reach the web UI without extra configuration.
+- **syslog-ng persist file moved to tmpfs** - The volatile log tweak now also redirects syslog-ng's persist file from eMMC to tmpfs, reducing unnecessary flash writes on UniFi gateways.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.7
 
 More device support updates. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
