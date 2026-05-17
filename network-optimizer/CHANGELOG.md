@@ -1,3 +1,38 @@
+## 1.16.9
+
+More audit fixes for advanced network setups. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+.
+
+## Security Audit
+
+- **L3 switch-routed VLAN support** - Networks routed by a switch (instead of the gateway) are now properly included in the audit. Previously, enabling L3 switching on a VLAN would cause it to disappear from the audit entirely, leading to false positives for cameras and missing firewall rule checks.
+
+- **Inter-VLAN routing network excluded** - The system "Inter-VLAN routing" network (used internally by UniFi for L3 switching) is no longer shown in the Network Reference list or treated as a user network.
+
+- **PPSK subnet mismatch false positives fixed** - Devices on PPSK SSIDs (where the AP assigns VLANs by password) no longer trigger incorrect "VLAN Subnet Mismatch" warnings when UniFi temporarily reports the wrong network assignment.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.8
 
 More fixes and improvements. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
