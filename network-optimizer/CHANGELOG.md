@@ -1,3 +1,43 @@
+## 1.16.10
+
+Fixes and a navigation improvement. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## WAN Steering
+
+- **Promoted to top-level nav item** - WAN Steering now has its own icon in the sidebar instead of being nested under Adaptive SQM.
+
+## Config Optimizer
+
+- **SQM firmware regression warning** - UCG-Fiber, UXG-Fiber, UCG-Max, and UXG-Max on firmware newer than 5.0.10 with WAN speeds above 500 Mbps now get a performance suggestion. SQM download throughput regressed to ~800 Mbps or less on these models with recent firmware.
+
+## Fixes
+
+- **Threat Dashboard client name resolution** - The UniFi API returns device fingerprinting fields as floats (e.g. `4.0` instead of `4`), which broke client list deserialization. The JSON converter now handles float-typed numbers.
+- **WiFi Optimizer propagation data loading** - Fixed an error that occurred when the Blazor circuit ended while background health evaluation was still running.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.9
 
 More audit fixes for advanced network setups. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+.
