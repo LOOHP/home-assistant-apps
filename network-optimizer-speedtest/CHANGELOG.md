@@ -1,3 +1,48 @@
+## 1.16.11
+
+Multiple WAN speed test server support and smarter Config Optimizer checks. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
+
+## Client WAN Speed Test
+
+- **Multiple external speed test servers** - You can now configure more than one external OpenSpeedTest server in Settings. The speed test page shows a dropdown when you have multiple, with a configurable default.
+- **Speed, Latency, and Jitter charts** - New tabbed charts with per-server series, a time slider from 1 hour to all time, and click-to-scroll from chart points to results in the table.
+- **Server filter** - Filter the history table and charts by server, alongside the existing device filter.
+
+## Config Optimizer
+
+- **Trunk ports excluded from Flow Control check** - Ports connecting switches and/or gateways on both sides are no longer flagged when Flow Control is disabled. Disabling FC on high-speed inter-switch links is common and often optimal. Port profiles with "trunk" in the name are also excluded.
+
+## Threat Dashboard
+
+- **IPS v2 detection fix** - Sites running IPS v2 now correctly show threat data. Previously, a successful v2 response was being ignored in favor of the v1 endpoint. Thanks to @jedis00 for the fix!
+
+## Performance Tweaks
+
+- **Fan control standby PWM reverted to stock** - Left at the factory default (20) since the standby role isn't fully understood.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.10
 
 Fixes and a navigation improvement. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
