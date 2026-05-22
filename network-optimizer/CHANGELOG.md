@@ -1,3 +1,63 @@
+## 1.17.0
+
+The big one. Full time-series network monitoring with a 3D real-time traffic visualization, latency and device health charting, and automated upstream path discovery. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what came before.
+
+## What's New
+
+- **Network Monitoring** - SNMP-based polling with InfluxDB 2.x storage. Interface counters, device health, latency probes, SFP optical levels, and WiFi client snapshots - all with configurable retention and a setup wizard that handles bucket and token provisioning automatically.
+- **3D LAN Flow Map** - Real-time Three.js visualization of your entire network topology with directional particle-flow traffic. WASD navigation, fullscreen mode, double-click any client to open their performance dashboard. Filter by band, network, or search by name.
+- **Upstream Path Discovery** - Automated traceroute-based discovery of your ISP's access infrastructure, transit networks, and internet service endpoints. Identifies your OLT/CMTS, ISP edge routers, and transit ASNs with both ICMP and UDP probes.
+- **SFP/ONT optical monitoring** - Live RX/TX power, temperature, voltage, and bias current for PON SFP modules. Auto-detects GPON vs XGS-PON from a database of common modules (Calix, Zyxel, Nokia, Leox, ODI, SourcePhotonics, and more). Shows a 2.5 Gbps upgrade hint for GPON modules on UCG/UXG-Fiber gateways.
+
+## Latency & Packet Loss
+
+- Time-series RTT and packet loss charts across four target categories - LAN fabric, ISP access hops, transit networks, and internet services
+- Per-target filter badges with solo-click UX
+- Time range presets (15m to 30d), shift arrows to pan the window, and a custom date range picker
+- Sub-15 ms query performance via InfluxDB tag-indexed queries
+
+## Device Health
+
+- Temperature, CPU, and Memory charts per network device
+- Gateway temperature via LM-SENSORS SNMP OID
+- AP CPU collection via hrProcessorLoad walk (ssCpuIdle not supported on APs)
+- Memory calculation excludes cache to show actual usage
+- Dashboard device cards show live CPU, memory, and temperature at a glance
+
+## Security Audit
+
+- **DNS VIP support** - New TrustedDnsRedirectTargets setting lets operators allowlist virtual IPs (keepalived, HAProxy, anycast) as valid DNAT redirect targets. Thanks to @jedis00 for the contribution.
+
+## Fixes
+
+- **Firmware 5.1.12** - Bumped max supported firmware
+- **Reverse proxy docs** - Clarified .env configuration for reverse proxy setups
+- **Settings defaults** - InfluxDB bucket defaults now match the setup wizard
+- **API endpoint refactor** - Moved from inline Program.cs to Endpoints/*.cs modules
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.16.11
 
 Multiple WAN speed test server support and smarter Config Optimizer checks. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what's new in v1.16.0+
