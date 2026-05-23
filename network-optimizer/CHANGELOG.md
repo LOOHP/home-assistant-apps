@@ -1,3 +1,44 @@
+## 1.17.3
+
+More monitoring improvements - this time for the Live View timeline. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Monitoring
+
+- **Historic playback for stat cards** - The stat cards above and below the 3D map (WAN rates, latency, gateway health, fabric load) now reflect the timeline position during playback, showing point-in-time values from InfluxDB instead of only live data
+- **Full map data during playback** - The 3D map now shows correct historic data for all link types during playback, including uplinks, WAN, mesh backhaul, wired clients, and switch-behind-mesh-AP links. Node badges show historic CPU, memory, temperature, and fabric rates. Cloud stats show historic latency.
+- **Playback speed control** - +/- buttons let you adjust playback speed from 1x (real-time) through 1440x, with the rate displayed between the buttons
+- **Growing scrubber window** - The timeline's left edge is anchored at page load, so the window grows as you leave the page open instead of dropping older time periods
+- **Historic badge** - Click the "Historic" badge to snap back to live. Tooltip only appears when in historic mode.
+- **Investigation timestamps** - Packet loss and SFP anomaly investigation results now include the local date and time in parentheses alongside the relative "19h ago" format
+- **GetWansAsync performance** - The WAN port table structure is now cached for 30 seconds instead of hitting the UniFi controller API on every 2-second live poll
+
+## Fixes
+
+- **SNMP concurrency limit** - Fast-tier and medium-tier SNMP polls previously fanned out to all devices with no concurrency limit, which could overwhelm the .NET runtime on macOS native installs. Now bounded to 8 concurrent SNMP operations across all tiers.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.2
 
 More monitoring upgrades. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
