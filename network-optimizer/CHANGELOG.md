@@ -1,3 +1,49 @@
+## 1.17.1
+
+More monitoring polish. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Monitoring
+
+- **SFP management** - All detected SFP modules now visible on the Monitoring page with controls to add or remove them from monitoring, and to tag modules as PON or standard SFP. Collapsible table with pagination, sorted by device IP.
+- **SFP time-series charts** - RX/TX optical power and temperature charts for monitored SFPs, with the same date/time filtering and module selector badges as the latency and device health charts. Defaults to a 24-hour window.
+- **Manual latency targets** - Add custom latency targets with configurable name, address, type (Custom, Internet, ISP, Transit), probe mode (ICMP or TCP), and polling interval.
+- **Per-target probe cadence** - Change the polling interval on any latency target directly from the table (2 s to 5 m).
+- **Chart polling optimization** - All chart modules now pause data fetching when scrolled out of view or when the 3D map is fullscreen, and catch up immediately when visible again. Reduces unnecessary API calls and fixes the stutter caused by background chart refreshes competing with the WebGL renderer.
+- **GPON Rx power range** - Corrected the displayed healthy range from -3 to -25 dBm to the actual ITU-T spec range of -15 to -25 dBm typical.
+- **Dashboard ONT Stats** - Now shows only PON modules (GPON / XGS-PON), not regular SFPs that happen to be monitored.
+- **Aggregate window scaling** - InfluxDB queries now scale proportionally (~150 data points) regardless of time range, preventing browser memory issues on very wide custom date ranges.
+
+## Fixes
+
+- **Negative packet loss** - Duplicate ICMP replies no longer produce negative loss percentages. The parser now clamps received count to never exceed sent.
+- **3D map WASD navigation** - Keyboard shortcuts no longer fire while typing in input fields.
+- **Button tooltips** - Clicking a button no longer triggers its tooltip; tooltips are hover-only on all buttons.
+- **Latency chart mobile layout** - Time range controls (arrows + presets) now wrap as a unit on narrow screens instead of splitting apart.
+- **Input validation** - Manual latency target addresses are validated as IP or hostname before saving.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.0
 
 The big one. Full time-series network monitoring with a 3D real-time traffic visualization, latency and device health charting, and automated upstream path discovery. See [v1.16.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.16.0) for what came before.
