@@ -1,3 +1,53 @@
+## 1.17.2
+
+More monitoring upgrades. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Monitoring
+
+- **Tabbed navigation** - Monitoring is now organized into five tabs: Live View, Network Performance, Device Stats, SFP Stats, and Setup. Each tab mounts/unmounts its charts independently so switching is fast and resource-friendly.
+- **Live View stat cards** - Real-time summary cards showing WAN download/upload (from SNMP), gateway RTT and packet loss, ISP and transit mean latency, gateway CPU/memory/temperature, and total fabric ingress/egress throughput.
+- **Statistics table** - Per-target mean, min, max, P95, and P99 for RTT plus mean and max for loss, rendered below the latency charts. Updates with the selected time range and badge filters.
+- **WAN throughput chart** - When viewing ISP, Transit, or Internet latency, a third chart shows summed WAN interface throughput over the same time window so you can correlate latency spikes with traffic patterns.
+- **Packet loss investigation** - A "Packet Loss Events" button finds the most recent 1-minute-averaged loss event across all WAN targets and navigates the chart to it. Back/forward arrows step through events chronologically.
+- **SFP threshold alerts** - New alert events for PON RX power below -25 dBm, TX power above 4 dBm, and temperature above 75 C (87 C for non-PON). Default rules auto-created on startup. Hysteresis prevents flapping.
+- **SFP anomaly investigation** - Similar to packet loss, finds the most recent SFP temperature or signal anomaly and jumps the chart to it.
+
+## Setup & UX
+
+- **InfluxDB recovery flow** - When the InfluxDB connection fails (expired token, unreachable), the Setup tab now shows "Update Token" (links to Settings) and "Re-run Setup" (re-provisions inline) buttons instead of requiring manual navigation.
+- **Wizard improvements** - The status card updates immediately when provisioning succeeds; Continue just collapses the wizard panel. Token field unlocks the provision button on input, not blur. Password managers no longer autofill the token field.
+- **Tab availability after restart** - Tabs are available immediately based on persisted config, no waiting for health checks to complete. Setup tab auto-selects when there's a known error.
+
+## Other
+
+- **Event catalog** - The Alerts Event Type Patterns dialog now lists all monitoring events (target offline/recovered/sustained loss, SFP thresholds) and WAN data usage events.
+- **Component extraction** - Latency Targets and SFP Modules cards extracted into standalone Razor components.
+- **Chart cleanup** - Removed fullscreen coupling from chart JS modules (tabs handle lifecycle). Category switching preserves the selected time window. Popover inputs stay in sync on preset changes.
+- **Upstream tracer** - Renamed "Access hop" to "ISP hop" for clarity.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.1
 
 More monitoring polish. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
