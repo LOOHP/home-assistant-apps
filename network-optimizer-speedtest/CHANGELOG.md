@@ -1,3 +1,39 @@
+## 1.17.4
+
+More 3D Live Map work - buildings from your Wi-Fi Signal Map floor plans now render in 3D with material textures, and all device types can be repositioned.
+
+## Self-Hosted Network Monitoring
+
+- **3D floorplan buildings** - Floor plan buildings render on the 3D map with walls, floor planes, and pitched roofs. Wall materials match what you set in the Wi-Fi Signal Map with procedural textures (brick, siding, wood, concrete, glass, doors, windows). Interior and exterior faces render differently based on winding direction
+- **WAN globe** - Wireframe lat/lng globe replaces the old cloud shapes for internet nodes
+- **Device repositioning** - All device types can now be right-click repositioned, including Wi-Fi and wired clients
+- **Overlay and camera persistence** - Toggle states and camera position save across sessions
+- **RTT precision** - 3 decimal places in the statistics table, 2 on stat cards
+- **Faster ping bursts** - 0.1 s interval on macOS, reduced process concurrency to mitigate a .NET 10 ARM64 runtime bug
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.3
 
 More monitoring improvements - this time for the Live View timeline. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
