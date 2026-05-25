@@ -1,3 +1,46 @@
+## 1.17.5
+
+More improvements to Self-Hosted Network Monitoring, faster traceroutes, and a community contribution for audit rules. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **Multi-WAN 3D map** - All active WANs now render as separate access globes with their own live throughput rates, speed test results, and friendly names from your UniFi Network configs.
+- **WAN detection overhaul** - The upstream tracer now reads the device's wan1...wan6 objects directly instead of relying on port_table.is_uplink, which may not be set for PPPoE, VLAN-tagged, or GRE tunnel connections. Fixes #651.
+- **Faster traceroute probes** - Reduced per-hop timeout and probe count so traces complete within the deadline even on paths with silent intermediate hops.
+- **Access technology selector** - Set your access network technology (GPON, DOCSIS, Active Ethernet, etc.) during upstream discovery review.
+- **Target deduplication** - Re-running upstream discovery no longer creates duplicate monitoring targets.
+- **Right-click WAN globe** - Context menu navigates directly to upstream discovery.
+- **Historic playback per-WAN** - Historic mode now resolves rates per-WAN. Speed test lookback extended to 30 days.
+- **Timeline controls** - 10x scrubber resolution, arrow key scrubbing (shift for 10x), spacebar pause/play, 0.5x playback speed.
+- **WASD sensitivity** - Reduced ~33% for smoother camera control.
+
+## Security Audit
+
+- **Mirror-port awareness** - Port-evaluating audit rules now skip mirror/span ports, avoiding false positives on monitoring ports. Thanks @jedis00! (#650)
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.4
 
 More 3D Live Map work - buildings from your Wi-Fi Signal Map floor plans now render in 3D with material textures, and all device types can be repositioned.
