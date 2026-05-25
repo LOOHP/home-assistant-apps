@@ -1,3 +1,38 @@
+## 1.17.6
+
+Important performance fix for SNMP monitoring. When we ported the monitoring stack from our internal tooling, the batched SNMP APIs didn't make it over - so the poller was doing individual round-trips for every OID on every interface. If you have monitoring enabled, this release significantly reduces CPU and memory usage. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Monitoring
+
+- **Fix N+1 SNMP polling** - The SNMP poller was issuing ~26 individual GET requests per interface per poll cycle, each blocking a thread pool thread on a UDP socket. Replaced with batched multi-OID GET (one packet for scalar metrics) and GETBULK walks (one walk per counter column). Static interface metadata (description, name, speed, type) is now cached for 60 seconds so only counters are re-walked on each tick. CPU usage drops substantially and working set drops from ~744 MB to ~310 MB.
+
+- **V3 discovery cache** - SNMP v3 engine discovery is now cached for 60 seconds instead of re-running on every request.
+
+- **Filter chipset pseudo-interfaces** - Qualcomm radio USB descriptors ("Device 17cb:1109" etc.), MII register, and traffic equalizer interfaces are now excluded from monitoring. These reported meaningless counter values that produced garbage throughput rates.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.5
 
 More improvements to Self-Hosted Network Monitoring, faster traceroutes, and a community contribution for audit rules. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
