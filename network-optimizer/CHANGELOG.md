@@ -1,3 +1,40 @@
+## 1.17.7
+
+More DNS audit improvements and a fix for missing monitoring data and intermittent errors. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Security Audit
+
+- **NextDNS CLI detection** - The audit now recognizes NextDNS CLI as a known DNS provider alongside Pi-hole and AdGuard Home. If your LAN DNS points to a local NextDNS CLI instance, the audit identifies it automatically and treats it as a trusted provider (no score penalty). Thanks to @jedis00 for the contribution (#655).
+- **IP-based DoH/DoH3 blocking detection** - Firewall rules that block DoH by destination IP (via IP groups or inline IP lists) are now recognized. This is a common deployment pattern on UniFi gateways, especially for users who prefer IP-based rules over domain or DPI-app targeting. Thanks to @jedis00 (#656).
+- **Stricter DoH provider matching** - DoH block rules now require coverage of all four major providers (Cloudflare, Google, Quad9, OpenDNS) to receive credit. Previously, a rule blocking just one or two providers could satisfy the check. This eliminates false positives from partial blocks and better reflects what a comprehensive DoH-bypass prevention setup looks like.
+
+## Fixes
+
+- **Database reliability after config import** - Importing a configuration backup could leave the database in DELETE journal mode instead of WAL, which could cause missing monitoring data, intermittent errors, or other seemingly random issues. The app now enforces WAL mode on every startup.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.6
 
 Important performance fix for SNMP monitoring. When we ported the monitoring stack from our internal tooling, the batched SNMP APIs didn't make it over - so the poller was doing individual round-trips for every OID on every interface. If you have monitoring enabled, this release significantly reduces CPU and memory usage. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
