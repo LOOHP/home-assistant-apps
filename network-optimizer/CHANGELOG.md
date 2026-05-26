@@ -1,3 +1,51 @@
+## 1.17.9
+
+Self-Hosted Network Monitoring reliability and live 3D map improvements. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **SNMP resilience** - a transient SNMP error on one interface no longer zeroes all interface counters for the entire device. The poller now preserves partial data when a walk encounters a bad response, and recovers on the next cycle.
+
+- **SNMP exclusion recovery** - devices excluded from SNMP polling (after consecutive failures) are now retried after 1 hour instead of staying excluded until app restart. The failure threshold was also raised from 3 to 10 consecutive failures to avoid false exclusions during brief outages.
+
+- **PPPoE WAN throughput** - WAN rate lookups now fall back to the logical uplink interface when the physical port has no active SNMP counters, fixing missing WAN throughput on PPPoE connections.
+
+- **Trunk link live rates** - switch-to-switch uplink links now update on the 5-second SNMP cadence instead of lagging behind and bursting every 30 seconds. The live tick reads per-port SNMP rates directly instead of a device-level aggregate that was never written for switches.
+
+- **Port alias filter fix** - the SNMP interface filter was dropping any port whose alias starts with "Lo" (e.g., "Loft Lower", "Lobby") because the loopback filter used a prefix match on "lo". Rebuilt the filter from actual device data to use exact matches for kernel defaults and safe prefixes for bridges.
+
+- **Upstream Discovery ping check** - discovered upstream targets are now pinged before being proposed, filtering out unreachable hops.
+
+- **Upstream Discovery guidance** - the Live View now guides users to run Upstream Discovery when ISP or transit targets aren't configured, with a navigation guard to prevent losing unsaved results.
+
+- **Packet Loss Events false positives** - the loss event navigator no longer finds old data from disabled/paused targets.
+
+- **"Last verified" showing "just now"** - fixed a timezone bug on non-UTC servers where the relative time display always showed "just now" for old timestamps.
+
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.8
 
 More fixes for monitoring and the 3D map. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
