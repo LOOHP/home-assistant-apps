@@ -1,3 +1,45 @@
+## 1.17.8
+
+More fixes for monitoring and the 3D map. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Monitoring
+
+- **WAN speed now shows on UDM gateways** - Live stats cards were missing WAN Download/Upload on UDM-Pro, UDM-SE, and UDM-Pro-Max because SNMP reported hardware descriptions instead of Linux interface names for the physical NICs. The SNMP poller now prefers ifName when it's a real interface name and the alias isn't.
+- **Gateway type filter expanded** - The WAN interface extraction now uses the canonical gateway classification, picking up UCG and USG devices that were previously skipped.
+- **SNMP re-detection on page load** - The Monitoring page now re-detects SNMP settings every time you visit it, avoiding stale false positives (e.g., showing SNMP v3 when the device only supports v2c).
+
+## 3D Map
+
+- **Live scrubbing** - The 3D map and stat cards now update as you drag the timeline scrubber, not just when you release it.
+- **Arrow key scrubbing improvements** - Better UX for arrow key scrubbing with hold-to-accelerate and Shift for fast scrub.
+
+## Fixes
+
+- **GeoLite2 database updates no longer fail** - Downloads now extract to a staging file and swap into place after closing the reader, preventing file-in-use errors.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.7
 
 More DNS audit improvements and a fix for missing monitoring data and intermittent errors. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
