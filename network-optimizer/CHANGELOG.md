@@ -1,3 +1,37 @@
+## 1.17.13
+
+More monitoring improvements. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **Differential SNMP polling** - The SNMP poller now skips OID walks whose cached data hasn't expired. Traffic counters are walked every 5s, oper status and error counters every 30s, and static metadata (interface names, speeds) every 300s. Reduces per-device SNMP requests by ~60%, which adds up on larger fabrics with many switches.
+- **Poller instance caching** - The SNMP poller is reused across polling cycles instead of being rebuilt every 5 seconds, preserving the V3 discovery cache and per-device state.
+- **SNMP failure learning for all tiers** - Medium and slow polling tiers now skip devices that don't speak SNMP (like USW-Flex-Mini), matching the fast tier's existing behavior. Eliminates repeated timeouts against non-SNMP devices.
+- **Per-device SNMP setup guidance** - The monitoring setup wizard and status page now explain that SNMP must be enabled on each UniFi device individually (Settings > SNMP > set Location or Contact), not just the global Console setting.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.12
 
 Hotfix for v1.17.11. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
