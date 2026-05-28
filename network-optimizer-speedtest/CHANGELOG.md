@@ -1,3 +1,48 @@
+## 1.17.11
+
+More monitoring improvements and a new topology view. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **2D LAN Topology Flow Map** - A new interactive hierarchical map on the Live View tab showing your full network topology with live throughput rates, device health, and client connections. Pan, zoom, and hover for details.
+- **Device health for non-SNMP devices** - Devices without SNMP (Flex Mini, devices with SNMP toggled off) now show CPU, memory, and temperature on Device Health charts, sourced from the UniFi API.
+- **Switch temperature monitoring** - Switch temps now appear on the temperature chart. SNMP doesn't report switch temps, so these come from the UniFi API automatically.
+- **Wired client throughput** - Wired clients behind non-SNMP switches now show live throughput on the 2D map, with InfluxDB storage for historic playback.
+
+## WiFi Optimizer
+
+- **Gateway-only console fix** - UDM-Beast, UDM-Pro, UDM-SE, and EFG were sometimes misclassified as access points when connected through a WAN Switch. These rack-mount consoles now always stay classified as gateways.
+
+## Fixes
+
+- **API call optimization** - Reduced redundant UniFi API device calls from ~7/min to ~2/min with a response cache. Network-only fetches save over 500 KB per call by skipping unnecessary device and client data.
+- **Container startup hang** - Stale migration locks from interrupted startups are now cleared automatically, preventing the container from hanging on restart.
+- **3D map stability** - Guard against NaN geometry when device placement data contains invalid coordinates.
+- **Docker healthcheck** - Start period increased from 40s to 120s to accommodate larger databases during migration.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.10
 
 More monitoring fixes. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
