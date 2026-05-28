@@ -1,3 +1,43 @@
+## 1.17.14
+
+Monitoring improvements and chart polish. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **L2 neighbor as first-mile target** - Upstream discovery now proposes the gateway's directly connected L2 neighbor (OLT on GPON, CMTS on DOCSIS, BNG on PPPoE) as a monitoring target. Useful on GPON where the OLT is L2-transparent and invisible to traceroute but still responds to ICMP. Reachability check auto-disables it if it doesn't respond.
+- **ISP RTT shows nearest hop** - The ISP RTT stat card and globe label now pick the lowest latency across all access hop targets instead of the deepest one, giving a better read on first-mile health.
+- **Link rate gap fix** - Fixed intermittent zero-rate gaps on live map links caused by SNMP counter refresh lag vs poll cadence. Rates no longer show a sawtooth pattern.
+- **SNMP health fallback** - Devices where SNMP is configured but doesn't return health OIDs (e.g. USW-Flex-XG) now get CPU/memory from the UniFi API instead of silently dropping the data.
+- **WAN link labels at lower threshold** - WAN/transit flow labels now appear at 500 Kbps instead of 1 Mbps on both 2D and 3D maps.
+
+## Charts
+
+- **33-color chart palette** - New chart palette (Observable 10 + Tableau + D3 Paired) replaces the old 6-color rotation. All color pairs are perceptually distinct, and devices keep the same color across tabs and restarts.
+- **Ctrl+Click filter badges** - Hold Ctrl (Cmd on Mac) when clicking a chart filter badge to toggle that single series. Normal click still does solo/show-all. Applied across Latency, Device Stats, SFP, WAN Speed Test, and Threat Dashboard.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.13
 
 More monitoring improvements. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
