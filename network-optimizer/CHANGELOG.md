@@ -1,3 +1,39 @@
+## 1.17.12
+
+Hotfix for v1.17.11. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **SNMP uptime fix** - Device uptime was always showing 0h in tooltips. The SNMP TimeTicks value wasn't being parsed correctly from the formatted string. Now extracts raw ticks directly, and uptime is included in historic playback.
+- **Port rate data restored** - A device cache change in v1.17.11 caused port rate deltas to compute as zero most of the time, killing switch throughput data. Reverted to the original 4s cadence (the upstream API cache handles call reduction).
+- **Historic playback performance** - Rewrote historic queries to skip InfluxDB's aggregateWindow and pivot (unnecessary at native 5s cadence), and added a 5-minute result cache so consecutive playback ticks don't re-query. Sustained InfluxDB CPU during playback drops from ~40% to near-zero between cache fills.
+- **Scrubber fixes** - Fixed play button auto-pausing after scrub, historic-to-live transition flicker, scrub-during-playback not stopping the timer, and playback jumping backward after fast arrow scrubbing.
+- **2D keyboard parity** - Arrow keys, Shift acceleration, and Space play/pause now work when the 2D scrubber is focused.
+- **2D layout polish** - Tighter horizontal spacing, longer device name labels (24 chars), longer client name labels (32 chars), ISP expected rates in italic.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.11
 
 More monitoring improvements and a new topology view. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
