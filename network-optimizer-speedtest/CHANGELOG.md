@@ -1,3 +1,46 @@
+## 1.17.15
+
+More improvements for monitoring and network tools. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Dashboard
+
+- **Live View panel** - New dashboard card that embeds the live 2D or 3D topology map alongside WAN rates, latency stats, and gateway health. Disabled by default; enable and toggle between 2D/3D in dashboard edit mode.
+
+## Network Tools
+
+- **WAN interface selection** - On multi-WAN gateways, a new dropdown lets you bind ping and traceroute to a specific WAN link by friendly name (e.g. "Comcast Cable (WAN1) - eth4"). Useful for isolating per-WAN latency and path.
+- **Gateway SSH credential fix** - Probes from the gateway vantage now use gateway-specific SSH credentials instead of generic UniFi SSH creds, fixing auth failures on sites where the two differ.
+- **Traceroute auto-install** - If traceroute isn't installed on the gateway, it's installed automatically via apt on first probe attempt.
+
+## Fixes
+
+- **Traceroute probe count** - Fixed the output parser showing doubled probe counts on successful hops (e.g. "3 / 6" instead of "3 / 3").
+- **Live View mobile UX** - Touch interaction fixes, responsive layout improvements, iOS orientation change handling, and scroll behavior tuned for tablet landscape for the 2D/3D topology maps.
+- **ONT/Cellular stats panels** - Fixed font-size override on ONT model display and centered metric rows in WAN panels.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.14
 
 Monitoring improvements and chart polish. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
