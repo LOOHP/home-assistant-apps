@@ -1,3 +1,51 @@
+## 1.17.16
+
+More improvements for upstream discovery and monitoring. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **AT&T transit probe** - New trace endpoint surfaces AT&T (AS7018) as a transit ASN during upstream discovery
+- **Border router detection** - Discovery now walks each individual trace to detect where traffic exits the access ISP, catching multiple border routers when the ISP peers through different exits for different transit providers
+- **Multi-hop transit candidates** - Up to 3 nearest responding hops per transit ASN proposed as candidates, with verified RTT shown
+- **Target naming** - All targets follow a consistent `<Org> <PTR-derived-name>` format. Corporate suffixes stripped from ASN org names. User-edited names persist across re-discovery.
+- **PTR resolution** - Explicit PTR lookup on proposed transit IPs, so Windows users get meaningful hostnames too
+- **Split review UI** - Transit networks and path-end Internet hosts shown in separate sections with editable labels
+- **DB reconciliation** - Existing targets matched on re-discovery: enabled targets pre-checked, disabled ones stay unchecked, unreachable targets clearly disabled
+- **Access technology preserved** - Your selection carries forward across re-discovery runs
+
+## Performance Tweaks
+
+- **MongoDB on SSD data loss fix** - Stale-data detection now uses WiredTiger.turtle (written on every checkpoint) instead of WiredTiger (written once at creation), preventing unnecessary re-migrations that could lose data. Thanks to @coreclk (#704).
+
+## Fixes
+
+- **Fabric throughput** - Fixed ingress/egress calculation on new Live Dashboard panel that was only computing for the gateway instead of all fabric devices
+- **Navigation guard** - Unsaved discovery warning now only fires when leaving the Network Performance tab, and clears immediately after saving
+- **Status indicator min-width** - Prevents dot indicators from collapsing in flex layouts
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.15
 
 More improvements for monitoring and network tools. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
