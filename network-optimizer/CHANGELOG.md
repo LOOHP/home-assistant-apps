@@ -1,3 +1,36 @@
+## 1.17.17
+
+Fix for database corruption on Unraid. See [v1.17.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) and the patch release notes since then for what's new in v1.17.
+
+## Fixes
+
+- **Database corruption on Unraid/FUSE filesystems** - SQLite's WAL journal mode requires shared-memory via mmap, which doesn't work correctly on Unraid's FUSE filesystem (shfs), mergerfs (common on OpenMediaVault), or network mounts (NFS, SMB). The app now detects these filesystems at startup and automatically switches to DELETE journal mode, which is fully safe. If you've been experiencing database corruption or data loss on Unraid, this should resolve it. For best performance, map your data volume to a cache drive path (e.g., `/mnt/cache/appdata/...` instead of `/mnt/user/appdata/...`) - this bypasses FUSE entirely and keeps the faster WAL mode.
+
+- **Reduced log noise from SNMP monitoring** - Interface rejection messages during SNMP polling moved from Debug to Trace level.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.16
 
 More improvements for upstream discovery and monitoring. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
