@@ -1,3 +1,37 @@
+## 1.17.18
+
+More monitoring refinements. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## Self-Hosted Network Monitoring
+
+- **INDATEL/GLC transit probe** - Added INDATEL (AS30517, Everstream infra) as a new transit probe target. Small transit networks where the probe endpoint itself is the only hop in the ASN are now supported, gated by ASN proximity so only networks within 2 ASN transitions of your access ISP are proposed.
+- **Tiered packet loss coloring** - Loss Mean and Loss Max in the stats table now use a 5-tier color scale with separate thresholds for each. Loss Mean is shown at 3 decimal places for more precision.
+- **Loss chart scale** - Y-axis now defaults to 5% instead of 100%, expanding dynamically when data exceeds that. Small loss events are no longer invisible.
+- **Active targets badge** - The "N active" badge on the Latency targets card no longer counts paused targets.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.17
 
 Fix for database corruption on Unraid. See [v1.17.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) and the patch release notes since then for what's new in v1.17.
