@@ -1,3 +1,46 @@
+## 1.17.19
+
+More SFP monitoring improvements - this one's for the Active Ethernet / P2P fiber folks. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
+
+## SFP Monitoring
+
+- **Active Ethernet support** - Users with AON / P2P fiber can now mark their SFP modules as Active Ethernet instead of the "pretend it's PON" workaround. Dedicated thresholds, health color bands, and alert rules tuned for point-to-point links where RX power should be much stronger than through a 1:32 splitter.
+- **Dashboard card links to SFP chart** - Clicking the ONT Stats / Fiber Stats card on the dashboard jumps straight to the SFP Diagnostics chart in Monitoring, pre-filtered to the module you were viewing.
+- **Dynamic card title** - Shows "ONT Stats (GPON / XGS-PON)" when all monitored modules are PON, switches to "Fiber Stats" when any AE module is present.
+- **"Set ONT" replaces "Set PON"** - Clearer labeling in the Optical table, plus a new "Set AE" button for P2P modules.
+
+## Performance Tweaks
+
+- **Firmware gate raised to 5.1.15** - Performance Tweaks now supports UniFi OS through 5.1.15 (previously capped at 5.1.13).
+
+## Fixes
+
+- **SFP vendor name cleaning** - Corporate suffixes like "Inc", "Ltd", "Technologies" are stripped from vendor names on the dashboard.
+- **Paging buttons on dashboard card** - Navigation arrows no longer accidentally trigger card click.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.18
 
 More monitoring refinements. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
