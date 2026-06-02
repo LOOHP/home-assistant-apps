@@ -1,3 +1,50 @@
+## 1.18.0
+
+Significant update for cellular 5G / LTE modem monitoring and live WAN visibility.
+
+## What's New
+
+- **Live WAN chart** - Real-time download, upload, packet loss, and mean ISP/transit RTT on the Dashboard and Monitoring Live View. Pre-loads 5 min history, then polls every 3 seconds. Follows the map timeline scrubber during historic playback.
+- **Cellular monitoring overhaul** - Multi-provider architecture for cellular modem polling, with support for Ubiquiti, Netgear Nighthawk, and GL-iNet/Quectel modems. Signal metrics charted over time via InfluxDB.
+- **U5G-Backup support** - Full product database entries for the new UniFi U5G Backup modem (US and EU variants).
+
+## Monitoring Live View
+
+- **Map swap buttons** - Swap 3D and 2D map display order, persisted to settings.
+- **Map mode: Off** - The 2D/3D toggle now cycles 2D, 3D, Off to hide the map entirely.
+- **Add to Dashboard** - Button on Monitoring Live tab when Live View isn't on the dashboard.
+
+## Cellular Monitoring
+
+- **Netgear Nighthawk hotspot support** - New HTTP provider for M-series hotspots (thanks @jedis00 for PR #661).
+- **GL-iNet / Quectel modem support** - SSH provider for third-party cellular routers using AT+QENG commands with per-modem credentials. Closes #158, reported by @kwschnei.
+- **uiwwand polling** - All UniFi modems now poll via the uiwwand ubus daemon first, falling back to raw qmicli. Faster startup recovery after modem reboot. Closes #635, reported by @jimstrang.
+- **Cellular Stats monitoring tab** - RSRP, RSRQ, SNR, and Signal Quality time-series charts with per-band per-device series, filter badges, and time range controls.
+- **InfluxDB time series** - Signal metrics written to the longterm bucket with separate data points for LTE and NR5G in NSA dual-connectivity mode.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.17.19
 
 More SFP monitoring improvements - this one's for the Active Ethernet / P2P fiber folks. See [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) for what's new in v1.17.0+
