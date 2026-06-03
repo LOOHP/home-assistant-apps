@@ -1,3 +1,42 @@
+## 1.18.1
+
+More fixes for WAN monitoring and Docker compatibility. See [v1.18.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) for what's new in v1.18.0+
+
+## Monitoring Live View
+
+- **Packet loss accuracy** - Loss is now a flat average across all WAN targets per time window instead of per-target smoothed. Gives a cleaner, more representative loss signal on the live WAN chart.
+
+## Client Speed Test
+
+- **Health check fix for bridge networking** - The browser speed test availability check was hardcoded to `127.0.0.1`, which failed on Docker setups where the speedtest container port is bound to a specific IP. Now uses `HOST_IP` when set. Fixes #724.
+
+## Fixes
+
+- **Docker: Speedtest container starts on IPv4-only hosts** - The OpenSpeedTest container no longer crashes on hosts with IPv6 disabled. The entrypoint now detects missing IPv6 support and skips the IPv6 listen directive. Fixes #724.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.18.0
 
 Significant update for cellular 5G / LTE modem monitoring and live WAN visibility.
