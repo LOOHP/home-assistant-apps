@@ -1,3 +1,36 @@
+## 1.18.2
+
+Patch fix for the config import/export feature introduced in [v1.18.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0). See [v1.18.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) and [v1.17.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) release notes for what's new in recent versions.
+
+## Fixes
+
+- **Config import no longer corrupts the database on restart** - Importing a .nopt backup replaced the database file but left stale SQLite WAL/SHM files from the previous database. On restart, SQLite replayed the old write-ahead log against the new database, corrupting the schema and crash-looping the app.
+
+- **Import preview shows export date in local time** - The export timestamp on the import confirmation screen now displays in server-local time instead of UTC.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.18.1
 
 More fixes for WAN monitoring and Docker compatibility. See [v1.18.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) for what's new in v1.18.0+
