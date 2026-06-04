@@ -1,3 +1,46 @@
+## 1.18.3
+
+More polish for the live monitoring views. See [v1.18.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) for what's new in v1.18.0+
+
+## Monitoring Live View
+
+- **2D map relayouts on filter changes** - Toggling Wi-Fi/Wired overlays, band filters, or text search now rebuilds the tree layout so the map compacts to use the available space instead of leaving gaps where hidden clients were
+- **Grid-wrap clients with infra siblings** - APs with downstream infra (like a UDB bridge) now grid-wrap their clients at 6 columns instead of one long horizontal line
+- **Dark background pills on device labels** - Device name and throughput rate labels below network devices now have the same dark pill background as link speed labels, improving readability over connector lines
+- **Smooth WAN chart scrolling** - The live WAN throughput chart now scrolls continuously instead of jumping on each poll cycle. Poll cadence aligned to the 5 s SNMP interval for consistent data
+- **Tooltip stays while inspecting** - Hovering a data point on the WAN chart pauses updates so the tooltip doesn't disappear while you're reading it
+- **WAN chart mobile full-width** - Y-axis labels hidden and padding optimized on mobile so the chart uses the full screen width
+- **Tab refocus catch-up** - Alt-tabbing away and coming back reloads the WAN chart history so there's no gap in the data
+
+## Fixes
+
+- **Missing InfluxDB buckets handled gracefully** - Renamed, deleted, or inaccessible buckets no longer crash the app. Returns empty data and marks InfluxDB unhealthy with a banner linking to Setup.
+- **Cellular Stats tab waits for InfluxDB** - Charts now wait for InfluxDB to be confirmed reachable before mounting, matching SFP tab behavior. Shows a loading spinner instead of empty charts during app startup.
+- **Packet loss line breaks fixed** - Null loss values from the API no longer create gaps in the WAN chart loss line
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.18.2
 
 Patch fix for the config import/export feature introduced in [v1.18.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0). See [v1.18.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) and [v1.17.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) release notes for what's new in recent versions.
