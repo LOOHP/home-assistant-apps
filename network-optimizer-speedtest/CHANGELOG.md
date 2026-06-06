@@ -1,3 +1,54 @@
+## 1.19.0
+
+Cable modem and fiber ONT monitoring - track your access network equipment's signal quality, power levels, and error rates over time.
+
+## What's New
+
+- **Cable Modem Monitoring** - Poll DOCSIS modems for downstream/upstream power, SNR, and FEC error rates. Supports Netgear CM (CM600, CM1000, CM1200, etc.) and ARRIS Surfboard (SB8200, SB6183) via HTTP scraping.
+- **ONT Device Monitoring** - Poll fiber ONTs for RX/TX power, temperature, voltage, and bias current. Supports AT&T residential gateways (BGW320, BGW210) and Realtek-based GPON sticks (ODI DFP-34X-2C2, V-SOL V2801F, T&W TWCGPON657, and other RTL960x modules).
+- **Dashboard Panels** - New Cable Modem Stats card and unified ONT Stats card that handles both SFP-based and device-polled ONTs with navigation between them.
+
+## CM Stats
+
+- New CM Stats tab on the Monitoring page with DS Power, DS SNR, US Power, and FEC Errors charts
+- FEC error chart shows both correctable and uncorrectable error deltas per interval
+- Settings section with provider selection, test connection, and polling interval
+
+## ONT Stats
+
+- New ONT Stats tab on the Monitoring page with RX/TX Power and Temperature charts
+- Unified dashboard panel shows SFP-based ONTs or device-polled ONTs (or both) with prev/next navigation
+- Empty state provides clear paths for SFP monitoring vs standalone ONT configuration
+- Settings section with AT&T Gateway, Realtek ONT Stick, and Generic HTTP ONT providers
+
+## Fixes
+
+- **LanFlowMap startup resilience** - Per-device InfluxDB query timeout on startup prevents cascade crashes when InfluxDB is slow after a restart.
+- **Proxmox arm64 install** - Skip AppArmor LXC config on hosts without AppArmor support, fixing installation on arm64 Proxmox (e.g., Raspberry Pi 5).
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.18.3
 
 More polish for the live monitoring views. See [v1.18.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) for what's new in v1.18.0+
