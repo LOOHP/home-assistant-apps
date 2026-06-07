@@ -1,3 +1,45 @@
+## 1.19.1
+
+Quick follow-up to v1.19.0 with 8311 ONT firmware support and several fixes. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in CM/ONT monitoring.
+
+## ONT Monitoring
+
+- **8311 community firmware support** - New provider for Lantiq/MaxLinear GPON and XGS-PON SFP sticks running 8311 firmware (WAS-110, PRX126, Nokia G-010S-P, and others). Scrapes the LuCI JSON endpoint for RX/TX power, temperature, voltage, and bias current. Defaults to HTTPS on port 443 with LuCI session auth.
+- **Self-signed TLS cert bypass** - All ONT providers now accept self-signed certificates since these are local network devices. Fixes connection failures on sticks serving HTTPS with self-signed certs.
+- **HTTP/HTTPS auto-fallback** - Providers try the port-based scheme first, then automatically try the opposite on connection or SSL failure. No manual configuration needed.
+
+## Cellular Monitoring
+
+- **LTE-only signal quality fix** - Signal quality wasn't written to InfluxDB when a cellular modem fell back to LTE-only mode. Charts now show signal quality regardless of whether the modem is on 5G, NSA, or LTE.
+
+## Fixes
+
+- **Device monitor services start at app launch** - CM, ONT, and Cellular monitor services now begin polling immediately on startup instead of waiting for the first page visit.
+- **macOS ARM64 crash fix** - Disabled single-file compression that caused crashes on Apple Silicon Macs running the native install.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.0
 
 Cable modem and fiber ONT monitoring - track your access network equipment's signal quality, power levels, and error rates over time.
