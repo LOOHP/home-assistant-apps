@@ -23,6 +23,16 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 
 Genuinely, thank you so much to everybody for taking the time to use Network Optimizer and have it find a place on your network(s). It really means a lot to receive all of the bug reports, feature requests, feedback, support, and donations from everybody. Totally a whole new experience from writing code in a dayjob, and it greatly motivates me to keep on going!
 
+## New: Access Network Monitoring
+
+Track signal quality on your cable modem, fiber ONT, and cellular modems over time - the same InfluxDB time-series charting as the rest of your network monitoring data. Instead of logging into each device's admin page to spot-check levels, everything is polled automatically and charted with the same time range controls, filter badges, and dashboard panels as your LAN and WAN metrics.
+
+**Cable Modem (DOCSIS)** - Downstream/upstream power levels, SNR, and FEC error rates (correctable and uncorrectable) with per-channel charting. Supports Netgear CM (CM600, CM1000, CM1200) and ARRIS Surfboard (SB8200, SB6183).
+
+**Fiber ONT** - RX/TX optical power, temperature, voltage, and bias current for standalone ONTs that aren't SFP modules in your gateway. Supports AT&T residential gateways (BGW320, BGW210), Realtek-based GPON sticks (ODI DFP-34X-2C2, V-SOL V2801F, T&W TWCGPON657), and 8311 community firmware sticks (WAS-110, PRX126, Nokia G-010S-P). SFP-based ONT monitoring (modules plugged into your gateway) is part of the Network Monitoring feature below.
+
+**Cellular Modems** - RSRP, RSRQ, SNR, and Signal Quality charted over time with per-band, per-device series and filter badges. Supports Ubiquiti (U-LTE, U5G-Max, U5G-Backup), Netgear Nighthawk hotspots, and GL-iNet/Quectel routers. Dual-connectivity mode tracks LTE and NR5G bands separately for NSA setups.
+
 ## New: Self-Hosted Network Monitoring
 
 Full time-series network monitoring that runs entirely on your hardware. SNMP polling feeds InfluxDB for interface counters, device health (CPU, memory, temperature, uptime), latency probes, SFP optical levels, and WiFi client stats. Everything is stored locally with configurable retention, and a setup wizard handles InfluxDB bucket and token provisioning so you're not hand-editing config files.
@@ -31,7 +41,7 @@ The Live View gives you two real-time topology maps. The 3D map is a Three.js vi
 
 Latency and packet loss charting covers four target categories (LAN fabric, ISP access, transit, and internet services) with per-target filter badges, time range presets from 15 minutes to 30 days, and sub-15ms query performance. Device health charts track temperature, CPU, and memory per device over time. SFP/ONT optical monitoring shows live RX/TX power, temperature, voltage, and bias current for PON modules, with automatic GPON vs XGS-PON detection.
 
-Upstream Path Discovery uses automated traceroute (ICMP and UDP probes) to map your ISP's access infrastructure, transit networks, and internet service endpoints. It identifies your OLT/CMTS, ISP edge routers, and transit ASNs with full latency and loss charting per hop category. The 2D map visualizes each WAN connection as a globe node with live RTT, loss, and ISP expected speeds.
+Upstream Path Discovery uses automated traceroute (ICMP and UDP probes) to map your ISP's access infrastructure, transit networks, and internet service endpoints. It identifies your OLT/CMTS, ISP edge routers, and transit ASNs with full latency and loss charting per hop category. Both maps include a WAN node for each internet connection showing live RTT, current throughput, latest speed test results, and ISP expected speeds.
 
 For the full changelog, see the [v1.17.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.17.0) and subsequent patch releases.
 
@@ -145,10 +155,6 @@ If you're running a U-LTE or U5G-Max for backup (or primary) connectivity, you c
 Ever wonder what ports your network is actually exposing to the internet? Your Xbox, Plex server, and smart home devices are all punching holes through your firewall via UPnP, and UniFi doesn't make it easy to see what's going on.
 
 The UPnP Inspector puts it all in one place: every dynamic UPnP mapping and static port forward, grouped by device, with color-coded status so you can see at a glance what's active, what's idle, and what's about to expire. Add notes to remember what each mapping is for (because you will forget). Search and filter when you're hunting for that one port that's causing problems.
-
-### Coming Soon
-
-Cable modem stats (signal levels, uncorrectables, T3/T4 timeouts) for those of you fighting with your ISP about line quality.
 
 ## Requirements
 
