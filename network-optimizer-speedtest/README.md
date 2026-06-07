@@ -31,7 +31,7 @@ Track signal quality on your cable modem, fiber ONT, and cellular modems over ti
 
 **Fiber ONT** - RX/TX optical power, temperature, voltage, and bias current for standalone ONTs that aren't SFP modules in your gateway. Supports AT&T residential gateways (BGW320, BGW210), Realtek-based GPON sticks (ODI DFP-34X-2C2, V-SOL V2801F, T&W TWCGPON657), and 8311 community firmware sticks (WAS-110, PRX126, Nokia G-010S-P). SFP-based ONT monitoring (modules plugged into your gateway) is part of the Network Monitoring feature below.
 
-**Cellular Modems** - RSRP, RSRQ, SNR, and Signal Quality charted over time with per-band, per-device series and filter badges. Supports Ubiquiti (U-LTE, U5G-Max, U5G-Backup), Netgear Nighthawk hotspots, and GL-iNet/Quectel routers. Dual-connectivity mode tracks LTE and NR5G bands separately for NSA setups.
+**Cellular Modems** - RSRP, RSRQ, SNR, and Signal Quality charted over time with per-band, per-device series and filter badges. Supports Ubiquiti (U-LTE, U5G-Max, U5G-Backup), Netgear Nighthawk modems/hotspots, and GL-iNet/Quectel modems/routers. Dual-connectivity mode tracks LTE and NR5G bands separately for NSA setups.
 
 ## New: Self-Hosted Network Monitoring
 
