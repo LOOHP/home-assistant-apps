@@ -1,3 +1,53 @@
+## 1.19.2
+
+More mobile polish and chart fixes for the monitoring release.
+
+## What's New in v1.19
+
+- **Cable Modem Monitoring** - Poll DOCSIS modems for downstream/upstream power, SNR, and FEC error rates. Supports Netgear CM and ARRIS Surfboard families.
+- **ONT Device Monitoring** - Poll fiber ONTs for RX/TX power, temperature, voltage, and bias current. Supports AT&T gateways, Realtek GPON sticks, and 8311 XGS-PON sticks.
+
+## Mobile UX
+
+- **Smoother nav bar** - No more content jump when the bar hides/shows on scroll
+- **Client Dashboard auto-hide** - Nav bar auto-hides after 2 seconds, tab switches preserve scroll position
+
+## Monitoring
+
+- **Throughput labels on clients** - Wi-Fi and wired clients now show download/upload rate badges on the 2D flow view
+- **Live WAN chart Y-axis fixed on mobile** - Packet loss and throughput axes were auto-scaling poorly on small screens
+- **Chart switch-back lines fixed** - 30-day latency and device health charts no longer draw backwards lines
+- **3D map fit button** - Reset camera to fit the full topology, matching the 2D map
+- **Animated map panel collapse** - Filter and Overlays panels animate open/close
+
+## Fixes
+
+- **macOS ARM64 ping stability** - Switched ping method to reduce crashes on Apple Silicon
+- **Stats panel CSS cleanup** - Consolidated duplicated styles across ONT, CM, and Cellular panels
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.1
 
 Quick follow-up to v1.19.0 with 8311 ONT firmware support and several fixes. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in CM/ONT monitoring.
