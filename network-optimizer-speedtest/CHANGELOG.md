@@ -1,3 +1,56 @@
+## 1.19.3
+
+A hefty batch of Monitoring and dashboard improvements this round. See the [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+.
+
+## Monitoring
+
+- **SNMP Devices list** - A new table under Monitoring -> Setup shows every device, whether SNMP looks enabled, whether we're actively polling it, and when it was last polled. Now it's obvious at a glance which devices are feeding data and which need a look.
+- **Heads-up when your gateway isn't being polled** - If a key device like your gateway isn't reporting over SNMP, the Live view shows a banner that takes you straight to the device list, expands it, and scrolls right to it.
+- **Faster recovery after reboots** - When a device stops answering SNMP (a firmware update or reboot, say), it's now set aside for 5 minutes instead of an hour, so it rejoins monitoring much sooner.
+
+### Live Map
+
+- **Open a client straight from the map** - Double-click any client on the 2D or 3D map to jump to its dashboard. Wi-Fi clients open right to the Signal tab.
+- **Jump to the live map from your Dashboard** - The Live View card header on the Dashboard now links to the Monitoring Live tab.
+- **Clearer device tooltips** - Tooltips now show a device's IP, and for wireless devices their Wi-Fi link rate. Throughput on access points and bridges (including UDBs) now reads from the network's perspective, toward the gateway, so it lines up with every other device. The layout is tidied up too: link speed sits right above the live throughput, and Network shows next to the SSID.
+
+## Data Usage
+
+- **Monthly usage history** - WAN data usage now keeps a permanent total for each past billing cycle, so you can look back month to month. Previously only the last couple of months of raw data were retained. It even backfills the cycles it already has data for.
+- **Data Usage on the Monitoring page** - Added a Data Usage tab to Monitoring that links over to the existing one under Alerts.
+
+## Client Dashboard
+
+- **Clearer Wi-Fi rate labels** - The top-bar rates now read "AP RX" / "AP TX" to make clear they're measured at the access point.
+- **All LAN speed tests show up** - Server-initiated iperf3 tests (where the app connects out to a device to test it), both scheduled and ones you run manually, now appear in the speed history alongside client-initiated and browser tests. Internet (WAN) tests still live elsewhere.
+
+## Fixes
+
+- **Accurate LAN latency on macOS** - macOS once again uses the native ping for sub-millisecond LAN latency, matching what you'd see in Terminal. Heads-up for Apple Silicon: there's an occasional harmless crash on startup from a .NET runtime bug, and the app recovers on its own.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.2
 
 More mobile polish and chart fixes for the monitoring release.
