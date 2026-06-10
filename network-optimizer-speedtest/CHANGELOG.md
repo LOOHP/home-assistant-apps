@@ -1,3 +1,44 @@
+## 1.19.4
+
+More monitoring quality-of-life in this one. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+
+
+## Monitoring
+
+- **Drag to zoom on stats charts** - Drag across any chart on the Network Performance, Device Stats, SFP Stats, CM Stats, ONT Stats, and Cellular Stats tabs to zoom into that window, Grafana style. Syncs with the time range selector and refetches at finer detail; live polling pauses until you pick a preset again.
+- **Why readings differ from UniFi Network** - New info panel under Device Stats: CPU temp is the SoC die sensor over SNMP, memory excludes Linux page cache (matches htop). Our numbers are the raw truth, not the smoothed ones.
+- **WAN live chart: faster and more accurate** - Polls twice as fast for snappier real-time feedback, and every SNMP sample is now plotted exactly once - no more duplicated or missed points making the line stutter or double back.
+
+## Adaptive SQM
+
+- **"Awaiting Status" panel state** - App cold starts briefly showed "Not Deployed" even with SQM enabled. Now shows "Awaiting Status" while polling; "Not Deployed" means no enabled config.
+
+## Fixes
+
+- **Proxmox installer: LXC template matches host architecture** - No longer assumes amd64.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.3
 
 A hefty batch of Monitoring and dashboard improvements this round. See the [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+.
