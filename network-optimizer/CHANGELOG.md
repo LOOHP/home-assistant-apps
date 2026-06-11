@@ -1,3 +1,45 @@
+## 1.19.5
+
+More fixes and polish for monitoring. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+
+
+## Network Monitoring
+
+- **PPPoE WAN throughput** - WAN throughput charts were completely blank on PPPoE connections (#669). The interface resolver looked for the physical uplink port, which never yields the `ppp0` tunnel where the counters actually live. Fixed with a shared interface-selection helper that picks the right counter source per connection type (PPPoE, GRE-tunneled cellular, plain Ethernet). Existing data appears retroactively since SNMP was collecting it all along.
+- **Corrupt SNMP counter rejection** - A single garbled SNMP read could produce terabit-per-second spikes on the chart (observed as 10 Tbps on a 2.5 G WAN port). Rates above 1.4x link speed are now discarded and the baseline recovers automatically.
+- **Counter reset recovery** - SNMP rate computation now detects device reboots and firmware upgrades (counter resets) and reseeds the baseline instead of charting a spike.
+
+## Client Stats
+
+- **Clearer traffic direction labels** - Disconnect events now show "Device downloaded X / uploaded Y" instead of ambiguous up/down labels, and Wi-Fi rates are labeled "AP TX/RX Rate" to make the perspective explicit.
+- **Client IP in detail header** - The detail banner shows the client IP next to the MAC address.
+
+## Fixes
+
+- **HTML instead of JSON from console** - During a console firmware upgrade (or other maintenance), the UniFi Console may serve an HTML page instead of JSON. The error now includes the page title and a clear explanation instead of a cryptic deserialization failure.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.4
 
 More monitoring quality-of-life in this one. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+
