@@ -1,3 +1,37 @@
+## 1.19.6
+
+More monitoring improvements and a dashboard refresh. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+
+
+## Network Monitoring
+
+- **Motorola MB8611 / MB8600 cable modem support** - New provider for Motorola DOCSIS modems using the HNAP protocol. Polls downstream/upstream channel stats and auto-detects the model from firmware. Select "Motorola MB8611, MB8600 (HNAP)" in CM Settings.
+- **Smarter ONT detection** - AT&T gateway provider now identifies GPON vs XGS-PON from the SFP wavelength, records the BWP provisioned speed, and shows PON registration state with human-readable labels (e.g. "Connected (O5)").
+- **Gateway latency fix** - Latency targets for gateways now use the LAN-side IP, fixing broken pings for users on PPPoE or CGNAT.
+- **CM, ONT, and Cellular panels redesigned** - Metric boxes reorganized into Connection and Stats groupings. CM correctables/uncorrectables now in the right place. Fixed paging between SFP ONTs and external ONTs when both are configured.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.5
 
 More fixes and polish for monitoring. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+
