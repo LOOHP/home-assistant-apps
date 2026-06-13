@@ -1,3 +1,71 @@
+## 1.20.0
+
+ISP Health is the headline of v1.20.0, and it's the payoff for everything the self-hosted Monitoring stack has been collecting. All that SNMP polling, latency and loss probing, WAN throughput tracking, and Upstream Path Discovery finally comes full circle: a single 0-100 score for how well your internet connection is actually performing.
+
+New to Monitoring? It's worth catching up - ISP Health builds directly on top of it. See the [v1.18.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.18.0) for the self-hosted monitoring foundation (SNMP, latency/loss, Live View maps, Upstream Discovery) and the [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for access network monitoring (cable modem, fiber ONT, and cellular signal tracking).
+
+## ISP Health
+
+A new sub-feature of Monitoring that turns the data you're already collecting into one score for your internet connection. No new agents or probes - it reads your existing latency, loss, throughput, and discovered path back over a trailing 48-hour window and grades it.
+
+- **Technology-aware scoring** - Thresholds are anchored to your access technology (GPON, XGS-PON, DOCSIS, DSL, fixed wireless, cellular, Starlink, and more), so a latency number that's healthy on DOCSIS doesn't read as a red flag on fiber. The score splits into equal thirds across your Access Layer, your ISP's network, and the Transit networks your traffic crosses, with a per-factor breakdown so a low score tells you exactly where the problem lives.
+- **Per-ASN transit grading** - Every network in your path is graded on its own (latency stability, jitter, loss, and congestion), with co-located hops clustered so monitoring a deep hop never drags down a network's grade.
+- **Congestion and path-shift detection** - Surfaces sustained latency and jitter under load (the bufferbloat / oversubscription tell, usually in the evenings) and flags path shifts where your traffic gets rerouted onto different infrastructure, kept informational since a BGP change isn't necessarily a problem.
+- **Speed vs Plan** - Grades demonstrated WAN throughput against the plan speeds you've set in UniFi Network, showing best and typical.
+- **SQM recommendations** - Points you at Smart Queues when loaded latency or loss crosses the line for your connection type, or recommends Adaptive SQM when it spots a recurring time-of-day congestion pattern.
+- **Live tile** - A color-coded ISP Health score on the Dashboard and Monitoring live views, linking straight to the tab.
+- **Upstream Discovery accuracy** - WAN L2-neighbor selection now prefers public over CGNAT over private and fresh over stale entries, and no longer proposes RFC1918 CPE LAN-side addresses as access hops.
+
+Coming soon: multi-WAN support for both Monitoring and ISP Health. The per-WAN stats are already being collected; today the scoring and dashboards grade your primary connection.
+
+## Monitoring
+
+### Cable modems
+
+- **Motorola HNAP login fixed (MB8611/MB8600)** - The provider failed to authenticate against current Motorola firmware and could trip the modem's failed-login lockout, which drops packets for 5 minutes and surfaced as connection timeouts. The login handshake now matches the firmware, sessions persist across polls instead of re-authenticating every cycle, and a failed login backs off for 5 minutes so the lockout can't be re-tripped. The timeout message now explains the lockout, and decimal-MHz channel frequencies parse correctly.
+
+### WAN live chart
+
+A round of accuracy and smoothness work on the WAN RTT chart. If you've ever reloaded the page and watched the latency line redraw at a different shape, or seen the left edge spike for no reason, this one's for you.
+
+- **It reads the same on reload as it does live** - History and live samples used to weight your ISP and transit targets differently, so every reload or tab-refocus nudged the RTT line to a new level, and a 60s moving average quietly flattened real events (like a speed-test bufferbloat hump) right out of the primed history. Both now use the live feed's weighting, the warmup rows that skewed the oldest minute are gone, and short events survive a reload intact.
+- **Scrolling is smooth** - The live window slides continuously instead of ticking forward a notch at a time, and historic playback interpolates between the once-per-second seeks. Draw-only, so no extra polling or fetches.
+- **Labels stay put** - X-axis labels are pinned to a fixed 20s grid (60s on mobile) in 24-hour time and scroll with the data instead of re-snapping as the window slides. And scrubbing just behind live no longer leaves the first few minutes of the chart blank.
+
+### Live View maps
+
+A pass of consistency and interaction polish across the 3D and 2D Live View maps.
+
+- **The two maps feel like one feature now** - The 2D map gained a collapsible Controls legend matching the 3D map's (limited to the interactions 2D actually supports), both maps share the same title-click collapse pattern for their Filter, Overlays, and Controls panels, and the 2D Overlays panel lines up with Filter on mobile.
+- **Scrubbing and playback behave** - Keyboard scrub keys now register while the 2D map is on screen (camera WASD/QE keys still need the 3D canvas in view), pausing in live mode clearly shows "Live (Paused)" on both maps, and 2D playback-speed changes publish instantly instead of waiting for the next tick.
+
+## Settings
+
+- **Consistent manual add/edit form styling** - The Modem, Cable Modem, and ONT add forms share common styles with refined sizing and spacing.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.19.6
 
 More monitoring improvements and a dashboard refresh. See [v1.19.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.19.0) for what's new in v1.19.0+
