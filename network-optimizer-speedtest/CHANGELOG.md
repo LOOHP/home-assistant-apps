@@ -1,3 +1,42 @@
+## 1.20.1
+
+More ISP Health polish and ARRIS Surfboard HNAP support. See [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+
+
+## ISP Health
+
+- **Plan speed in the hero card** - Best, Typical, and Plan speeds stacked so you can see how your connection compares to what you're paying for
+- **Last updated timestamp** - Shows how fresh the report is in the hero card upper right
+- **Idle latency scoring and findings** - Tuned the curve so normal-range values aren't penalized as harshly, and added a finding when first-hop latency exceeds the normal band for your access technology
+- **Refresh picks up speed changes immediately** - Changing your ISP speeds in UniFi Network no longer takes minutes to show up
+- **Mobile layout improvements** - Better chart fill, dimension gauges scale and wrap cleanly on narrow screens
+
+## Cable Modem Monitoring
+
+- **ARRIS Surfboard S33/S34 support** - New HNAP provider for Surfboard modems that use HNAP-over-HTTPS (S33/S34 firmware). Supports both SHA256 and MD5 login digests, with a raw-socket fallback for the S34's malformed HTTP headers.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.20.0
 
 ISP Health is the headline of v1.20.0, and it's the payoff for everything the self-hosted Monitoring stack has been collecting. All that SNMP polling, latency and loss probing, WAN throughput tracking, and Upstream Path Discovery finally comes full circle: a single 0-100 score for how well your internet connection is actually performing.
