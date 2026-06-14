@@ -1,3 +1,51 @@
+## 1.20.3
+
+More fixes and polish for ISP Health and mobile UX. See [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+
+
+## Monitoring
+
+- **Xfinity XB8/XB10 cable modem support** - SNMP-based monitoring for Xfinity gateway devices including signal levels, channel stats, and uptime.
+- **ISP Health: reliable multi-network tooltips** - Per-Network RTT chart tooltip now consistently shows all ASN series at every point, not just one. Fixed by aligning all series to a shared time grid.
+- **ISP Health: step-change detection tuning** - Lowered the detection threshold, improved transit ASN labeling, and fixed step-down detection after short-lived transit shifts so path changes are caught more reliably.
+
+## Fixes
+
+- **Mobile nav bar scroll behavior** - Fixed an edge case where the nav bar could get stuck hidden on short pages (like Client Dashboard tabs with no data). The bar now reappears automatically when switching to a tab with less content.
+- **Touch tooltips on buttons** - Tapping buttons on mobile no longer leaves a tooltip stuck on screen after the action or after navigating away.
+
+## Wi-Fi Optimizer
+
+- **Clickable links from band distribution and AP load balance** - Client counts in band distribution and AP load balance now link directly to client stats.
+
+## Documentation
+
+- **Proxmox updating guide** - Added a clear "Updating" section to the Proxmox README and deployment guide.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.20.2
 
 More ISP Health tuning and a new "Dig deeper" section for BGP exploration. See [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for the ISP Health launch and [v1.20.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.1) for ARRIS Surfboard support and hero card improvements.
