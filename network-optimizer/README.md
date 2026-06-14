@@ -346,4 +346,4 @@ For commercial licensing inquiries, contact tj@ozarkconnect.net.
 
 ---
 
-<sub>Network Optimizer for UniFi is an independent project by Ozark Connect and is not affiliated with, endorsed by, or sponsored by Ubiquiti, Inc. Ubiquiti, UniFi, UDM, and Cloud Key are trademarks or registered trademarks of Ubiquiti, Inc. All other trademarks are the property of their respective owners.</sub>
+<sub>Network Optimizer for UniFi is an independent project by Ozark Connect and is not affiliated with, endorsed by, or sponsored by Ubiquiti, Inc. Ubiquiti, UniFi, UDM, and Cloud Key are trademarks or registered trademarks of Ubiquiti, Inc. ARRIS and Surfboard are trademarks of CommScope Technologies LLC. Xfinity is a trademark of Comcast Corporation. Netgear and Nighthawk are trademarks of NETGEAR, Inc. All other trademarks mentioned are the property of their respective owners.</sub>
