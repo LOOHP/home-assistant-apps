@@ -1,3 +1,55 @@
+## 1.20.5
+
+More monitoring and data-usage improvements, plus a 3D map stability fix. See [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+
+
+## Data Usage
+
+- **Pay-as-you-go bucket mode** - Data usage tracking can now run as an open-ended bucket that accumulates until you manually reset it, instead of resetting on a calendar billing day. Built for prepaid balances that don't expire monthly. Hit "Reset bucket" when you top up to start a fresh count; the previous total is archived to history.
+
+## Monitoring
+
+- **LAN flow map: fixed blank 3D view** - On networks with no AP placements on the Signal Map, the 3D force layout could blow up to invalid positions and blank the whole scene with no error. The layout now stays bounded and recovers cleanly.
+- **WAN live chart: smarter time labels** - The x-axis tick spacing now sizes to the chart's own width instead of the viewport, so half-view and mobile panels space their time labels out instead of overlapping.
+- **CM / ONT / Cellular stats: hide orphaned series** - Deleting a modem, ONT, or cellular config no longer leaves phantom leftover series on the charts.
+- **Added Cox CGM4981** - Recognized for cable modem stats (shares the Xfinity/Technicolor web UI).
+
+## Network Tools
+
+- **Moved to its own route** - Network Tools now lives at /network-tools so it no longer double-highlights the Monitoring section in the nav.
+
+## Kiosk Mode
+
+- **New kiosk display mode** - A per-device setting that forces the collapsed layout at any width and hides the side menu, so a mini-display shows just the content. Applied before render so the sidebar never flashes in. Find it under Settings -> UI / Display Settings.
+
+## Performance Tweaks
+
+- **Firmware support raised to UniFi OS 5.1.18** - Performance tweaks are now validated through UniFi OS 5.1.18.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.20.4
 
 ISP Health gets a lot sharper this release: it now grades every hop on your ISP's path and can tell a genuinely congested router from one that just deprioritizes ping. Plus new alerts for your gateway, modem, ONT, and cellular WAN. See the [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for the bigger picture since v1.20.0.
