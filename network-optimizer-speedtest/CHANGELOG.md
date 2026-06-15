@@ -1,3 +1,49 @@
+## 1.20.4
+
+ISP Health gets a lot sharper this release: it now grades every hop on your ISP's path and can tell a genuinely congested router from one that just deprioritizes ping. Plus new alerts for your gateway, modem, ONT, and cellular WAN. See the [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for the bigger picture since v1.20.0.
+
+## ISP Health
+
+- **Every ISP hop is graded** - The ISP Network score now reflects packet loss and congestion on every hop in your provider's path, not just the nearest one. The closest hop still sets your idle-latency baseline.
+- **Honest jitter, even across split paths** - When a clean upstream (a transit provider, a deeper ISP router, or a destination reached through a hop) proves the path is actually steady, ISP Health stops penalizing a router whose high "jitter" is really just ICMP deprioritization. It only does this when it can prove traffic truly flows through that router, so a clean detour can't hide a genuinely congested hop. Sub-0.05 ms differences are treated as noise.
+- **Clearer cards** - Each provider card shows the effective jitter with an info icon explaining when a reading was absorbed and why, the RTT range across hops, and transit RTT as a winsorized mean so one bad probe doesn't skew it. Packet-loss expectations now scale with how loaded your WAN is.
+- **A nudge to re-map your path** - If ISP Health doesn't have your hop layout yet, a banner points you to re-run Upstream Discovery, and it clears itself once you do.
+- **Lighter on InfluxDB** - Watching Live View no longer kicks off a heavy ISP Health recompute every few minutes. The query runs far less often now, cutting periodic database CPU spikes. Same scores, computed more sparingly.
+
+## Monitoring - Alerts
+
+- **New modem / ONT alerts** - You can now get alerts on your gateway, cable modem, ONT, and cellular WAN, alongside the existing ones.
+
+## Fixes / Improvements
+
+- **Clearer IFB error** - When a device is missing its IFB interface, the message now explains the QoS-rule workaround instead of leaving you guessing.
+- **Footer version links to release notes** - Click the version in the footer to jump to that release's notes.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.20.3
 
 More fixes and polish for ISP Health and mobile UX. See [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+
