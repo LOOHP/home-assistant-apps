@@ -1,3 +1,53 @@
+## 1.20.6
+
+More ISP Health scoring improvements and some monitoring polish. See the [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+.
+
+## Monitoring - ISP Health
+
+- **Smarter loaded-latency scoring** - Loaded latency now cross-checks your ISP access hops against end-to-end internet targets, so a single router that deprioritizes ping under load, or one anycast destination having a bad night, no longer inflates the measured loaded latency and unfairly drags your score down. Still computed passively from whatever real load your connection sees, no bufferbloat test required.
+- **Adaptive SQM probe windows excluded** - Adaptive SQM briefly lifts the shaper to measure your true line speed, which looks like bufferbloat but isn't your shaped experience. Those windows are now carved out of the loaded-line analysis.
+- **Retuned idle latency** - The idle baseline is more robust to outliers and the per-technology curves were retuned so a top score is genuinely earned.
+- **Consistent primary-WAN resolution** - ISP Health, the 2D / 3D Live Views, and upstream discovery now agree on which WAN is your configured primary (by load-balance weight and failover priority), and rate and Adaptive SQM data resolve to the correct counter and data-path interfaces, including VLAN-tagged WANs. Live throughput cards still follow the active uplink so failover stats stay correct.
+  - **NOTE for PPPoE users:** please report any breakage in a GitHub issue, as we refactored some of the code that controls WAN interface mapping.
+- **Lighter footprint** - Added WAN summary caching so the app stops re-reading it on every request.
+
+## Monitoring - 2D / 3D Live Views
+
+- **Cleaner timeline playback** - Scrubbing back through history no longer paints latency on secondary WAN globes that aren't being monitored.
+
+## Security Audit
+
+- **More DNS providers recognized** - Detects on-gateway NextDNS CLI and ControlD, and recognizes more public DNS provider IPs.
+
+## Fixes
+
+- **Standalone UniFi Network Server (legacy)** - Self-hosted UniFi Network Server installs no longer fall back to UniFi OS API paths that don't exist on them. UniFi OS Server consoles were unaffected.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.20.5
 
 More monitoring and data-usage improvements, plus a 3D map stability fix. See [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+
