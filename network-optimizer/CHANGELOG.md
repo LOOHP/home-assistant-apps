@@ -1,3 +1,54 @@
+## 1.21.0
+
+The big one this release is Monitoring Interfaces: Network Optimizer can now reach a modem or ONT that lives behind your WAN, so you can poll and view a device that was previously unreachable from the LAN.
+
+## What's New
+
+A recap of what landed across the 1.20.x patches, in case you're jumping up from 1.20.0 or earlier:
+
+- **ISP Health loaded-latency scoring** - A series of refinements to how loaded latency is measured and graded, including a pooled global baseline across ISP, transit, and internet targets and per-target deltas, so the score better reflects what your line actually does under load.
+- **Alerts for gateway, cable modem, ONT, and cellular** - New alert evaluators so you can get notified when these devices report trouble.
+- **Data Usage pay-as-you-go mode** - A manual-reset bucket for plans that don't follow a fixed monthly cycle.
+- **Kiosk mode** - Hide the side menu for a clean mini-display or wall-mount presentation.
+- **DNS provider detection** - Auto-detects on-gateway NextDNS CLI and ControlD, with an expanded list of public DNS provider IPs.
+- **More modem support** - Added Xfinity XB8/XB10, ARRIS Surfboard S33/S34, and Cox CGM4981.
+
+## Monitoring
+
+- **Monitoring Interfaces: reach an ONT or modem behind the WAN** - Some modems and ONTs have a management IP that sits on the WAN side, unreachable from your LAN. Monitoring Interfaces deploys a small, self-contained, idempotent script to your gateway (modeled on Adaptive SQM and Performance Tweaks) that makes that device reachable for polling and from the LAN. It includes preflight checks for network overlap and duplicate IPs, a "try a native UniFi static route first" callout, and optional VLAN-tagged WAN support for fiber ISPs that run the WAN on a tagged VLAN. Reachable from the CM/ONT/Cellular monitor forms and from their failure messages.
+- **Quantum Fiber Q1000K SmartNID ONT** - New provider that polls the Q1000K's CGI JSON API for link health, PON type, full DDM optics (Rx/Tx power, temperature, voltage, bias), link uptime, and OLT identity.
+- **Statistics tables on every monitoring tab** - SFP, ONT, CM, Cellular, and Device Stats tabs now show a sortable mean/min/max table below the charts, matching the latency stats pattern. Click any column to sort, click device names to filter, and the tables hold their scroll position on mobile when data refreshes.
+- **Motorola HNAP modems connect reliably** - The MB8611 and siblings exposed a .NET-on-macOS TLS quirk that stalled HTTPS until timeout. We now auto-detect HTTP vs HTTPS so these modems poll cleanly.
+
+### 3D LAN Map
+
+- **3D map no longer collapses from one bad placement** - A single device placed far outside the cluster (bad geocode, mis-drag, stale placement) used to drive the whole scene scale and shrink real buildings to a speck. Outlier anchors that are both more than 6x the median distance and past 200 m are now ignored, while spread-out campus layouts are left untouched.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.20.7
 
 More ISP Health scoring improvements and some monitoring polish. **If you're on v1.20.6, this release improves the loaded-latency estimator - we recommend updating.** See the [v1.20.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.20.0) for what's new in v1.20.0+.
