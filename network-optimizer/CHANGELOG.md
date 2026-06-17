@@ -1,3 +1,66 @@
+## 1.21.1
+
+Internet outage detection lands in ISP Health, and the LAN map now plays back what your network was actually doing - live and across the timeline. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0.
+
+## Monitoring
+
+### ISP Health
+
+- **Internet outage detection** - ISP Health now spots internet-unreachable outages and tells them apart from monitoring gaps: it only counts an outage when your internet targets all go dark while the Monitoring Agent keeps probing (if the gateway itself drops there are no samples, so that's a gap, not an outage). It pins where the break sat - your access OLT can stay reachable while everything upstream goes dark, which means an ISP-side fault, not your network - scores it by how long you were actually down, and draws a recovery-shape timeline. A brief blip barely moves your score; a multi-hour outage tanks it. Outage windows are kept out of the regular packet-loss grades so they don't double-count.
+- **Speed hero links to WAN Speed Tests** - The "Speed vs Plan" section now links to the WAN Speed Tests page, with a subtle hover highlight.
+- **Truer path-shift reporting** - Path RTT reverts now show their real magnitude instead of "0 ms", and a correlated path shift is labeled from the transit network it happened in rather than a CDN endpoint that just routes through it.
+- **Cleaner transit names** - Hand-added transit hops now get the same household-name cleanup as auto-discovered ones (e.g. "Level 3", not "Level 3 Parent"), and a few providers show their familiar names (Arelion, Sparkle, and "Zayo" instead of "Zayo Bandwidth").
+
+### LAN Map
+
+- **Live and historic playback** - The 2D and 3D LAN maps now reflect what the network was actually doing instead of freezing the current snapshot. Device online/offline state plays back correctly through the timeline and updates live; offline devices dim and drop to zero throughput instead of holding their last sample.
+- **Wi-Fi client stats over time** - Band, signal, and PHY link rate play back at the scrubbed instant rather than always showing current values.
+- **Wi-Fi roam tracking** - A client now shows up on the AP it was actually connected to, live and during playback. A seamless roam (no disconnect) used to never move the client on the map until a disconnect or page refresh.
+- **Map polish** - 3D throughput labels and client pipes respect the band/overlay/name filter (no orphaned pipes after a redraw); the 2D map fits tighter to the top with label-aware spacing.
+
+## Security Audit
+
+- **Power devices no longer flagged for tagged VLANs** - UPS, PDU, and RPS devices were getting a "Port Issue: Excessive Tagged VLANs" finding on their single internal management port, which isn't a real downstream port and can't be reconfigured. They're now skipped (the upstream switch port they plug into is still audited), which also clears an inconsistency where UPS-2U was skipped but USP-PDU-Pro wasn't.
+- **Technitium DNS** - Recognized as a DNS provider, with a 1-second per-port probe timeout so detection doesn't hang.
+
+## Device Support
+
+- **EF-Core, UNVR-G2, UNVR-G2-Pro** - Three newly shipped UniFi devices now resolve with friendly names and icons: the Enterprise Firewall Core gateway and the Gen 2 / Gen 2 Pro Network Video Recorders. EF-Core is correctly treated as a gateway, not an AP, even when the API reports phantom radios.
+
+## Performance Tweaks
+
+- **Firmware support extended to UniFi OS 5.1.19** - All performance tweaks and patches, including SGMII+ 2.5 Gbps support, were vetted on a UCG-Fiber and by two community members on the new firmware.
+
+## Fixes
+
+- **Database concurrency errors** - Fixed recurring "second operation started on this context" / disposed-context errors that filled the logs over time. The threat dashboard now uses its own isolated database context per operation.
+- **Alerts: jump to the form** - Adding an alert rule now scrolls to the Add Rule form once it renders, so it doesn't open off-screen.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.21.0
 
 The big one this release is Monitoring Interfaces: Network Optimizer can now reach a modem or ONT that lives behind your WAN, so you can poll and view a device that was previously unreachable from the LAN.
