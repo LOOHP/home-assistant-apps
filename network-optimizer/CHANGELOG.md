@@ -1,3 +1,55 @@
+## 1.21.3
+
+More ISP Health depth and upstream-discovery accuracy. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0+.
+
+## Monitoring
+
+### ISP Health
+
+- **Fairer scoring for large access networks** - ISP access hops are now graded against where the internet actually sits, not just the nearest hop, so a regional ISP whose network spans a whole state no longer gets dinged for normal in-region distance.
+- **Jitter graded by connection type** - jitter is measured against a per-technology baseline (cable runs a few ms by nature, fiber sub-ms, Starlink a bit more), so DOCSIS and LEO connections stop being penalized for jitter that's normal for the medium.
+- **Flaky target detection** - when a monitored hop shows packet loss well above its peers (usually a router deprioritizing ICMP), ISP Health surfaces it in a panel above your Latency Targets and lets you disable it in one click so it stops skewing your score. A Live View banner points you to it.
+
+### Upstream Discovery
+
+- **Smarter first-hop detection** - 1.1.1.1 and 8.8.8.8 (UniFi's WAN SLA ping targets) are no longer mistaken for your ISP's first hop; discovery prefers the actual on-link WAN gateway, and any saved by mistake get cleaned up automatically.
+- **Stricter target selection** - a target must answer a full quick ping burst before it's auto-selected (relaxed for fixed-wireless and cellular), keeping flaky routers out of your monitoring set.
+- **Level 3 transit visibility** - when your path crosses Level 3 (Lumen) but none of its routers answer, 4.2.2.2 is monitored as a stand-in so you still get transit health for that hop.
+- **Cleaner discovery list** - transit hops group by network (nearest first), and renaming a target during review no longer occasionally loses the edit.
+
+## Dashboard
+
+- **Security Findings** - renamed the "Active Alerts" stat and "Recent Audit Issues" panel to "Security Findings" to better reflect what they show.
+
+## Fixes
+
+- **Realtek ONT login** - fixed sign-in on Realtek-based ONT sticks that use different login field names across firmware variants.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.21.2
 
 More refinements to ISP Health outage reporting. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in the 1.21 line, and [v1.21.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.1) for the last patch.
