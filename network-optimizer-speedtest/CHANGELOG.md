@@ -1,3 +1,39 @@
+## 1.21.2
+
+More refinements to ISP Health outage reporting. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in the 1.21 line, and [v1.21.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.1) for the last patch.
+
+## Monitoring
+
+### ISP Health
+- **Per-hop outage waterfall** - Access ISP hops are broken out per target, so you can see which hop dropped and which recovered first (the inside-out heal), with ASN-based row labels and internet endpoints trimmed to two.
+- **More accurate outage boundaries** - A target with no data during an outage no longer shows as a spurious "stayed up" row, and a single outage that briefly clears during staggered recovery is no longer split into several separate outages.
+- **ISP Network ordered by RTT** - The hop list now sorts by round-trip time, nearest first.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.21.1
 
 Internet outage detection lands in ISP Health, and the LAN map now plays back what your network was actually doing - live and across the timeline. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0.
