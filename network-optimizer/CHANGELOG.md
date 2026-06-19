@@ -1,3 +1,44 @@
+## 1.21.4
+
+More accuracy fixes for ISP Health upstream discovery, plus a couple of dependency-install fixes. See [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0+
+
+## Monitoring
+
+- **More accurate upstream transit detection** - Reworked how we decide which upstream hops actually belong to your ISP versus the wider internet backbone. The near-transit window is now computed per individual traceroute and unioned across them, so multi-homed connections keep all their genuine direct upstreams instead of dropping one when several surface at the same hop. Tier-1 backbone ASNs that only ever sit above another tier-1 are now treated as core peering and excluded, while a tier-1 that's genuinely your ISP's upstream is kept. The result is fewer bogus monitoring targets and a truer picture of where your transit horizon actually ends.
+- **Tier-1 transit probes gated to the near-transit window** - Probing toward a well-known anycast IP always enters that provider's network near the probe destination, which used to make it look like your upstream even when it wasn't. These probes now only count when the provider lands within the first couple of hops past your ISP, and are dropped when they're three or more transitions out.
+- **Collapsible ISP Health - ISP Network list** - The ISP Network hop list now caps at 5 entries with an expand/collapse toggle, with a smooth open/close animation, so long paths don't dominate the page.
+
+## Fixes
+
+- **SSH probe installs traceroute reliably** - A UniFi Console with stale or empty package lists couldn't install traceroute from a bare install command. We now refresh the package index first (and bumped the timeout to cover the fetch).
+- **Adaptive SQM installs dependencies reliably** - Same fix for the bc/jq dependency install: refresh the package index first so a console with stale lists can resolve them.
+- **Fixed broken CSS animations** - A couple of animations (toast fade-in and a purpose fade) were dead due to a double-`@` escaping issue in plain CSS. They animate properly again.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.21.3
 
 More ISP Health depth and upstream-discovery accuracy. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0+.
