@@ -1,3 +1,52 @@
+## 1.21.5
+
+A big upgrade to ISP Health: congestion localizes to the exact hop, the whole tab gets a date/time filter, and LAN/gateway outages are told apart from real WAN outages. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0+.
+
+## Monitoring
+
+### ISP Health
+
+#### Congestion
+- **Bottleneck localization** - Congestion is pinned to the specific hop that's actually congested instead of being merged into a time-based blur of networks. The feed names the hop.
+- **A disposition for every event** - Each event says whether it's a confirmed bottleneck, control-plane (ICMP) noise, self-inflicted bufferbloat, or unverifiable, with a plain-language reason so you know how much to trust it.
+- **Sibling confirmation** - A dead-end hop with nothing monitored beyond it is confirmed when a sibling hop on the same network is congested in the same window.
+- **Latency and jitter** - The feed reports both, and tells you when other monitored paths stayed clean under the same load, so you can separate a single-hop problem from your access link.
+
+#### Date and time filter
+- **Filter any window** - The standard Monitoring date/time filter is now on the ISP Health tab (24h, 48h, 7d, 14d, 30d, or a custom range from 4 hours up to a month), defaulting to 48h. The chart and report follow the window.
+
+#### Outages
+- **LAN/gateway vs WAN** - If your own gateway goes unreachable, it's surfaced as a "LAN / Gateway outage" and does not lower your ISP score, since it isn't the ISP's fault. Real WAN outages score as before.
+- **Score impact on hover** - Each outage shows what it cost the score, or "not scored", on the badge and the type text.
+
+## Dashboard
+- **LAN Speed Test client IP** - For a client that doesn't match a known device (such as a VPN client), the LAN Speed Test panel on the dashboard shows its IP in a code block instead of "Unknown".
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.21.4
 
 More accuracy fixes for ISP Health upstream discovery, plus a couple of dependency-install fixes. See [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0+
