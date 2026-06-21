@@ -1,3 +1,42 @@
+## 1.22.1
+
+More improvements on ISP Health and added cable modem support. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for what's new in v1.22.
+
+
+## ISP Health
+
+- **More accurate Loaded Latency and Loaded Loss** - In short: loaded latency and loss are now measured more accurately during normal usage (like user-initiated speed tests), without mis-attributing downstream loss to the upstream direction or vice versa. Under the hood, the measurements are matched against a dilated loaded window that captures the ramp-in and drain edges of a load event, which previously fell in transition windows and got dropped. The dilation never crosses into an opposite-direction loaded run, so a speed test's download phase can't be misattributed to its upload phase; it's direction-symmetric, so it's equally correct for download- and upload-bottlenecked connections. The idle baseline stays a strict, clean uncongested floor.
+
+## Cable Modem Monitoring
+
+- **Netgear CM2050V support** - The Netgear / Nighthawk CM provider now also handles the CM2050V and the newer .htm web UI it serves: it auto-detects the form login (instead of HTTP Basic) and parses the DOCSIS 3.1 OFDM and OFDMA channels, all from the same provider entry with nothing new to pick. Other newer Netgear cable modems may work too; if yours doesn't, please open an issue with a scrubbed HAR capture so we can add support.
+- **Netgear CM700** - Primes the anti-CSRF cookie before Basic auth, which should fix CM700 support.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.22.0
 
 The headline this release is deep per-port visibility: a live, timeline-synced statistics table for every switch and gateway port, plus the ability to poll any SNMP OID your gear exposes.
