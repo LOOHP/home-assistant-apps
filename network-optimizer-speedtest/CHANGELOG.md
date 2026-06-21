@@ -1,3 +1,63 @@
+## 1.22.0
+
+The headline this release is deep per-port visibility: a live, timeline-synced statistics table for every switch and gateway port, plus the ability to poll any SNMP OID your gear exposes.
+
+## The 1.21 line, recapped
+
+If you're jumping up from 1.21.0 or earlier, here's what landed across that cycle:
+
+- **ISP Health grew up** - Line-aware scoring (per-technology jitter, fair grading for sprawling regional ISPs), internet-outage detection with a per-hop recovery waterfall, congestion pinned to the exact bottleneck hop, flaky-target detection, and a date/time filter for the whole tab.
+- **Your network, in motion** - Monitoring Interfaces can now reach a modem or ONT that sits behind your WAN, and the 2D/3D LAN maps play back what the network was actually doing (device up/down, Wi-Fi roaming, signal and throughput) live and across the timeline.
+- **More devices, more visibility** - Quantum Fiber Q1000K ONT, Motorola and Realtek modem/ONT fixes, EF-Core and UNVR-G2 support, and sortable mean/min/max stats tables on every monitoring tab.
+
+## Monitoring
+
+### Live View
+
+- **Per-port statistics** - A new per-port table below the maps shows link rate (in/out), cumulative bytes transferred (in/out), unicast/multicast/broadcast packet counters, and errors/discards for every SNMP-polled switch and gateway, synced to the map timeline with live updates and historical playback (current support for -24 h but your NO instance is already collecting data for looking even further back). Color-coded RJ45/SFP connector glyphs show negotiated link speed, and each access port links to its connected client's performance dashboard. Includes VPN / tunnel interfaces, raw UniFi 5G / LTE modem interfaces, raw AP Wi-Fi interfaces, and VLAN sub-interfaces.
+- **Note** - _On many gateways and APs the raw SNMP stats from the device can be misleading. For example, on UCG-Fiber/UXG-Fiber and other IPQ gateways, the WAN VLAN sub-interface byte counters / rates are double-counted. This is taken into account in our Live views, ISP Health, displayed WAN rates and graphs, but in the raw port table the double-counted data can be seen on these interfaces._
+
+### SNMP & Device Stats
+
+- **Custom OID polling** - Add any SNMP OID per device, test it against the live device, map it to a named field, and it auto-charts on the Device Stats tab with mean/min/max columns. Standard per-port packet counters now poll on the 5s fast tier too.
+
+### ISP Health
+
+- **Loaded latency, separated from congestion** - When every monitored path slows together under load, that's your access link (bufferbloat or a busy shared-access network), not a single ISP hop. It now reads as Loaded Latency and no longer counts against your ISP Health score.
+
+### Cable Modem
+
+- **Netgear CM700** - Added alongside the CM600 and CM1000, pulling full downstream/upstream power, SNR, and error-correction stats whether your modem requires a login or serves its status page openly.
+
+## Security Audit
+
+- **Sharper DNS leak detection** - More precise detection of DNS that bypasses your configured resolver, reported as clear rule-level findings.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.21.5
 
 A big upgrade to ISP Health: congestion localizes to the exact hop, the whole tab gets a date/time filter, and LAN/gateway outages are told apart from real WAN outages. See the [v1.21.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.21.0) for what's new in v1.21.0+.
