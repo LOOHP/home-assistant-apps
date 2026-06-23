@@ -1,3 +1,44 @@
+## 1.22.2
+
+A couple of fixes plus a handy map addition. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for what's new in v1.22.0+
+
+## Wi-Fi Optimizer
+
+- **Address search on the maps** - Both the Speed Test Map and the Signal Map (Floor Plan Editor) now have a collapsible search control in the top-right corner. Click the magnifying glass, type a street address or place name, and the map jumps there with a dropped pin instead of you panning around by hand. This should help with getting your initial bearings when placing your APs and buildings.
+
+## Threat Intelligence
+
+- **Disabled forwarding rules no longer counted as exposed** - A disabled port forwarding rule isn't passing any traffic, so it no longer shows up in the exposure report as an exposed service under attack. UPnP rules are still treated as live since they inherently are.
+
+## Config Optimizer
+
+- **SQM firmware regression advisory knows about the fix** - The "SQM Performance Regression on Current Firmware" advisory now knows the download-throughput regression is fixed in UniFi OS 5.1.17 on the UXG line and 5.1.19 on the UCG line. It only fires for firmware in the affected window, and it now points you forward ("upgrade to the fixed version or later") instead of recommending a rollback to 5.0.10.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.22.1
 
 More improvements on ISP Health and added cable modem support. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for what's new in v1.22.
