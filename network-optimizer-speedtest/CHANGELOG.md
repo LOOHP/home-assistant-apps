@@ -1,3 +1,52 @@
+## 1.22.3
+
+By request, satellite imagery and a smarter address search for the Wi-Fi Optimizer maps. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for what's new in v1.22.0+
+
+## Wi-Fi Optimizer: Signal & Speed Maps
+
+### Satellite imagery
+
+- **Satellite toggle** - Flip the base layer to satellite imagery on the Signal and Speed Test maps. Works out of the box with Esri World Imagery, which needs no account or API key. A one-time confirm notes the built-in imagery is free for personal, non-commercial use.
+- **Optional Mapbox token for commercial use** - A new Settings > Satellite Imagery section accepts a Mapbox public token. When set, the satellite layer uses commercially licensed Mapbox imagery instead of Esri, with a badge showing the active provider.
+
+### Address search
+
+- **Smarter zoom by place type** - Searching a country zooms to a wide view, a city to a regional view, and a specific house all the way in, instead of one fixed zoom for everything.
+- **Grid-style address matching** - Addresses like "1234 S 5678 W" now resolve by retrying without the cardinal direction when the first pass comes up empty.
+- **Clear button** - An X appears in the search field when you have text, to clear and start over without retyping.
+- **Staged Esc** - Esc steps back one level at a time: close the suggestions, then clear the text, then collapse the search box, so dismissing suggestions no longer wipes what you typed.
+- **Result pin cleanup** - The pin dropped on a search result goes away when you clear the search.
+
+### Map controls
+
+- **Esc exits fullscreen** - On the Signal Map, after backing out of any open dialog, mode, or building selection, a final Esc leaves fullscreen.
+- **Zoom button styling** - The zoom buttons on the Signal and Speed Test maps now match the 2D / 3D LAN flow maps, including a muted look when you are at the zoom limit.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.22.2
 
 A couple of fixes plus a handy map addition. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for what's new in v1.22.0+
