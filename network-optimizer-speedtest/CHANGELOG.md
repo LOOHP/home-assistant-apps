@@ -1,3 +1,52 @@
+## 1.23.0
+
+Smarter Wi-Fi channel planning, configurable temperature and SFP alert thresholds, and a round of ISP Health improvements. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for the bigger picture.
+
+## What's New
+
+- **Address search on maps** - Search an address to jump there on the Speed Test and Signal maps, with zoom improvements. (#887, #888)
+- **Satellite imagery toggle** - Switch the maps between street and satellite views. (#888)
+- **More cable modem support** - Added the Netgear CM2050V, plus a CM700 auth fix for gateways that need an anti-CSRF cookie primed. (#883, #881)
+- **More accurate ISP Health** - Loaded latency and loss now align with WAN rate windows, and brief loaded-event edges are captured via window dilation. (#875, #882)
+- **Threat Intelligence accuracy** - Disabled port-forwarding rules are no longer counted as exposure. (#886)
+- **Adaptive SQM** - Stopped flagging the firmware regression on gateways that are already patched. (#884)
+
+## Wi-Fi Optimizer
+
+- **Smarter channel recommendations** - Fixes and improvements to the physical interference model behind channel planning, with better per-AP channel moves. (#890)
+- **Stable suggestions between scans** - Marginal channel suggestions no longer flicker on and off as conditions shift slightly between scans. (#893)
+- **Overview auto-refresh** - The Overview tab refreshes itself when its data goes stale instead of showing old numbers until a manual reload. (#895)
+
+## Monitoring
+
+- **Configurable temperature and SFP alert thresholds** - Switch and gateway high-temperature alerts are now configurable per device type (Monitoring -> Device Stats), and the per-transceiver-type SFP thresholds (PON / Active Ethernet / generic SFP+) are editable (Monitoring -> SFP Stats) instead of hard-coded. Each falls back to the built-in default when unset. (#894)
+- **ISP Health improvements** - Detects brief and partial-loss disruptions, more accurate congestion scoring, a clearer timeline, and faster data loading (initial load and when switching tabs). (#891)
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.22.3
 
 By request, satellite imagery and a smarter address search for the Wi-Fi Optimizer maps. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for what's new in v1.22.0+
