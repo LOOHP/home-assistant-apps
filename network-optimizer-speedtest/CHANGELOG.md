@@ -1,3 +1,51 @@
+## 1.23.1
+
+Performance Tweaks unlocked on UniFi OS 5.1.21, plus steadier upstream change detection, fixed Netgear CM700 support, and a smarter WAN Steering redeploy prompt. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0.
+
+## ISP Health
+
+- **Steadier upstream change detection** - Scheduled re-discovery now compares your upstream on stable per-ASN identity instead of exact hop IPs, so normal ECMP hop shuffling no longer looks like a change. A hop has to go missing for three runs in a row before it's flagged as removed, and once something's pending the recheck happens daily so a real change confirms in days instead of weeks.
+- **Results-ready banner** - When a scheduled re-discovery finds your path changed, a dismissable banner now appears on the Live View and Network Performance tabs so you can review and update your targets. It re-arms on its own if the next run finds something new.
+- **Manual targets stay put** - Transit and Access ISP targets you add by hand are now treated as curated, so re-discovery won't flag them as removed or keep suggesting them back.
+- **Scheduled runs match manual ones** - The background scheduler now carries your saved access technology forward, so an automatic re-discovery infers roles and reachability exactly the way a run you kick off yourself does.
+
+## Cable Modems
+
+- **Netgear modems that emit malformed HTTP** - Some Netgear modems (the CM700 is the usual culprit) intermittently send slightly corrupted HTTP that .NET refuses to parse, even though browsers read it fine. We now fall back to a lenient reader on exactly that failure so these modems report their DOCSIS status. Modems that behave normally are untouched.
+
+## WAN Steering
+
+- **Only nag when the daemon actually changed** - The "binary outdated, redeploy" prompt now tracks the daemon's behavior version rather than the app version, so it only shows up when redeploying would actually change something, not after every release. One heads-up: on Mac, Windows, and Linux bare-metal installs you'll see the prompt once after updating. Do a single WAN Steering deploy to push the version-aware binary and it stays clear from then on.
+
+## Performance Tweaks
+
+- **UniFi OS 5.1.21 support** - Performance tweaks are now validated up to UniFi OS 5.1.21 on the UCG-Fiber.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.23.0
 
 Smarter Wi-Fi channel planning, configurable temperature and SFP alert thresholds, and a round of ISP Health improvements. See [v1.22.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.22.0) for the bigger picture.
