@@ -1,3 +1,45 @@
+## 1.23.3
+
+One-click function to roam a stuck mesh AP to its strongest parent, plus accurate mesh channel width, and a UDM gateway temperature monitoring fix. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0+
+
+## Wi-Fi Optimizer
+
+- **Re-pair Uplink for mesh APs** - A new per-AP button that re-scans a wireless mesh child's backhaul so it reconnects to its strongest available parent. Mesh children often get stuck on a weaker parent after you reconfigure the parent or after a firmware upgrade, and don't re-roam on their own; this nudges them to. It only prompts the scan (UniFi Network still decides which parents are eligible), is safe to re-run, and reports whether the AP actually moved.
+- **Accurate mesh channel width** - The radio panel now shows the width a mesh backhaul is actually running at, not just the configured width. An AP set to 160 MHz but negotiated down to its parent's 80 MHz now correctly reads 80 MHz.
+
+## Signal Map
+
+- **Map frames to your real layout** - The Signal Map and floor plan editor now fit the view to your actual placed content (APs, drawn walls, floors with an uploaded image) instead of being dragged off to a default location by a brand-new building or floor that hasn't been positioned yet. New buildings and floors are also seeded wherever you've got the map pointed rather than at a fixed default.
+
+## Monitoring
+
+- **Gateway temperature when SNMP is quiet** - Some gateways (like the UDM family) report CPU and memory over SNMP but not temperature. Gateway temperature now falls back to UniFi Network data when SNMP leaves it out, while gateways that do report it over SNMP are left untouched.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.23.2
 
 This release sharpens the Wi-Fi Optimizer's channel recommendations and broadens Upstream Discovery so it can still map your ISP even when its first-mile routers stay silent to pings. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0+.
