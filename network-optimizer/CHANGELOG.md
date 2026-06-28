@@ -1,3 +1,54 @@
+## 1.23.2
+
+This release sharpens the Wi-Fi Optimizer's channel recommendations and broadens Upstream Discovery so it can still map your ISP even when its first-mile routers stay silent to pings. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0+.
+
+## Wi-Fi Optimizer
+
+- **Signal Map framing** - The map no longer zooms out to the whole globe when a floor or AP was created but never placed; un-positioned items are excluded from the map fit.
+- **Better co-channel detection** - Two APs on different control channels that share the same bonding block (e.g. 100/160 and 112/160) are now correctly scored as fully co-channel.
+- **Mesh-aware recommendations** - Mesh children stay pinned to their leader's channel through the whole recommendation flow, so suggested plans are always physically valid for the backhaul.
+- **More accurate channel scoring** - Airtime contention and raw utilization are now scored separately instead of as one lumped penalty.
+
+## Monitoring
+
+- **Upstream Discovery: ISP test-server fallback** - When no first-mile hop inside your ISP's own network answers ICMP, discovery now falls back to a curated, reachable ISP speed-test endpoint so the access-ISP cloud still resolves on the map. Currently covers Deutsche Telekom, T-Mobile / T-Mobile Fiber, and Spectrum (Charter). Discovery also counts as complete when the path is proven through transit alone. If your ISP also exposes no pingable access-network hops, open an Issue and we'll try to add fallback targets for it.
+- **WAN globes** - A down WAN now reports zero throughput instead of inheriting the gateway's aggregate rate, unused WANs are hidden, and labels and discovery messaging are clearer.
+- **Flex 2.5G latency probing** - Flex 2.5G switches are re-asserted as disabled latency targets on every reconcile, so a target missed during an offline or reconnect window self-heals once the model resolves.
+- **Custom OID discovery** - The Setup tab's device card is now "SNMP Devices and Custom OIDs" and auto-expands the first device once, so custom OID polling is easier to find.
+
+## Performance Tweaks
+
+- **Lighter MongoDB eMMC backups** - The MongoDB SSD-offload backup now keeps a single compressed archive on eMMC instead of an uncompressed copy, with a one-time migration. Your console's stock boot failsafe is untouched.
+- **Module update banner** - A banner now surfaces when a deployed gateway module (WAN Steering, Adaptive SQM, Performance Tweaks) has a newer version available.
+
+## Alerts & Schedule
+
+- **Bulk incident actions** - New "Acknowledge All" and "Resolve All" actions handle the whole incident list at once.
+- **Easier speed test scheduling** - "Add Test" buttons and helper text make it clear you can schedule a separate test for each WAN line or device.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.23.1
 
 Performance Tweaks unlocked on UniFi OS 5.1.21, plus steadier upstream change detection, fixed Netgear CM700 support, and a smarter WAN Steering redeploy prompt. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0.
