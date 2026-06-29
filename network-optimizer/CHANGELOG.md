@@ -1,3 +1,55 @@
+## 1.23.4
+
+This release deepens ISP Health with a new Physical Link factor and a smarter outage score, plus a cross-platform fix for the Wi-Fi mesh Re-pair Uplink action. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0+.
+
+## Monitoring
+
+### ISP Health
+
+- **New Physical Link factor** - ISP Health now grades the actual health of your WAN's connection medium and folds it into the Access Layer score. It automatically matches your connection's access technology and grades the real signal: fiber ONT optical power (PON or active Ethernet, via SFP DDM or an external ONT), DOCSIS cable (downstream SNR/MER, FEC, and power levels), or cellular signal quality. If there's no monitored source for that WAN, the factor is simply left out: no penalty, no free points. When more than one source could match, you choose which one.
+- **Smarter outage scoring** - Outages now score by severity, recurrence, and time of day, not just total duration. A widespread near-total drop reads hotter than a narrow shallow one, ten separate micro-drops cost far more than one slightly-longer dip, and a drop during your heavy-usage hours counts in full while one at a typically-idle hour dings less. The heavy-vs-idle profile is derived automatically from throughput already being recorded, so there's nothing to set up.
+
+### ONT Monitoring
+
+- **8311 ONT error counters** - SFP ONT sticks running 8311 firmware now have their FEC and BIP error counts read from the pontop page, feeding the fiber Physical Link score.
+
+## Wi-Fi Optimizer
+
+- **Re-pair Uplink works across more access points** - The mesh Re-pair Uplink action was tuned for the U7 line and failed on others (notably the U6 line) with "Couldn't read the mesh backhaul status." It now adapts to each AP's wpa_supplicant socket layout, so it works across platforms.
+
+## Device Status
+
+- **Provisioning devices no longer show as Offline** - A device that's reprovisioning, updating, adopting, or pending now shows an accurate status (a yellow "Provisioning" or "Updating") instead of grey "Offline." This applies to the Dashboard Device Status list, the Wi-Fi Optimizer AP cards, and the Client Speed Test device list. A device mid-reprovision is also no longer briefly dropped from monitoring and speed-test target lists.
+
+## Alerts & Schedule
+
+- **Device event reference completed** - The Device Health group now lists every device event (offline, high temperature, gateway CPU, gateway memory), and `device.offline` is grouped with them instead of being stranded under Schedule.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.23.3
 
 One-click function to roam a stuck mesh AP to its strongest parent, plus accurate mesh channel width, and a UDM gateway temperature monitoring fix. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0+
