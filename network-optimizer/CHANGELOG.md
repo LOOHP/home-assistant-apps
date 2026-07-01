@@ -1,3 +1,74 @@
+## 1.24.0
+
+Bringing measured RF spectrum into the Channel Optimizer, deeper ISP Health investigation tools, and a round of accuracy fixes across Wi-Fi and Monitoring. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for the bigger picture.
+
+## What's New
+
+- **Channel Optimizer now measures real RF** - Channel recommendations factor in UniFi's per-channel spectrum scan (actual airtime and RF noise floor), not just neighbor network and historic AP airtime metric data, with on-demand scans when a radio has no recent measurement. See below for the full writeup.
+- **ISP Health Physical Link factor** - ISP Health grades the actual health of your WAN's connection medium (fiber ONT optical power, DOCSIS SNR/FEC/power, or cellular signal) and folds it into the Access Layer score. (v1.23.4)
+- **Smarter outage scoring** - Outages score by severity, recurrence, and time of day, not just total duration, with the heavy-vs-idle profile derived automatically from recorded throughput. (v1.23.4)
+- **Re-pair Uplink for mesh APs** - A per-AP button that nudges a stuck wireless mesh child to re-roam to its strongest available parent, now working across the U6 and U7 lines. (v1.23.3, v1.23.4)
+- **Upstream Discovery fallback** - When no first-mile hop inside your ISP answers ICMP, discovery falls back to a curated reachable ISP speed-test endpoint so the access-ISP cloud still resolves. (v1.23.2)
+- **Performance Tweaks on UniFi OS 5.1.21** - Validated up to UniFi OS 5.1.21 on the UCG-Fiber, plus a module-update banner when a deployed gateway module has a newer version. (v1.23.1, v1.23.2)
+- **Fixed Netgear CM700 support** - Netgear modems that emit malformed HTTP (the CM700 is the usual culprit) now report their DOCSIS status via a lenient reader. (v1.23.1)
+
+## Wi-Fi Optimizer
+
+- **Measured RF spectrum in scoring** - Recommendations now use actual airtime utilization and RF noise floor from UniFi's spectrum scan. A channel that looks quiet by neighbor network and historic AP airtime metric data but is noisy in RF (radar, microwaves, other non-Wi-Fi interference, or hidden congestion) is now correctly penalized. Wide channels are aggregated across their whole span the way UniFi's own wide-channel scan does, and an AP's current channel is read from a neighbor's vantage so it isn't penalized for traffic that follows it wherever it moves. (#940)
+- **Span-aware neighbor influence** - A wide neighbor's full spectral footprint now counts against every channel it overlaps, instead of only its control channel, so a nearby 160 MHz network is scored against its whole span. (#940)
+- **On-demand RF scans** - When a radio has no recent spectrum measurement, the recommendation page prompts you to run a quick scan on exactly those radios, then re-runs on the fresh data. Scans run at each radio's current bandwidth, one band at a time per AP and in parallel across APs. Mesh APs are excluded (they can't scan without dropping their uplink), and the wording adapts to each AP's scan hardware. (#940)
+- **Safer, more honest recommendations** - The engine never recommends a plan that would worsen the overall network score, per-AP fallback moves are judged on the real network objective, and DFS handling gets a span-aware penalty, a badge on the current channel, and friction when leaving DFS for unscanned channels. (#940)
+- **DFS toggle defaults from your console** - The 5 GHz DFS toggle now defaults to match your UniFi Console's Auto-Optimize (RF Scanning) setting instead of always starting on Include DFS. Once you pick an option yourself, your choice is preserved. (#937)
+
+## Monitoring
+
+### ISP Health
+
+- **Investigate links on loss findings** - The "Packet loss under load" and "Packet loss above acceptable" findings now link straight to the matching event on the Network Performance charts, so you can confirm which series drove the finding. (#938)
+- **Anycast DNS on the Per-Network RTT chart** - Cloudflare (1.1.1.1) and Google (8.8.8.8) now plot as their own lines, giving a known-good baseline to read a noisy ISP or transit hop against. (#938)
+- **Smarter loss advice** - Persistent-loss recommendations now name oversubscription alongside physical-plant faults on shared media, stay physical-layer-only on dedicated media, and defer to Adaptive SQM's own tuning knobs when it's already shaping the WAN. (#938)
+- **DOCSIS 3.1/4.0 label** - The Physical Link RF-health description reads "DOCSIS 3.1/4.0" when OFDMA is detected, since OFDMA alone doesn't distinguish 3.1 from 4.0. (#939)
+- **WoodyNet / PCH excluded from Transit** - IXP route-server and anycast DNS infrastructure no longer lands in the Transit dimension, since it doesn't haul traffic upstream. (#939)
+- **Branded loading spinner** - The initial load now shows a centered loading state that matches the ISP Health hero card instead of a tiny left-aligned spinner. (#939)
+- **Re-score by access technology** - You can select the connection's access technology to re-score, and the Physical Link subheader links to its monitoring tab.
+
+### Network Performance
+
+- **Event-based loss investigation** - Stepping through Packet Loss / Loaded Loss events now coalesces contiguous loss minutes into distinct events and steps event-to-event (landing on each event's peak-loss minute), with the investigated event highlighted by a labeled band. The Investigate card moved above the chart and is now collapsible with a saved state. (#938)
+
+## Client WAN Speed Test
+
+- **Steadier charts** - Charts refresh after a new result and only re-render when results actually change.
+
+## Fixes
+
+- **Visited links keep their color** - Dropped a global `a:visited` override so visited links no longer fade into body text.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.23.4
 
 This release deepens ISP Health with a new Physical Link factor and a smarter outage score, plus a cross-platform fix for the Wi-Fi mesh Re-pair Uplink action. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for what's new in v1.23.0+.
