@@ -1,3 +1,65 @@
+## 1.24.1
+
+Expanding the timeline history to 90 days, locking down noisy 2.4 GHz channel churn, and rolling out massive performance and timeout fixes for ISP Health on lower-power hardware. See [v1.24.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.24.0) for what's new in v1.24.0+.
+
+## What's New
+
+* **Extended Live View timeline history** - Unlocked the scrubber from its 24-hour limit. You can now select presets up to 30 days and Max (the 90-day retention cap), using a server-side cache so younger installs cleanly clamp to their actual data duration.
+* **Smarter 2.4 GHz optimization** - Raised the bar for channel moves on the crowded 2.4 GHz band. The optimizer now requires an 8% whole-site score improvement (up from 3%) before recommending a change, stopping zero-sum channel churn.
+* **Adaptive ISP Health fallback** - Low-power boxes and spinning disks no longer hang on heavy computations. The engine now automatically scales back the evaluation window ($48\text{h} \to 24\text{h} \to 16\text{h}$) if a step exceeds the time budget.
+
+## Wi-Fi Optimizer
+
+* **Surfaced scan permission errors** - Read-only accounts no longer fail silently or loop through re-authentication. The UI now catches the 403 error immediately and prompts you to grant the account the Network: Site Admin role.
+* **Streamlined scan button and UI** - Condensed the wordy scan banner into a single line, moving details to a tooltip. The scan button now stretches full-width on mobile and shows live per-band progress (e.g., "Scanning… 2/3 bands").
+* **Updated connection guidance** - Changed the setup instructions in Settings to recommend Network: Site Admin, adding a note that View Only covers everything except on-demand RF scans.
+
+## Monitoring
+
+### ISP Health
+
+* **5x faster computations** - Optimized in-memory hot paths to prevent timeouts on 30-day windows. The engine now precomputes indexes, sorts series exactly once instead of 4 to 5 times, and skips per-bucket object allocations. Output remains bit-identical.
+* **Adaptive fallback badges** - Added a small badge next to the date selector when the compute window has been auto-reduced. Hovering explains why, and clicking it re-probes the full target window.
+* **Fixed InfluxDB query timeouts** - Raised the default query timeout past the compute budget, fixing a bug where heavy database reads were canceled mid-flight (#941).
+* **Hero loading states** - Changing time windows, refreshing, or switching access technology now shows a styled loading spinner in the score area instead of sticking on stale numbers.
+
+### Network Performance
+
+* **Pooled loss percentage investigation** - Modified the Latency & Packet Loss "Investigate" highlight band to show the pooled mean loss across the exact target definitions used to grade the score, eliminating data drift.
+
+## Fixes
+
+* **2D Map Mobile Scrubber** - Fixed a layout bug to ensure the mobile timeline scrubber renders correctly beneath the 2D canvas area.
+* **Congestion timeline phrasing** - Gated the phrase "and the hops beyond" strictly on a placed bottleneck hop, preventing unlocalized events without saved traces from using intermediate hop phrasing.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.24.0
 
 Bringing measured RF spectrum into the Channel Optimizer, deeper ISP Health investigation tools, and a round of accuracy fixes across Wi-Fi and Monitoring. See [v1.23.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.23.0) for the bigger picture.
