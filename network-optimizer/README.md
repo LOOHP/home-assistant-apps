@@ -8,13 +8,13 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 <br>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/logo-network-optimizer-pride.png" alt="Network Optimizer - Happy Pride Month!" width="300">
+  <img src="https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/app-logo-v2.png" alt="Network Optimizer" width="300">
 </p>
 
 # Network Optimizer for UniFi
 
 [![GitHub Release](https://img.shields.io/github/v/release/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/releases)
-[![Docker Pulls](https://img.shields.io/badge/docker_pulls-351k-blue?logo=docker)](https://github.com/orgs/Ozark-Connect/packages?repo_name=NetworkOptimizer)
+[![Docker Pulls](https://img.shields.io/badge/docker_pulls-367k-blue?logo=docker)](https://github.com/orgs/Ozark-Connect/packages?repo_name=NetworkOptimizer)
 [![Windows Downloads](https://img.shields.io/github/downloads/Ozark-Connect/NetworkOptimizer/total?label=windows%20downloads)](https://github.com/Ozark-Connect/NetworkOptimizer/releases)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/commits)
 [![GitHub Stars](https://img.shields.io/github/stars/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/stargazers)
