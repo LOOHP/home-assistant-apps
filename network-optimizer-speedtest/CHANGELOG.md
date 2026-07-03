@@ -1,3 +1,44 @@
+## 1.24.2
+
+More refinements to ISP Health and the Wi-Fi Channel Optimizer. See [v1.24.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.24.0) for what's new in v1.24.0+.
+
+## Monitoring: ISP Health
+
+- **Optical readings survive a transient glitch** - The Physical Link score reads a fiber ONT's optical power (GPON and XGS-PON), where a single bad reading could briefly ding a healthy link. It now grades receive and transmit power over the whole window instead of one sample, and compensates receive power for temperature (an optic reads a little lower when it runs cool, higher when warm). A brief thermal swing no longer looks like a signal drop, but a genuine dip still gets flagged.
+- **Brief WAN load is recognized as load** - A congestion event that lined up with a short download or a quick speed test was being reported as external congestion instead of "under heavy WAN load." Short bursts of local saturation are now recognized, so they get labeled correctly. Sustained events are unchanged.
+- **Congestion rows show the real latency rise** - A congestion row could show a near-zero latency/jitter change that didn't match what actually happened. Rows now use the affected hop's own numbers, so you see its real rise. Display only; scoring is unchanged.
+- **Outages split by a monitoring gap are stitched together** - An outage with a gap in the middle of monitoring could show up as two separate events. They now merge into the single outage they really were.
+
+## Wi-Fi Channel Optimizer
+
+- **The optimizer now has a memory** - Channel Recommendations learn from the channels you've actually run and the neighbors it has actually seen, instead of judging every candidate on a single live snapshot. Each channel's real-world performance (utilization, interference, TX retries) is recorded per radio and kept for months, well past the UniFi Console's short retention, with older evidence aging out. Remembered neighbors are weighted by how consistently they show up, so a one-off guest hotspot can't pile up into load a channel never carried. Works on all bands but bites hardest on noisy 2.4 GHz, where a single scan could otherwise talk the optimizer into a confident but pointless swap.
+- **No ping-ponging after a channel change** - Once a radio moves, the channel it just left is held out of recommendations for a 16-hour soak, long enough for a real evening peak to prove out the new channel. If the new channel turns out genuinely catastrophic (70%+ of airtime from other networks), the soak lifts so a bad move can be corrected. A "Soaking" badge shows which APs are in their soak window and until when.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 1.24.1
 
 Expanding the timeline history to 90 days, locking down noisy 2.4 GHz channel churn, and rolling out massive performance and timeout fixes for ISP Health on lower-power hardware. See [v1.24.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v1.24.0) for what's new in v1.24.0+.
