@@ -24,6 +24,10 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 
 Genuinely, thank you so much to everybody for taking the time to use Network Optimizer and have it find a place on your network(s). It really means a lot to receive all of the bug reports, feature requests, feedback, support, and donations from everybody. Totally a whole new experience from writing code in a dayjob, and it greatly motivates me to keep on going!
 
+## Multi-Site Support Is in Developemnt
+
+Multi-site support is almost ready! Please see this thread if you'd like to help test it: https://github.com/Ozark-Connect/NetworkOptimizer/discussions/954
+
 ## New: ISP Health
 
 All that monitoring data has to add up to something. ISP Health is the part of Monitoring that takes everything Network Optimizer is already collecting - SNMP device health, the latency and packet loss probes, WAN throughput, and the hops your Upstream Path Discovery mapped - and brings it full circle into a single honest score for how well your internet connection is actually performing. No new agents and no extra probes: it's the same data you're already storing, read back over a trailing 48-hour window and graded.
