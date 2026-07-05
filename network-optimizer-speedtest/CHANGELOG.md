@@ -1,3 +1,58 @@
+## 2.0.0-beta.2
+
+**This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
+
+This build is beta.1 plus the fixes below.
+
+## Fixes since beta.1
+
+- **Alerts now name their site** - Notifications from a managed (agent-backed) site were indistinguishable from your main site: no site name, and the "View" link ignored the site. Delivered alerts now carry the site name and a link that takes you straight to that site.
+- **Roaming failures rated by success rate** - The roaming-failures health issue flagged any AP pair with a single failed roam and escalated on the raw count, so busy links looked broken. It now fires only when the roam success rate drops below 95% (critical below 90%).
+- **Site switcher lands on the dashboard** - Switching sites via the nav bar site picker while on the All Sites overview now takes you to the new site's dashboard instead of reloading the All Sites list, and nav-ing to a site from an alert link no longer gets you stuck on the linked site.
+- **Fixed a reconnect crash loop** - A console reconnect could throw a dispatcher error that crash-looped the app on several pages (Wi-Fi, Dashboard, Adaptive SQM, Monitoring). Reconnects now refresh cleanly.
+
+## What's New
+
+- **Multi-Site** - Manage multiple networks from one Network Optimizer. Each site is fully isolated: its own database, monitoring, speed tests, alerts, threat intelligence, and UniFi Console connection. Turn it on under **Settings > Multi-Site**.
+- **Agent-backed remote sites** - Add a site on a different network by running a lightweight on-site agent that tunnels back to your main instance. Once connected, that remote site's gateway and device SSH, cable modem / ONT status, WAN and LAN speed tests, SNMP and custom OID polling, path analysis, and Network Tools probes all work - no VPN, no port forwarding. A guided wizard walks you through enrollment.
+- **Per-site everything** - Monitoring, ISP Health, alerts and digests, threat intelligence, path analysis, and InfluxDB buckets are all scoped per site, so one site's data never bleeds into another.
+
+## Also improved for everyone (single-site too)
+
+- **Settings reorganized into tabs** - Connection, Monitoring, Speed Tests, Security & Alerts, Application, and Multi-Site.
+- **Network Tools** - TCP ping now does a real TCP connect to the port (instead of silently falling back to ICMP) from gateway and device vantages; friendlier vantage labels; ping limited to the modes that make sense.
+- **WAN Speed Test** - The gateway (direct) test now raises completion and degradation alerts, with a smoother progress animation.
+- **Polish** - MaxMind GeoIP gets its own Settings card; the pre-setup ISP Health tile links to Upstream Discovery.
+
+## Trying this preview
+
+Pin the beta tag - do not use `:latest`, which stays on stable 1.x. When 2.0 ships for real, switch your image back to `:latest` to rejoin the stable track. Multi-site is off by default, so your single-site experience is unchanged until you enable it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: edit your `docker-compose.yml` to pin the beta tags (since `:latest` stays on stable), then pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:2.0.0-beta.2
+image: ghcr.io/ozark-connect/speedtest:2.0.0-beta.2
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Proxmox** (upgrade an existing LXC install to the beta - rewrites the compose tags, then pulls):
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && sed -i -E 's#(network-optimizer|speedtest):latest#\1:2.0.0-beta.2#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.2 && ./scripts/install-macos-native.sh
+```
+
+When 2.0 ships for real, switch back to the stable track: Docker/Proxmox rewrite the image tags back to `:latest`; macOS `git checkout main && git pull && ./scripts/install-macos-native.sh`.
+
 ## 2.0.0-beta.1
 
 **This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
