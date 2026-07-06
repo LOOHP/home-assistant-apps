@@ -1,3 +1,82 @@
+## 2.0.0-beta.3
+
+**This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
+
+This build is beta.2 plus the fixes below.
+
+## Update your on-site agents with this release
+
+This beta changes the agent tunnel contract, so update each site's agent alongside the server: re-run the install one-liner from **Settings > Multi-Site > (site) > Agents**, or `docker compose pull && docker compose up -d` for Docker agents. The agent list now flags agents running an older release. This churn is a beta thing - after 2.0 ships, agent updates will be rare, and a built-in update system is planned.
+
+## Fixes since beta.2
+
+- **Port Statistics "Client" column on managed sites** - The agent never relayed the SNMP interface index needed to correlate switch ports, leaving the column empty. Fixed.
+- **Phantom gateway ports** - Virtual interfaces could claim real port numbers and names, showing duplicate port rows on gateways. Fixed, and old bad rows heal themselves after upgrading.
+- **Client column in playback** - Scrubbing Port Statistics back in time now shows which client was on which port. History from before this release has no port data, so it fills from upgrade time.
+- **UI freeze switching to a site whose agent is down** - Console calls now fail fast into the "waiting for the agent" state instead of hanging pages for a minute-plus, and reconnect the moment the agent returns.
+- **Monitoring charts after a console outage** - Charts on the Monitoring page stayed blank once the console (re)connected until you switched tabs. They now load on their own.
+- **Optical (SFP / ONT) tables blank after a restart** - The live readings grid now warms itself from recorded data at startup instead of waiting minutes for the next polling cycle.
+- **Site status indicators disagreed** - The site picker, All Sites page, and Multi-Site settings each had their own stale idea of agent status. All now share one live, tunnel-driven definition.
+- **WAN speed tests on agentless managed sites** - The test buttons and links now explain the site's agent is required instead of silently measuring or recording against the wrong network.
+- **2D LAN map fullscreen** - Fixed fullscreen not expanding the 2D topology map.
+- **Monitoring chart polish** - Tooltips on the RTT, Network Performance, and Device Health charts sort by value to match the line order and no longer clip; compacter filter badges and spacing tweaks throughout.
+- **Monitoring deep links before setup** - Now land on Setup instead of an empty page.
+
+## What's New in 2.0
+
+- **Multi-Site** - Manage multiple networks from one Network Optimizer. Each site is fully isolated: its own database, monitoring, speed tests, alerts, threat intelligence, and UniFi Console connection. Turn it on under **Settings > Multi-Site**.
+- **Agent-backed remote sites** - Add a site on another network by running a lightweight on-site agent that tunnels back to your main instance. Gateway/device SSH, modem and ONT status, WAN and LAN speed tests, SNMP and custom OID polling, path analysis, and Network Tools probes all work - no VPN, no port forwarding. A guided wizard handles enrollment.
+- **Per-site everything** - Monitoring, ISP Health, alerts and digests, threat intelligence, path analysis, and InfluxDB buckets are all scoped per site.
+
+## Also improved for everyone (single-site too)
+
+- **Settings reorganized into tabs** - Connection, Monitoring, Speed Tests, Security & Alerts, Application, Multi-Site.
+- **Network Tools** - TCP ping does a real TCP connect from gateway and device vantages; friendlier vantage labels.
+- **WAN Speed Test** - The gateway (direct) test raises completion and degradation alerts.
+
+## WAN speed tests on managed sites
+
+- **Start from the site's agent** - The WAN Speed Test page on an agent-backed site links through the on-site agent (`https://<agent>:3000/wan/`), which forwards to your external test server. Results land in the right site, attributed to the client device's LAN IP - no site parameter in any URL. Picking a non-default server routes through `/wan/<server-id>/` automatically.
+
+## Agent improvements
+
+- **Update callout** - Settings > Multi-Site > Configuration > Agents flags agents running an older release.
+- **Plain-HTTP opt-out** - Set `AGENT_SPEEDTEST_TLS=0` to serve the agent's LAN speed test over HTTP instead of self-signed TLS (for sites behind their own reverse proxy). LAN tests only - the WAN post-back needs HTTPS. Details in the agent README.
+- **Clearer speed test override** - The per-site override field shows the auto-detected agent address as its placeholder, with a gear-icon shortcut from the speed test banner. SFP module codes show their vendor on hover.
+
+## Windows (MSI)
+
+- **Agent tunnel out of the box** - The bundled Traefik config now routes the multi-site agent tunnel, so remote agents can enroll against a Windows-hosted server without manual reverse-proxy work.
+
+## Trying this preview
+
+Pin the beta tag - do not use `:latest`, which stays on stable 1.x. When 2.0 ships for real, switch back to `:latest` to rejoin the stable track. Multi-site is off by default, so your single-site experience is unchanged until you enable it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: edit your `docker-compose.yml` to pin the beta tags (since `:latest` stays on stable), then pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:2.0.0-beta.3
+image: ghcr.io/ozark-connect/speedtest:2.0.0-beta.3
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Proxmox** (upgrade an existing LXC install - best-effort backs up the database, rewrites the compose tags, then pulls). Beta upgrades migrate your database and can't be rolled back to stable 1.x, so snapshot the LXC first:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && cp -n data/network_optimizer.db data/network_optimizer.db.pre-beta3 2>/dev/null; sed -i -E 's#(network-optimizer|speedtest):(latest|2\.0\.0-beta\.[0-9]+)#\1:2.0.0-beta.3#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.3 && ./scripts/install-macos-native.sh
+```
+
+When 2.0 ships for real, switch back to the stable track: Docker/Proxmox rewrite the image tags back to `:latest`; macOS `git checkout main && git pull && ./scripts/install-macos-native.sh`.
+
 ## 2.0.0-beta.2
 
 **This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
