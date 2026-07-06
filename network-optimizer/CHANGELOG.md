@@ -1,3 +1,62 @@
+## 2.0.0-beta.4
+
+**This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
+
+This build is beta.3 plus the fixes below.
+
+## Update your on-site agents with this release
+
+This beta fixes agent-side bugs, so update each site's agent alongside the server: the agent list flags outdated agents and now shows the upgrade one-liner right next to the flag (or `docker compose pull && docker compose up -d` for Docker agents). This churn is a beta thing - after 2.0 ships, agent updates will be rare, and a built-in update system is planned.
+
+## Fixes since beta.3
+
+- **Agents now survive extended server downtime** - If the central server's host was powered off long enough (think hardware maintenance), agents stopped retrying entirely and sat "running" but disconnected until manually restarted: a timed-out heartbeat was mistaken for a shutdown signal. Agents now keep retrying every ~30 seconds for as long as the outage lasts and reconnect promptly when the server comes back.
+- **False packet loss when an agent restarts** - Stopping or updating an on-site agent killed its in-flight pings, and the agent reported them as real packet loss before shutting down - planting a loss spike on the site at every agent update. The agent now shuts down cleanly and discards in-flight probes; stops are also instant instead of hanging for 90 seconds.
+- **Upgrade one-liner in the UI** - The "Update agent" flag in Settings > Multi-Site now shows the copyable upgrade command (enrollment is preserved; only the binaries update).
+- **Smarter transit hop selection in Upstream Discovery** - When a transit network appears twice in your path (ingress near you, egress on the far side), discovery now auto-selects the lowest-latency reachable hop in each run instead of just the first hop it saw - so ISP Health can tell which end of a transit network is misbehaving.
+- **ISP Health speed test load failures are now logged** - If ISP Health can't read your WAN speed test history (for example database contention right after a restart), the Speed vs Plan card could claim "no recent tests" until the next recompute even though tests exist. The failure now logs a warning so it's diagnosable; a fuller fix distinguishing "couldn't read" from "none exist" is planned.
+
+## What's New in 2.0
+
+- **Multi-Site** - Manage multiple networks from one Network Optimizer. Each site is fully isolated: its own database, monitoring, speed tests, alerts, threat intelligence, and UniFi Console connection. Turn it on under **Settings > Multi-Site**.
+- **Agent-backed remote sites** - Add a site on another network by running a lightweight on-site agent that tunnels back to your main instance. Gateway/device SSH, modem and ONT status, WAN and LAN speed tests, SNMP and custom OID polling, path analysis, and Network Tools probes all work - no VPN, no port forwarding. A guided wizard handles enrollment.
+- **Per-site everything** - Monitoring, ISP Health, alerts and digests, threat intelligence, path analysis, and InfluxDB buckets are all scoped per site.
+
+## Also improved for everyone (single-site too)
+
+- **Settings reorganized into tabs** - Connection, Monitoring, Speed Tests, Security & Alerts, Application, Multi-Site.
+- **Network Tools** - TCP ping does a real TCP connect from gateway and device vantages; friendlier vantage labels.
+- **WAN Speed Test** - The gateway (direct) test raises completion and degradation alerts.
+
+## Trying this preview
+
+Pin the beta tag - do not use `:latest`, which stays on stable 1.x. When 2.0 ships for real, switch back to `:latest` to rejoin the stable track. Multi-site is off by default, so your single-site experience is unchanged until you enable it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: edit your `docker-compose.yml` to pin the beta tags (since `:latest` stays on stable), then pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:2.0.0-beta.4
+image: ghcr.io/ozark-connect/speedtest:2.0.0-beta.4
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Proxmox** (upgrade an existing LXC install - best-effort backs up the database, rewrites the compose tags, then pulls). Beta upgrades migrate your database and can't be rolled back to stable 1.x, so snapshot the LXC first:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && cp -n data/network_optimizer.db data/network_optimizer.db.pre-beta4 2>/dev/null; sed -i -E 's#(network-optimizer|speedtest):(latest|2\.0\.0-beta\.[0-9]+)#\1:2.0.0-beta.4#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.4 && ./scripts/install-macos-native.sh
+```
+
+When 2.0 ships for real, switch back to the stable track: Docker/Proxmox rewrite the image tags back to `:latest`; macOS `git checkout main && git pull && ./scripts/install-macos-native.sh`.
+
 ## 2.0.0-beta.3
 
 **This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
