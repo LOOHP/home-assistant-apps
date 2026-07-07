@@ -1,3 +1,75 @@
+## 2.0.0-beta.5
+
+**This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
+
+This build is beta.4 plus the changes below.
+
+## Update your on-site agents with this release
+
+This beta updates the agent's speed test web server with a new identity endpoint that Client Performance uses to recognize devices at remote sites, so update each site's agent alongside the server: the agent list flags outdated agents and shows the upgrade one-liner right next to the flag (or `docker compose pull && docker compose up -d` for Docker agents). This churn is a beta thing - after 2.0 ships, agent updates will be rare, and a built-in update system is planned.
+
+## New in this beta
+
+- **Client Performance works for devices at managed sites** - Opening Client Performance on a remote site used to dead-end at "Device Not Found", since the central server only ever sees the site's public IP. The page now asks the on-site agent who you are and lands straight on your device with full features (live signal, walk-test mapping, speed tests). If the agent can't answer (offline, or your browser hasn't trusted its certificate), you get a device picker instead, remembered per browser.
+- **Telekom Glasfaser-Modem 2 ONT support** - Optical stats (TX/RX power, errors, uptime) for Telekom Germany's Glasfaser-Modem 2 in ONT Device Monitoring, verified on real hardware. Contributed by @Optic00 (#962) - thank you!
+- **HTTPS retrofit for existing Proxmox installs** - New installs have offered automatic HTTPS (Traefik + Let's Encrypt) for a while; existing containers had no way to add it later. Run this on the Proxmox host and follow the prompts (needs a Cloudflare DNS API token):
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/v2.0.0-beta.5/scripts/proxmox/add-https.sh)"
+```
+
+## Fixes since beta.4
+
+- **Agent-run WAN speed test traces** - The path trace for a WAN test run at a remote site's agent either failed ("could not determine server position") or traced to a random device. It now traces from the agent through the site's own gateway and WAN, like the server test does at the main site.
+- **ISP Health: outage break attribution rebuilt** - "Break upstream of X" could name a target that isn't on the traced path at all, an internet endpoint (everything is upstream of a destination), or a clean sibling transit branch while the loss sat elsewhere. Attribution now only anchors on trace-mapped path hops with everything nearer verified clean, names the lossy network's ASN when no clean boundary exists, and says "Path-wide" when the loss picture has no single culprit.
+- **ISP Health: brief total outages no longer read "Partial loss"** - A short sharp outage that straddled detection bucket edges landed in the partial-loss pass and undersold itself. When the loss hit the blackout threshold on essentially every monitored hop, the event now reads "Total loss / Path-wide total loss".
+- **ISP Health: coalesced outages read whole-WAN correctly** - An outage window padded by gap-bridging could dilute every hop's dark time below the attribution threshold, so an everything-went-dark event claimed a break "upstream of" the deepest hop. Darkness is now measured against the outage's own dark span, immune to padding.
+- **Agent WAN test progress text** - The status line under the progress bar during an agent-run WAN test just repeated the progress bar's own label, so it's gone. The result summary still appears when the test completes.
+
+## What's New in 2.0
+
+- **Multi-Site** - Manage multiple networks from one Network Optimizer. Each site is fully isolated: its own database, monitoring, speed tests, alerts, threat intelligence, and UniFi Console connection. Turn it on under **Settings > Multi-Site**.
+- **Agent-backed remote sites** - Add a site on another network by running a lightweight on-site agent that tunnels back to your main instance. Gateway/device SSH, modem and ONT status, WAN and LAN speed tests, SNMP and custom OID polling, path analysis, and Network Tools probes all work - no VPN, no port forwarding. A guided wizard handles enrollment.
+- **Per-site everything** - Monitoring, ISP Health, alerts and digests, threat intelligence, path analysis, and InfluxDB buckets are all scoped per site.
+
+## Also improved for everyone (single-site too)
+
+- **Settings reorganized into tabs** - Connection, Monitoring, Speed Tests, Security & Alerts, Application, Multi-Site.
+- **Network Tools** - TCP ping does a real TCP connect from gateway and device vantages; friendlier vantage labels.
+- **WAN Speed Test** - The gateway (direct) test raises completion and degradation alerts.
+
+## Trying this preview
+
+Pin the beta tag - do not use `:latest`, which stays on stable 1.x. When 2.0 ships for real, switch back to `:latest` to rejoin the stable track. Multi-site is off by default, so your single-site experience is unchanged until you enable it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: edit your `docker-compose.yml` to pin the beta tags (since `:latest` stays on stable), then pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:2.0.0-beta.5
+image: ghcr.io/ozark-connect/speedtest:2.0.0-beta.5
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Proxmox** - new install? Run the standard installer first (creates the LXC on stable, with optional automatic HTTPS), then pin the beta with the one-liner below:
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+Upgrade to the beta (new and existing installs - best-effort backs up the database, rewrites the compose tags, then pulls). Beta upgrades migrate your database and can't be rolled back to stable 1.x, so existing installs should snapshot the LXC first:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && cp -n data/network_optimizer.db data/network_optimizer.db.pre-beta5 2>/dev/null; sed -i -E 's#(network-optimizer|speedtest):(latest|2\.0\.0-beta\.[0-9]+)#\1:2.0.0-beta.5#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.5 && ./scripts/install-macos-native.sh
+```
+
+When 2.0 ships for real, switch back to the stable track: Docker/Proxmox rewrite the image tags back to `:latest`; macOS `git checkout main && git pull && ./scripts/install-macos-native.sh`.
+
 ## 2.0.0-beta.4
 
 **This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
