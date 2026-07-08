@@ -1,3 +1,53 @@
+## 2.0.0-beta.6
+
+**Preview (beta) build of Network Optimizer 2.0 (with new Multi-Site support) for testers.** Pin the tag below - `:latest` stays on stable 1.x. Feedback welcome.
+
+Beta.5 plus the below. Already on beta.5? No agent update needed, nothing changed on the agent. Coming from an earlier beta, update your site agents as beta.5 described.
+
+## New in this beta
+
+- **Transit route changes don't count against your access line** - When a transit or backbone network on your path goes fully unreachable for more than a few minutes, that's a routing (BGP) change, not your access line dropping packets. ISP Health now carves that window out of your access-layer Packet Loss and shows it as a path change on the timeline and RTT chart. The network's own health still reflects it; brief flaps and lossy-but-reachable transit still count as loss.
+- **"That was me" on outages** - Mark your own maintenance (pulled the coax to add a splitter, unplugged a fiber to clean the connector, swapped gear) so it doesn't count against your ISP Health score. On each outage and its finding, with undo. Remembered per site.
+
+## Also improved
+
+- **Pull to refresh on ISP Health** - Pull down on the tab to recompute the scorecard instead of reloading the page.
+
+## Fixes since beta.5
+
+- **Mobile top bar** - Scrolling up reliably reveals it and keeps it visible.
+- **Mobile site switcher** - No longer goes tap-dead after the top bar auto-hides.
+- **ISP Health findings on mobile** - Cleaned up cramped, mislaid cards on narrow screens.
+
+New to the 2.0 beta? See the [beta.5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0-beta.5) for the Multi-Site overview.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: pin the beta tags in `docker-compose.yml` (since `:latest` stays on stable), then pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:2.0.0-beta.6
+image: ghcr.io/ozark-connect/speedtest:2.0.0-beta.6
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Proxmox** - new install? Run the standard installer first, then pin the beta below:
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+Upgrade (new and existing). Beta upgrades migrate your database and can't roll back to stable 1.x, so snapshot the LXC first:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && cp -n data/network_optimizer.db data/network_optimizer.db.pre-beta6 2>/dev/null; sed -i -E 's#(network-optimizer|speedtest):(latest|2\.0\.0-beta\.[0-9]+)#\1:2.0.0-beta.6#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.6 && ./scripts/install-macos-native.sh
+```
+
 ## 2.0.0-beta.5
 
 **This is a preview (beta) build of Network Optimizer 2.0 for testers.** Pin the tag below - do not use `:latest`, which stays on stable 1.x. The headline is Multi-Site, and there's plenty here for single-site users too. Feedback very welcome.
