@@ -1,3 +1,56 @@
+## 2.0.0-beta.7
+
+**Preview (beta) build of Network Optimizer 2.0 (with new Multi-Site support) for testers.** Pin the tag below - `:latest` stays on stable 1.x. Feedback welcome.
+
+Beta.6 plus the below. Already on beta.6? No agent update needed, nothing changed on the agent. Coming from an earlier beta, update your site agents as beta.5 described.
+
+## Wi-Fi Channel Optimizer
+
+- **Soaking APs hold their channel** - A soaking AP keeps its channel for the full soak window, so toggling DFS no longer bumps it mid-measurement.
+- **Others avoid a soaking channel** - The optimizer keeps other APs off a channel a soaking AP is holding, and tags mesh children of a soaking leader.
+- **Band-aware escape from a bad channel** - A soaking AP can leave a genuinely congested channel early, at per-band airtime thresholds (2.4 GHz 60%, 5 GHz 50%, 6 GHz 45%) instead of a flat 70%.
+
+## Multi-Site
+
+- **External sites need a live agent to probe** - Upstream Discovery and adding Latency Targets require a connected on-site agent; default internet targets seed disabled and auto-enable on first agent deploy.
+- **Clearer WAN gateway test status** - When Gateway (Direct) can't run, the reason shows below the option (not just a badge) and links to the right Settings page.
+- **LAN Speed Test respects managed sites** - No agent locks out the tests with a setup pointer, and the server iperf3 version badge is hidden (the test runs on the agent).
+- **Per-site schedule reminder** - On managed sites the schedule banner notes that schedules are per site.
+
+## Fixes since beta.6
+
+- **Clearer agent-offline wording** - Speed Test, Monitoring Tools, and WAN Steering say tests "can resume when the agent reconnects" rather than implying they auto-run.
+- **LAN Speed Test polish on managed sites** - The device list now populates on its own when the agent reconnects (no manual Refresh), no SSH-warning flash on load, connection and setup warnings stay readable while the section is locked, and it degrades gracefully if the gateway status can't be read.
+
+New to the 2.0 beta? See the [beta.5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0-beta.5) for the Multi-Site overview.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: pin the beta tags in `docker-compose.yml` (since `:latest` stays on stable), then pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:2.0.0-beta.7
+image: ghcr.io/ozark-connect/speedtest:2.0.0-beta.7
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Proxmox** - new install? Run the standard installer first, then pin the beta below:
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+Upgrade (new and existing). Beta upgrades migrate your database and can't roll back to stable 1.x, so snapshot the LXC first:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && cp -n data/network_optimizer.db data/network_optimizer.db.pre-beta7 2>/dev/null; sed -i -E 's#(network-optimizer|speedtest):(latest|2\.0\.0-beta\.[0-9]+)#\1:2.0.0-beta.7#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.7 && ./scripts/install-macos-native.sh
+```
+
 ## 2.0.0-beta.6
 
 **Preview (beta) build of Network Optimizer 2.0 (with new Multi-Site support) for testers.** Pin the tag below - `:latest` stays on stable 1.x. Feedback welcome.
