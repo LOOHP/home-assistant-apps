@@ -1,3 +1,62 @@
+## 2.0.0-beta.8
+
+**Preview (beta) build of Network Optimizer 2.0 (with new Multi-Site support) for testers.** Pin a beta tag below - `:latest` stays on stable 1.x. Feedback welcome.
+
+Beta.7 plus the below. Already on beta.5 or later? No agent update needed, nothing has changed on the agent since beta.5. Coming from an earlier beta, update your site agents as beta.5 described.
+
+## Site Licensing
+
+2.0 introduces license keys. The short version: personal, non-commercial use on up to 3 sites stays exactly as it is - free, no key, no account, and the app never phones home. That is most of you, and that is by design.
+
+- **License keys** - Commercial use takes a license key (at any site count), and so does going past 3 sites. Keys go in under Settings > Application > Licensing; they stack, cover a set number of sites, and come in perpetual and term flavors, with per-site coverage assignment and status on the Sites page. No accounts, ever - just keys.
+- **Grace, not cliffs** - An expired key gives its sites a 10-day grace period with a countdown banner before anything is restricted. Restriction only stops new operations and stats collection; all historic data stays viewable, and entering a new key restores everything within seconds.
+- **Built for self-hosters** - Entitlements are signature-verified and cached locally, so a license server outage can never disable your sites. Perpetual keys confirm once about a month after activation and then never phone home again.
+- **Firewall note** - Activating or renewing a key makes an outbound HTTPS request to `licensing.ozarkconnect.net`; strict egress rules need 443 allowed to that hostname. Free-tier installs never make this connection.
+
+## WAN Speed Test
+
+- **ISP Health score in the header** - Your ISP Health score now shows right where you run tests, auto-refreshing as results land.
+- **Smarter sparse-data scoring** - ISP Health tops up to 4 WAN speed samples from before its window, so a quiet couple of days does not blank the throughput factor.
+- **No empty score flash on managed sites** - ISP Health and the header tile wait for the site's UniFi Console connection before computing.
+
+## Monitoring
+
+- **Live View and LAN flow map self-heal** - Both now recover on their own when a site's console connects after the page loads, instead of staying empty until a refresh.
+
+## Fixes
+
+- **Small fixes** - Speed results with no direction show a dash instead of a blank, and the mobile nav logout is icon-only so it fits the bar.
+
+New to the 2.0 beta? See the [beta.5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0-beta.5) for the Multi-Site overview.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**: new for beta.8 - a rolling `:beta` tag. Set it once and every future beta is just a pull:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:beta
+image: ghcr.io/ozark-connect/speedtest:beta
+```
+```bash
+docker compose pull && docker compose up -d
+```
+Prefer to hold a specific build? Pin `2.0.0-beta.8` instead.
+
+**Proxmox** - new install? Run the standard installer first, then pin the beta below:
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+```
+Upgrade (new and existing installs). Beta upgrades migrate your database and can't roll back to stable 1.x, so snapshot the LXC first. This pins the rolling `:beta` tag, so future betas are just a pull:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && cp -n data/network_optimizer.db data/network_optimizer.db.pre-beta8 2>/dev/null; sed -i -E 's#(network-optimizer|speedtest):(latest|beta|2\.0\.0-beta\.[0-9]+)#\1:beta#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+**macOS** (native):
+```bash
+cd NetworkOptimizer && git fetch --tags && git checkout v2.0.0-beta.8 && ./scripts/install-macos-native.sh
+```
+
 ## 2.0.0-beta.7
 
 **Preview (beta) build of Network Optimizer 2.0 (with new Multi-Site support) for testers.** Pin the tag below - `:latest` stays on stable 1.x. Feedback welcome.
