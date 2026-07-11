@@ -24,9 +24,11 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 
 Genuinely, thank you so much to everybody for taking the time to use Network Optimizer and have it find a place on your network(s). It really means a lot to receive all of the bug reports, feature requests, feedback, support, and donations from everybody. Totally a whole new experience from writing code in a dayjob, and it greatly motivates me to keep on going!
 
-## Multi-Site Support Is in Development
+## Multi-Site Support
 
-Multi-site support is almost ready! Please see this thread if you'd like to help test it or need a trial license for multiple sites: https://github.com/Ozark-Connect/NetworkOptimizer/discussions/954
+Whether you run an MSP with a book of client networks, a few business locations, or your own place plus a handful you keep an eye on, you can now manage all of them from one Network Optimizer. Each site runs a lightweight on-site agent that dials home over a single outbound HTTPS tunnel: no inbound access to the site, nothing to port-forward, works fine behind CGNAT. Every site gets the full treatment from the central dashboard: ISP Health scoring and path analysis, security audits, Wi-Fi and channel optimization, Adaptive SQM, performance tweaks, and LAN, WAN, and client speed tests, with the agent proxying that site's probing, SNMP, UniFi Console, and device SSH over the tunnel and each site's data kept its own. The [agent guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/src/NetworkOptimizer.Agent/README.md) walks through installing an agent.
+
+**Licensing and firewalls:** Personal, non-commercial use on up to 3 sites is free - no key, nothing phones home. Commercial use or more than 3 sites requires a license key (Settings > Application > Licensing); for licensing or a trial key, contact tj@ozarkconnect.net. Activating a key makes an outbound HTTPS request to `licensing.ozarkconnect.net`, so allow HTTPS (443) to that hostname if you run strict egress rules. A license server outage never disables your sites - entitlements are cached and verified locally.
 
 ## New: ISP Health
 
