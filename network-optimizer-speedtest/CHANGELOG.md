@@ -1,3 +1,75 @@
+## 2.0.1
+
+More multi-site fixes and hardening. See the [v2.0.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0) for the multi-site launch and the rest of the feature set.
+
+**Multi-Site Agent update:** this release updates the On-Site Agent - update it on each external site (re-run the agent install script, or use the in-app update prompt). One-time for this release, not every release.
+
+## Multi-Site
+
+- **Per-tab site context** - each browser tab pins its own site via a `?site=` URL, so you can keep different sites open in different tabs at once.
+- **Alert "View" links open the site the alert came from** (including the main site), pinning only that tab instead of the browser-wide default.
+- **Site name shown next to the Dashboard header** when multi-site is enabled.
+
+### On-Site Agent
+
+**Monitoring**
+
+- **External sites keep collecting through tunnel and WAN outages.** The agent buffers probe and SNMP data while the tunnel is down and replays it on reconnect, with end-to-end acks so nothing is silently lost. Charts backfill the gap automatically.
+- **Alerts aren't silently suppressed by agent clock skew** - if an external site's agent host clock is off, its samples could look too old and quietly skip alerting; that's now surfaced instead of silent.
+
+**Console & SSH Proxy**
+
+- **Switching to an offline external site is instant, not a hang** - a dead tunnel is detected fast and the site shows a "waiting for the site's agent" banner instead of freezing.
+- **The Ignore-SSL-errors setting is shown as forced-on** for agent-connected consoles (it can't apply through the tunnel), instead of a toggle that does nothing.
+- **Agent-owned dial policy** - the proxy only dials site-local addresses by default, with an optional `proxyAllowedCidrs` pin and an agent-side dial audit log.
+
+## Monitoring
+
+### ISP Health
+
+- **Path-shift detection accepts noisy transition windows** - a step whose transition median dips just outside the band is no longer discarded.
+
+### Network Performance
+
+- **Flaky LAN target advisory** - a dismissible hint on LAN latency charts when a non-gateway/non-AP device shows loss that's usually a measurement artifact (roaming, ping deprioritization), linking to its target row. Gateways and APs excluded.
+
+## Fixes
+
+- **Mobile scroll no longer locks up after backgrounding,** and the top bar's hide/reveal is smoother.
+- **Returning to the app on mobile keeps your place** - a backgrounded app used to go back to the homepage/dashboard when resuming, now it correctly returns to where you left off
+- **Dismissed "install as an app" and channel-analysis banners stay dismissed** across site switches.
+- **Live WAN chart no longer clips hover tooltips** at its edges.
+- **2D Flow Map** fits devices tighter on the canvas instead of behind the scrubber bar.
+- **ONT external refresh button** disables with a spinner while polling, preventing double-taps.
+- **Per-device SSH:** setting a key path clears any stored password; a blank password on edit means "keep," not "clear."
+
+## Installation
+
+On a beta build? See "Switching from a beta build" in the [v2.0.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0) to get back on the stable track.
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.0.0-beta.8
 
 **Preview (beta) build of Network Optimizer 2.0 (with new Multi-Site support) for testers.** Pin a beta tag below - `:latest` stays on stable 1.x. Feedback welcome.
