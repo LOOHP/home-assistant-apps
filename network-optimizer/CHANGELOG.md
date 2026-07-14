@@ -1,3 +1,61 @@
+## 2.0.2
+
+More fixes and a couple of nice additions, mostly around Monitoring's Upstream path discovery. See [v2.0.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0) for what's new in v2.0.
+
+## Client Performance
+
+- **Simplified view for VPN clients** - Tailscale, UniFi Teleport, and UniFi One-Click / S2S VPN clients now get their own dashboard: name, IP, both speed-test buttons, live results, speed map, and path traces.
+- **Clearer "device not found" copy** - distinguishes "console unreachable" from "console fine, device just isn't listed yet," and shows the detected address.
+
+## Monitoring
+
+- **Right access ISP on silent first miles** - some fiber/PPPoE first miles don't announce themselves, which let Upstream path discovery crown the wrong provider (in one case a DNS resolver's edge). It now anchors on your gateway's WAN address, and those first-mile hops become monitorable targets.
+- **"Did you switch internet providers?"** - when your access ISP actually changed, Upstream path discovery asks; confirm and it pauses the old targets and adopts the new path in one save.
+- **Off-path transit networks get cleaned up** - when your ISP re-routes, targets for a transit network you no longer use are surfaced for pausing instead of dragging down ISP Health. Nothing is deleted.
+- **First-mile device picks the real WAN gateway** - on a shared WAN segment it no longer reads the device from an unrelated same-subnet neighbor.
+- **Flaky monitoring targets advisory clears on recovery** - a flagged target drops off once its monitoring is clean again (about half an hour for a target that was fully down) instead of nagging for up to two days.
+- **Flaky monitoring targets advisory on ISP Health** - the advisory now also appears on the ISP Health tab where the score lives, not just Live View.
+
+## LAN Speed Test
+
+- **Speed map auto-fit** - a new result or a time-range change brings the visible results back into view, unless you've manually panned or zoomed. Applies to the Client Performance speed map too.
+
+## Multi-Site
+
+- **Current site opens its dashboard** - clicking the site you're already on now opens it instead of doing nothing. Ctrl/cmd/shift/middle-click still opens a new tab.
+- **Cold managed-site connection** - shows the device picker right away and auto-loads once the on-site agent's tunnel comes up, instead of stranding you until a manual refresh.
+- **Cleaner logs on agent sites** - ONT, cable modem, and cellular modem poll logs name the configured device host instead of the internal tunnel loopback; agent version labels drop the `+build` suffix.
+
+## Fixes
+
+- **Break out of a wedged reconnect spinner** - if "Reconnecting..." gets stuck and never clears, the app now probes the server and reloads once it answers.
+- **Settings polish** - darker row hover so rows read differently from buttons, dark chrome on native form controls, and the site-name field focuses when you click edit.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.0.1
 
 More multi-site fixes and hardening. See the [v2.0.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0) for the multi-site launch and the rest of the feature set.
