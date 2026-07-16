@@ -1,3 +1,93 @@
+## 2.1.0
+
+**On-Site Agent update (optional):** this release includes a small agent update that fixes one minor bug - client speed tests run from an external site could log the IPv4-mapped (`::ffff:`) form of a client's address instead of its real IP. It's not critical, so update the agent on your external sites whenever it's convenient (re-run the install script, or use the in-app update prompt). Nothing else needs it.
+
+Network Optimizer has been in production for over seven months and runs on roughly 15,000 networks today, mostly power users looking after their own homes and their family's. It has always had MSP-grade capabilities - deep monitoring, ISP Health, security auditing, alerting - that those power users found cool. Multi-Site is the newest piece, and 2.1 is where it comes together: self-healing console connections, first-class alerts when a UniFi Console or On-Site Agent drops, and a real site lifecycle (add, pause, remove) make it a genuinely viable way to manage every network you touch from one instance. Around that, 2.1 adds native Starlink dish monitoring, support for two devices that share one management IP across different WANs, and a round of Wi-Fi Optimizer and client-identification fixes. For what came before, see [v2.0.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0) and the [v2.0.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.1) / [v2.0.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.2) patches.
+
+## What's New
+
+- **Multi-Site, rounded out** - Built on a single-site core with 7+ months in production, Multi-Site now has the operational pieces to run on day to day - connections that recover on their own, alerts when a console or agent goes offline, and a full site lifecycle - making Network Optimizer a viable way to manage many networks, not just your own. Still off by default and free for personal use on up to 3 sites.
+- **Native Starlink monitoring** - First-class health for Starlink dishes: a live dashboard card with an obstruction sky map, a dedicated Monitoring tab with history, and ISP Health scoring built on what only the dish knows. Works at external sites over the agent tunnel too.
+- **Monitor duplicate management IPs** - Two devices that answer at the same IP on different WANs (a common one is an ONT or cable modem sharing 192.168.100.1 with a Starlink dish on another WAN) can now both be monitored, using a per-interface alias IP on the gateway.
+- **Self-healing console connections** - A UniFi Network restart, upgrade, or brief outage no longer takes your console connection down. Previously it stayed down until you re-saved the connection in Settings or restarted Network Optimizer; now it re-validates and recovers on its own, usually within a minute.
+
+## Multi-Site
+
+- **Disable / Remove Site** - A new section in each site's Configuration panel (Settings - Multi-Site). Disable stops that site's monitoring and console connection immediately and hides it from the site switcher, keeping all data so you can re-enable it in place later. Remove is permanent and behind a double confirmation: it deletes the site, its database, and its agent enrollments, and frees the license seat. InfluxDB buckets are deliberately left in place (removing them needs the admin token, which is never stored), and the confirmation tells you so. Both actions are blocked for the default site and the site you're currently viewing.
+- **Clearer feedback during site creation** - The provisioning spinner now actually shows while a new site is being built, so you can see it working instead of wondering whether your click registered, and a re-entrancy guard swallows the double-click that could previously create a duplicate "-2" copy.
+- **Add Site lands on the form** - The + card on the Sites page now scrolls the add form into view with the name field focused, instead of just opening the settings tab.
+- **Live site switcher** - The switcher rebuilds in every open browser tab when sites are created, renamed, enabled, disabled, or removed, instead of waiting for a page reload. It also gained keyboard support: Escape closes it, Up/Down move through sites, Enter or Space selects.
+
+## Monitoring
+
+### Starlink Dish / Terminal Monitoring
+
+- **Starlink Stats dashboard card** - A live panel centered on the obstruction sky map, rendered from the dish's own 123x123 SNR grid so blockages appear exactly where they sit in the sky. Alongside it: sky-obstruction percentage, dish-side packet loss, power draw, negotiated Ethernet speed, uptime, GPS fix, last outage, and any active dish alerts. Present by default with a configure prompt when no dish is set up, matching the Cable Modem and ONT cards.
+- **Starlink Stats monitoring tab** - A new tab to the right of Cellular Stats with history charts for power draw, dish ping-drop rate, sky obstruction, outage seconds, GPS satellite count, and alignment offset. Supports multiple dishes.
+- **ISP Health scoring for satellite WANs** - For any WAN set to the Satellite access technology, Starlink becomes the Physical Link source, scored on sky obstruction, dish-to-ground packet loss, and outage burden, with caps for thermal shutdown, tilt, water intrusion, and persistently low SNR. A slow-negotiated Ethernet link is surfaced as advice rather than counted against the ISP.
+- **Set it up under Settings - Starlink Monitoring** - Add and manage dishes (host defaults to 192.168.100.1, port 9200) with a connection test. No credentials needed, since the dish's local API is unauthenticated. We deliberately leave latency and throughput out of this feature: the monitoring pipeline already measures RTT and WAN speed with better fidelity, so Starlink Stats tracks only what the dish uniquely reports.
+
+### General
+
+- **Show or hide hardware stat tabs per site** - The CM Stats, ONT Stats, Cellular Stats, and Starlink Stats tabs each get a "Show this tab in Monitoring" toggle in their Settings section. All stay visible by default; hiding one just drops it from the Monitoring nav for that site, so a site that only has a cable modem isn't carrying tabs it can't use. Switching to a site that hides your current tab lands you on the default tab instead of a stranded one.
+- **Stat cards link only when there's something to view** - The Cable Modem Stats, ONT Stats, Cellular Stats, and Starlink Stats dashboard cards are whole-card links only when a device is actually configured. With nothing to show, the card keeps its own Configure button instead of bouncing you to an empty tab.
+- **Cleaner jumps between Settings and Monitoring** - A link icon next to each hardware monitoring card title (Cable Modem, ONT, Cellular, Starlink) opens the matching tab, and ONT Device Monitoring now explains when an SFP ONT should be read off the gateway port via Set ONT on the SFP Stats tab instead.
+
+### Monitoring Interfaces
+
+- **Alias IP for duplicate management IPs** - Monitoring Interfaces can now poll a device through an alias IP, so two devices sharing the same management address on different WANs (for example an ONT and a Starlink dish both answering at 192.168.100.1) can both be monitored at once. Set an alias on one interface and the gateway translates for it (policy routing plus DNAT out that interface's own path), while the other device keeps the plain address and UniFi's own native dashboards stay untouched. Deploys are gated by subnet-overlap and mark/table ownership checks so it never collides with UniFi's own routing, and each interface holds a stable MAC across gateway reboots. Verified on real dual-WAN hardware.
+
+## UniFi Console Connection
+
+- **API key connections self-heal after a Network restart or upgrade** - While the UniFi Network application restarts, upgrades, or wedges, its proxy answers with 401/403 even though your API key is still valid. The client used to read that as a revoked key and permanently stop calling the console, so Wi-Fi Optimizer, Config Optimizer, Security Audit, Threat Intelligence, and SNMP detection all went dark until you re-saved the connection in Settings or restarted Network Optimizer. It now re-validates the key instead (throttled to one probe a minute, so a genuinely revoked key stays cheap) and recovers on its own within a minute of the console coming back.
+- **Reverse-proxied consoles recover from gateway errors** - Connections through a reverse proxy now self-heal on 502, 503, and 504 the same way they already did on 401 and 403.
+- **The default site auto-reconnects after a transient outage** - A brief blip no longer leaves the main site's console connection down until you touch it.
+
+## Alerts & Schedule - Rules
+
+- **UniFi Console connection alerts** - New `console.connection_failed` (Warning) and `console.connection_restored` (Info) event types, per site, armed only after a first successful connection so setup-time failures never alert. A 30-minute failure cooldown keeps a flapping console upgrade to a single alert.
+- **On-Site Agent alerts** - New `agent.offline` (Warning) fires when an enrolled agent has been continuously offline for 3 minutes, paired with `agent.reconnected` (Info). Judged by the same live definition the UI uses, so routine agent redeploys and brief tunnel bounces stay silent, and single-site installs without an agent never see rules they can't use. Both sets deliver through your existing Notification Channels.
+
+## Wi-Fi Optimizer
+
+- **Wi-Fi-less gateways no longer show up as empty access points** - A UXG-Fiber (or any gateway without integrated Wi-Fi) could appear in the Wi-Fi Optimizer as an access point with zero clients and then trip a false "Significant Load Imbalance," because some firmware reports phantom radio entries for radio-less gateways. Gateway Wi-Fi capability is now decided by model against a curated list of the gateways that genuinely have Wi-Fi, so gateway-only hardware is treated correctly and real Wi-Fi gateways (including an Express uplinked as an AP) behave exactly as before.
+- **No more channel moves onto a measurably-worse channel** - The recommender no longer moves an AP onto a channel its own radio measured as worse (a louder noise floor or more airtime) when the move buys no co-channel relief for your own APs. It only ever holds an AP in place, so it can't create new churn, and a move that genuinely unsticks a collision among your own APs still goes through.
+- **Re-scan prompt when a stale scan is steering the advice** - When an AP's spectrum scan is 3+ days old and that aging reading is actually holding or deciding a channel while nearby networks no longer corroborate it, the channel recommendations now offer a Re-scan option. It stays quiet when a fresh scan wouldn't change the answer. Scan age now comes from the console's real scan timestamp, so staleness is accurate.
+
+## Client Performance
+
+- **Devices resolve when clients arrive as IPv4-mapped IPv6** - On a dual-stack setup, an IPv4 client can be accepted as the IPv4-mapped form `::ffff:10.x.x.x`, which never matched the console's plain-IPv4 client list. Where that happened, the page showed "Device Not Found" with a `::ffff:`-prefixed address, and stored speed-test results under the mapped address with the wrong LAN/WAN label and no device correlation. Client addresses are now normalized to plain IPv4 everywhere they're captured, including the on-site agent's whoami path, so those devices resolve, speed tests store the real IP with the correct label and attach to the right client's speed history, and a data migration cleans up existing `::ffff:` results for display. Genuine IPv6 clients are never altered.
+
+## Fixes
+
+- **Clearer agent alert names** - An agent that's simply named "agent" no longer shows a redundant quoted name in its alerts, and pasted console URLs in Settings - Monitoring are trimmed to the bare host.
+- **Settings polish** - Form help text is a touch larger and more legible across the settings forms.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.0.2
 
 More fixes and a couple of nice additions, mostly around Monitoring's Upstream path discovery. See [v2.0.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.0.0) for what's new in v2.0.
