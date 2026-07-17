@@ -1,3 +1,60 @@
+## 2.1.1
+
+A focused round of ONT monitoring, Starlink handling, and Wi-Fi channel improvements. See the [v2.1.0 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.1.0) for the bigger picture.
+
+## Monitoring
+
+### ONT Stats
+- **Nokia XS-010X-Q** support - reads optical power and device info over its web interface (thanks @jakerobb for the traces).
+- **ONT temperature alert** - fires when a monitored ONT reports a temperature over the limit.
+- **ONT Alert Thresholds** - a new card to set the ONT temperature and RX-power limits.
+
+### SFP Stats
+- Empty RX / TX / Temp columns now explain themselves: the module isn't reporting DDM. If it's an ONT, monitor it directly instead.
+
+### Monitoring Interfaces
+- Selecting a **Starlink WAN** now steers you to native Starlink Stats instead of a monitoring interface, detected by ISP rather than WAN name (thanks @Optic00).
+
+## Alerts & Schedule - Rules
+- **Threshold shortcuts** - the SFP, ONT, and Device temperature rules link straight to the card that configures their limits.
+- The SFP power alerts are renamed **SFP: RX Power Low** and **SFP: TX Power High** (they cover Active Ethernet and other optical modules, not just PON).
+
+## Wi-Fi Optimizer - Channels
+- The optimizer never moves an AP onto a measurably-worse channel, and channel scores are now on a real, readable scale.
+
+## Fixes
+- **LAN flow map** - corrected the throughput direction shown for hypervisor/server nodes.
+- **Multi-site** - new default alert rules now enable on secondary sites that already run the matching monitoring.
+- **UI tables** - action buttons stay readable on row hover and inside nested cards.
+
+## Coming soon
+- **Multi-WAN ISP Health and Monitoring** - a lot of the groundwork landed here; full support is likely the next minor release.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.1.0
 
 **On-Site Agent update (optional):** this release includes a small agent update that fixes one minor bug - client speed tests run from an external site could log the IPv4-mapped (`::ffff:`) form of a client's address instead of its real IP. It's not critical, so update the agent on your external sites whenever it's convenient (re-run the install script, or use the in-app update prompt). Nothing else needs it.
