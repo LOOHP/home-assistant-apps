@@ -20,7 +20,7 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 [![GitHub Stars](https://img.shields.io/github/stars/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/stargazers)
 [![License](https://img.shields.io/badge/license-BSL_1.1-green)](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/LICENSE)
 
-**[Quick Start](#quick-start-linux-docker)** • **[Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md)** • **[Releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases)**
+**[Website](https://ozarkconnect.net/network-optimizer)** • **[Quick Start](#quick-start-linux-docker)** • **[Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md)** • **[Releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases)**
 
 ## THANK YOU to all of my Sponsors
 
@@ -32,7 +32,7 @@ Whether you run an MSP with a book of client networks, a few business locations,
 
 Already run a site-to-site VPN to a location? Onboard it with no agent at all and still get a solid floor: security audits, Wi-Fi and channel optimization, performance tweaks, Adaptive SQM, WAN steering, and SNMP device health, straight over the VPN. Deploy the agent when you also want that site's monitoring and performance layer - ISP Health, path discovery, latency and loss, and speed tests - or for any site the VPN doesn't reach. The [agent guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/src/NetworkOptimizer.Agent/README.md) walks through installing one.
 
-**Licensing and firewalls:** Personal, non-commercial use on up to 3 sites is free - no key, nothing phones home. Commercial use or more than 3 sites requires a license key (Settings > Application > Licensing); for licensing or a trial key, contact tj@ozarkconnect.net. Activating a key makes an outbound HTTPS request to `licensing.ozarkconnect.net`, so allow HTTPS (443) to that hostname if you run strict egress rules. A license server outage never disables your sites - entitlements are cached and verified locally.
+**Licensing and firewalls:** Personal, non-commercial use on up to 3 sites is free - no key, nothing phones home. Commercial use or more than 3 sites requires a license key (Settings > Application > Licensing); see [licensing details and pricing](https://ozarkconnect.net/network-optimizer/licensing), then contact tj@ozarkconnect.net for a license or trial key. Activating a key makes an outbound HTTPS request to `licensing.ozarkconnect.net`, so allow HTTPS (443) to that hostname if you run strict egress rules. A license server outage never disables your sites - entitlements are cached and verified locally.
 
 ## New: Starlink Monitoring
 
