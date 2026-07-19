@@ -1,3 +1,90 @@
+## 2.2.0
+
+The headline: the On-Site Agent can now run directly on the site's UniFi gateway, so a monitoring-only site doesn't need a separate box for it. Plus a synced Live View timeline, sharper ISP/Transit loss, two Security Audit false-positive fixes, and SNMP credential self-healing.
+
+## What's New
+
+Catching up the v2.1 line, in case you're coming from v2.0.x (see the [v2.1.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.1.0) / [v2.1.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.1.1) notes for detail):
+
+- **Multi-Site, rounded out** - self-healing UniFi Console connections, first-class alerts when a console or On-Site Agent drops, and a real site lifecycle (add, disable, remove) - enough to run every network you touch from one instance.
+- **Native Starlink monitoring** - a live dashboard card with an obstruction sky map, a dedicated Starlink Stats tab with history, and ISP Health scoring built on what only the dish knows. Works at external sites over the agent tunnel.
+- **Monitor duplicate management IPs** - two devices answering at the same address on different WANs (classically an ONT and a Starlink dish both at 192.168.100.1) can now both be monitored, via a per-interface alias IP on the gateway.
+- **Nokia XS-010X-Q ONT support** - reads optical power and device info over the ONT's web interface, with a temperature alert and configurable thresholds.
+- **Channel optimizer on a real scale** - the optimizer never moves an AP onto a measurably-worse channel, and channel scores are now readable.
+
+## Multi-Site
+
+**The On-Site Agent can now run directly on the site's UniFi gateway** - any current UniFi OS gateway (UCG, UXG, UDM, UDR, EFG lines). Monitoring-only by design: hosting a speed-test server on the router would compete with the data plane. The Set up agent wizard generates a third one-liner alongside Docker and bare metal. It installs to `/data` (persists on UniFi OS) with a memory-fenced systemd unit that holds a ~50 MB footprint, so it can never pressure routing or IPS. Free memory is the only check; there's no model gate. Re-running the command upgrades in place or reinstates the service after a firmware update, and `--uninstall` gives clean teardown.
+
+- **Speed-test surfaces adapt** - a gateway-resident agent hosts no speed-test listener, so the LAN, WAN, and client speed-test pages explain how to add a separate agent box for testing instead of pointing at the router.
+
+## Monitoring
+
+### ISP Health
+
+- **Outages that began before the view window** - an outage already in progress when a view opened was clipped to its recovery tail and mislabeled as a path-wide ISP outage with its duration collapsed to seconds. Detection now reaches back before the window start, so an outage is classified and timed consistently across views.
+
+### Live View
+
+- **Synced timeline playback** - scrubbing the timeline moves the 3D/2D map, the WAN chart cursor, the Port Statistics table, and the stat cards to the same instant, with uniform keyboard steps and no jump when resuming playback.
+- **Click the WAN chart to seek** - clicking the WAN live chart scrubs the whole timeline to that instant, with a Historic badge and a play/pause control while off the live edge. Tap-for-tooltip is preserved on touch devices.
+- **ISP/Transit loss accuracy** - the WAN chart Loss series and the map's WAN globes share one combined ISP+Transit loss figure, and loss is no longer dropped between sampling windows or when a probe cycle times out under load, so sustained loss shows for its full duration.
+
+### 3D LAN Flow Map
+
+- **Property-relative sizing** - devices, pipes, particle streams, and WAN globes scale with the property, so fixed-size objects no longer tower over shrunken buildings on large or multi-building sites.
+- **Link speed tooltips and precise device height** - adds link-speed tooltips and accurate device height, and fixes a placement round-trip bug. The capacity changes also improve the 2D LAN Topology Flow Map.
+- **Full-duplex link load colour** - link colour reserves red for both directions loaded; a single saturated direction reads as amber. Applies to the 3D and 2D maps.
+
+### ONT Stats
+
+- **Nokia ONT resilience** - the Nokia XS-010X-Q provider retries transient failures on a fresh connection, so intermittent stat gaps self-recover, and logs the ONT's raw responses so the ones that still fail leave a diagnosable trace.
+
+### Setup
+
+- **SNMP Community String length warning** - UniFi Network accepts a Community String longer than devices reliably support (20 characters), so switches silently drop from polling while the gateway keeps reporting - which reads as "no data from my switches". Setup and Live View now warn with the measured length, the banner auto-appears when the string changes mid-session and auto-dismisses once it's fixed, and a too-long value is never adopted as the polling credential.
+- **SNMP credential self-heal** - a rotated Community String (or changed v3 credentials, or SNMP toggled off and back on) previously needed Monitoring disabled and re-enabled to pick up. The server now detects the fabric-wide poll failure, re-pulls the SNMP config from the UniFi Console, and adopts the change automatically - recovery in about 30-45 seconds on direct sites and within 2 minutes on agent sites.
+
+## Security Audit
+
+- **Missing Isolation false positive when a narrow block precedes a broad block** - a port-specific block (e.g. a DoT block) ahead of an all-traffic block made the isolation check fail and report the pair as unisolated. Partial-block rules are now transparent to the evaluation, so a broad block behind a narrow one still satisfies isolation, while an allow ahead of a broad block is still flagged as a bypass. (fixes #1010, thanks @jimstrang for the repro)
+- **Raw-MAC policy sources recognized** - UniFi's newer raw source MAC restriction now parses alongside the older client-based shape, so a one-device allow ahead of a zone-wide deny is classified as an intentional exception instead of a rule-order warning. Also fixes a cross-zone eclipse false positive. (fixes #1011, thanks @jimstrang for the sample policy JSON)
+
+## Performance Tweaks
+
+- **UniFi OS 5.1.26 supported** - the firmware gate that disables deploying new tweaks on untested versions now allows UniFi OS 5.1.26, verified statically compatible and confirmed in the field. (thanks @mark0263 for confirming)
+
+## Fixes
+
+- **Duplicate default agent names** - new agents were named count+1, which collided after deletions (a site with a sole "Agent 2" minted a second "Agent 2"). Default names now take the first free number.
+- **Site switcher kept a stale client pinned on Client Performance** - switching sites carried the pinned client along, pinning the new site's page to a client from the old site. The switcher now drops it (tab and range selections still carry).
+- **Client identity for off-site viewers** - the agent's client-identity probe gained Private Network Access support for Chromium browsers enforcing public-to-private fetch rules at sites, so own-device identity resolves where the browser previously blocked it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.1.1
 
 A focused round of ONT monitoring, Starlink handling, and Wi-Fi channel improvements. See the [v2.1.0 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.1.0) for the bigger picture.
