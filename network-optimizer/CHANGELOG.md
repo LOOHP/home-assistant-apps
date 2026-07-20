@@ -1,3 +1,61 @@
+## 2.3.0
+
+Two headliners this release: new ONT monitoring providers (a Zyxel GPON-SFP stick and a vendor-neutral HTTP JSON provider you can attach to an SFP module), and continued Multi-Site work for multi-location and MSP deployments, most notably agent tunnels no longer silently breaking behind a reverse proxy. Plus sharper ISP Health Transit scoring and better device names on the maps.
+
+See the [v2.2.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.2.0) for what came before this.
+
+## ONT Device Monitoring
+
+- **Zyxel GPON-SFP PMG3000 (HTTP) provider** - Read-only optics, line status, and temperature for the Zyxel PMG3000-D20B GPON-SFP stick on ONT Stats. (#1033, thanks @Optic00)
+- **Network Optimizer Custom (HTTP JSON) provider** - Point it at any endpoint serving vendor-neutral PON stats and it feeds ONT Stats and alerts like a built-in provider. In Attach to SFP Module mode the PON data (link status, FEC/BIP errors) merges onto that module in SFP Stats, so a PON-over-SFP setup shows as one device instead of two.
+- **Nokia ONT works on more firmware** - Sends browser headers and falls back to a page-walk auth flow, so ONT stats now populate on T-Fiber/Metronet CLEI variants that previously 401'd. (#929, thanks to the testers who helped figure this out)
+- **Smoother setup** - Selecting a provider prefills the ONT Host with the address that device ships on, and the ONT form and Add-a-Site wizard no longer linger on stale state.
+
+## Monitoring - ISP Health
+
+- **Your direct peering now shows up in Transit Health** - Internet targets reached directly over your ISP's peering/IX are graded as a synthetic IX Peering entry instead of dragging Transit against a neutral fill, each peer scored on its own so one flapping peer doesn't crater it. (#1031)
+- **More accurate Transit scoring** - Transit Health is now a plain involvement-weighted average (no more neutral-100 blend inflating it), jitter is scored at P90 instead of P95 to stop double-counting bursts, and a transit ASN is no longer penalized for jitter when a destination proven to route through it looks clean. Off-path networks scoring low now carry a tooltip explaining they may just be deprioritizing ICMP. (#1028, #1034)
+
+## Monitoring - Live View
+
+- **Better names and throughput on the LAN Flow Map** - UniFi Device Bridge clients (e.g. a Protect camera bridged onto the LAN) now show their friendly name and real throughput on the 2D/3D maps and in Client Performance, and name-less clients use UniFi's display name instead of a raw MAC. Works in historic playback too. (#1027)
+
+## Multi-Site
+
+- **Reverse proxies no longer silently break the agent tunnel** - The canonical-host redirect no longer catches the agent's gRPC stream, which could redirect the tunnel to death behind a reverse proxy while REST heartbeats kept the agent falsely green. A down tunnel now correctly reads as offline. (#1032)
+- **Agent setup polish** - A LAN speed test toggle in the default-site token flow, a dismiss X on the expanded site config row, and an installer that self-remediates AppArmor-confined nginx and adds a `--uninstall` flag. (#1035)
+
+## Fixes
+
+- **Duplicate Health Issues entries** - A load-vs-refresh race could double every Health Issues entry (the "(2)" badges); refreshes are now serialized. (#1026)
+- **Spurious console-connection error** - A reconnect mid-login no longer surfaces a "Cannot access a disposed object" error; it degrades to the normal retry. (#1026)
+- **Technitium DNS detection** - Now prefers Technitium's /api/status endpoint. (#1023, thanks @jimstrang)
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux), see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.2.0
 
 The headline: the On-Site Agent can now run directly on the site's UniFi gateway, so a monitoring-only site doesn't need a separate box for it. Plus a synced Live View timeline, sharper ISP/Transit loss, two Security Audit false-positive fixes, and SNMP credential self-healing.

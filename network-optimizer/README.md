@@ -14,7 +14,7 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 # Network Optimizer for UniFi
 
 [![GitHub Release](https://img.shields.io/github/v/release/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/releases)
-[![Docker Pulls](https://img.shields.io/badge/docker_pulls-412k-blue?logo=docker)](https://github.com/orgs/Ozark-Connect/packages?repo_name=NetworkOptimizer)
+[![Docker Pulls](https://img.shields.io/badge/docker_pulls-426k-blue?logo=docker)](https://github.com/orgs/Ozark-Connect/packages?repo_name=NetworkOptimizer)
 [![Windows Downloads](https://img.shields.io/github/downloads/Ozark-Connect/NetworkOptimizer/total?label=windows%20downloads)](https://github.com/Ozark-Connect/NetworkOptimizer/releases)
 [![GitHub last commit](https://img.shields.io/github/last-commit/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/commits)
 [![GitHub Stars](https://img.shields.io/github/stars/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/stargazers)
@@ -62,7 +62,7 @@ Track signal quality on your cable modem, fiber ONT, and cellular modems over ti
 
 **Cable Modem (DOCSIS)** - Downstream/upstream power levels, SNR, and FEC error rates (correctable and uncorrectable) with per-channel charting. Supports Netgear CM (CM600, CM700, CM1000, CM1200), ARRIS Surfboard (SB8200, SB6183, S33/S34), Motorola (MB8611, MB8600, MB7621), and Xfinitiy / Cox (XB8 / XB10 and CGM4981).
 
-**Fiber ONT** - RX/TX optical power, temperature, voltage, and bias current for external and SFP ONTs. Supports AT&T residential gateways (BGW320, BGW210), Quantum Q1000K, Realtek-based GPON sticks (ODI DFP-34X-2C2, V-SOL V2801F, T&W TWCGPON657), and 8311 community firmware sticks (WAS-110, PRX126, Nokia G-010S-P). SFP-based ONT monitoring (modules plugged into your gateway that expose DDM optical data) is part of the Network Monitoring feature below.
+**Fiber ONT** - RX/TX optical power, temperature, voltage, and bias current for external and SFP ONTs. Supports AT&T residential gateways (BGW320, BGW210), Quantum Q1000K, Nokia XS-010X-Q, Realtek-based GPON sticks (ODI DFP-34X-2C2, V-SOL V2801F, T&W TWCGPON657), Zyxel PMG3000-D20B GPON stick, and 8311 community firmware sticks (WAS-110, PRX126, Nokia G-010S-P). SFP-based ONT monitoring (modules plugged into your gateway that expose DDM optical data) is part of the Network Monitoring feature below and also has a custom ONT stats augmentation API you can code to.
 
 **Cellular Modems** - RSRP, RSRQ, SNR, and Signal Quality charted over time with per-band, per-device series and filter badges. Supports Ubiquiti (U-LTE, U5G-Max, U5G-Backup), Netgear Nighthawk modems/hotspots, and GL-iNet/Quectel modems/routers. Dual-connectivity mode tracks LTE and NR5G bands separately for NSA setups.
 
