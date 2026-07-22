@@ -1,3 +1,84 @@
+## 2.3.1
+
+More Monitoring depth and multi-site polish. Speed-test results now replay in Live View, ISP Health grades latency stability per access technology, and every Device Monitoring integration gets a Disable/Enable toggle. See [v2.3.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.3.0) for what's new in v2.3.0+.
+
+**Optional On-Site Agent update:** agent binaries since v2.2.0 detect an unreachable SNMP device in seconds instead of burning full walk timeouts, which also makes SNMP credential self-heal responsive on agent sites. Only agents still on 2.1.0 are affected - if yours relay SNMP monitoring, re-run the agent install script whenever convenient. Agents on 2.2.0 or newer already have this, and 2.1.0 otherwise keeps working fine. **Note:** please disregard the incorrect command for on-gateway upgrade given in Settings->Multi-Site, use the correct gateway installation/upgrade script.
+
+## Monitoring
+
+- **Device Monitoring Disable/Enable toggles** - ONT, Cable Modem, Cellular Modem, and Starlink Device Monitoring each get a one-click Disable/Enable toggle in Settings, so you can pause polling without losing the saved config; the Dashboard cards respect it (#1044, #1046, #1047, thanks @Optic00).
+- The **Flaky monitoring targets** advisory no longer counts loss from a gateway or shared-fabric outage against a target's averages.
+
+### Live View
+
+- **Speed-test results replay in Live View** - the date/time on every speed-test result detail now links into historic playback, paused just before the test, so you can watch the traffic light up the maps. (#1039)
+- **Near-present playback fixes** - scrubbing close to now no longer shows every device offline or throughput stuck, an On-Site Agent test appears on the maps right away instead of minutes later, and resuming playback after sitting on the page starts at the parked instant. (#1039, #1041)
+
+### ISP Health
+
+- **Per-technology latency stability grading** - each hop's RTT wander is now graded against a band for its access technology instead of a one-size ratio: fiber's sub-millisecond wander no longer reads as a fault, and Starlink is judged against its own normal. (#1040)
+- **Path witness absolution** - a hop's wander is forgiven when a destination proven to route through it shows a steadier end-to-end path, so ICMP-deprioritizing core routers don't drag the grade down. (#1040)
+- **Cleaner ISP names** - legal-entity suffixes (LLC, L.C, L.P) are trimmed from provider names on the ISP card.
+
+### Network Performance
+
+- **AWS regional path-end targets** - Upstream path discovery probes the AWS regional endpoints, latency-ranks them, and surfaces the five best as monitorable Internet targets, tracked by hostname so AWS IP rotation doesn't break them. Unchecked regions are remembered and not re-suggested. (#1040)
+- **Via column** - Path-end Internet hosts now show the farthest transit ASN they connect through, or "peered" when the path is provably transit-free. (#1040)
+- **Custom targets as path witnesses** - a user-added Custom target, whether a known-stable CMTS ping or a more distant endpoint, now contributes its steadiness to ISP Health for the hops it crosses, without being treated as an internet destination. (#1040)
+- **Smarter default filter** - the chart filter defaults to ISP when the site has no LAN targets.
+
+### ONT Stats
+
+- **Luleey LL-XS2510 covered** - the Realtek ONT Stick (HTTP) provider already handles this 2.5G XPON stick (stock Realtek firmware under its own branding); now locked in with tests and docs. (#1043, thanks @Optic00)
+- **Optics in the custom ONT contract** - the Network Optimizer Custom (HTTP JSON) contract gains an optional optics section (RX/TX power, temperature, voltage) for modules whose DDM the gateway can't read. It fills only the fields the gateway leaves blank on SFP Stats; standalone configs chart it here. (#1036)
+
+### Monitoring Interfaces
+
+- **Disable/Enable toggle** - pause a monitoring interface (all gateway artifacts torn down, survives reboots) while keeping its saved config, then bring it back with one click. (#1042, thanks @Optic00)
+
+## Dashboard
+
+- **CyberSecure engine upgrade advisory** - the gateway's device card now notes when a CyberSecure (Suricata) engine upgrade is available.
+
+## Multi-Site
+
+- **Site picker during Console onboarding** - the Add Site wizard's Console step now offers the same Site field and "List Sites" button as Settings, for consoles hosting more than one UniFi site.
+- **Configuration highlight** - the site whose Configuration panel is open is now highlighted in the Sites list.
+
+## Fixes
+
+- **Stray speed-test results** - client speed-test results (OpenSpeedTest and iperf3) arriving with an unprovisioned site slug are dropped instead of landing in the main site's results.
+- **UniFi Console Connection** - fixed a crash during connect and errors from requests on an already-disposed client.
+- **On-Site Agent offline** - agent sites now show "waiting for agent" instead of an SSH error.
+- **Adaptive SQM on multi-site** - deployment status reloads when you switch sites, and the SmartQ settle timer is keyed per site so two sites can't collide.
+- **Threat Intelligence** - client names are cached per site, so names no longer bleed between sites.
+- **On-Site Agent uninstall** - reliably stops the agent process across all install modes.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.3.0
 
 Two headliners this release: new ONT monitoring providers (a Zyxel GPON-SFP stick and a vendor-neutral HTTP JSON provider you can attach to an SFP module), and continued Multi-Site work for multi-location and MSP deployments, most notably agent tunnels no longer silently breaking behind a reverse proxy. Plus sharper ISP Health Transit scoring and better device names on the maps.
