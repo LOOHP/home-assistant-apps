@@ -1,3 +1,91 @@
+## 2.4.0
+
+This release answers a question UniFi Network could never answer before: exactly why did that device reboot? Plus a guided tour of what's new, an ISP Health report you can hand your ISP, and read-only gateway interface diagnostics with a WAN lease countdown.
+
+## What you missed on v2.3.1
+
+- **One-click Device Monitoring toggles** - ONT, Cable Modem, Cellular, Starlink and Monitoring Interfaces each got a Disable/Enable switch.
+- **Sharper ISP Health scoring** - per-technology RTT stability grading, path witness absolution, and AWS path-end targets.
+- **Speed test results link into Live View** at the moment the test ran.
+- **Multi-Site onboarding picks the site** during UniFi Console onboarding.
+- **CyberSecure upgrade advisory** when the gateway's Suricata engine has an update waiting.
+
+See the [v2.3.1 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.3.1) and the [v2.3.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.3.0) for the full detail.
+
+## Guided Tours
+
+- **A short walkthrough after you upgrade** - land on the Dashboard and Network Optimizer offers a tour of what's new, spotlighting each feature where it lives. Later means later, not "ask me again tomorrow". Replay any tour, or turn them off entirely, in the new Guided Tours card in Settings - Application.
+
+## Dashboard
+
+- **Why a UniFi Network Device restarted** - hover the uptime on a Dashboard device card for the reason behind the current boot: firmware upgrade, commanded restart, lost power, a hang, or a kernel panic, with the evidence behind it. Reasons are read from the device itself and backfilled, so devices that rebooted before this release get answers too.
+- **_Coming Soon_** - firmware / UniFi app upgrade orchestration, taking into account historic WAN and LAN activity patterns, device topology, preferred speed of rollout, and more.
+
+## Monitoring
+
+### ISP Health
+
+- **Export PDF** - the whole scorecard for the window on screen, naming the WAN and ISP it scored. Ready to attach when you open a ticket.
+- **Category filter pills for Path & Congestion Events** - narrow the feed to the kind of event you're chasing. (#1050)
+
+### Live View
+
+- **The timeline shows the clients that were connected then** - scrubbing back used to show only who is connected right now. Clients are rebuilt from the telemetry for the moment you're viewing, on the device they were actually attached to, and keep their names even after weeks away.
+
+### Network Tools
+
+- **Inspect a gateway interface** - read one interface live off the gateway: link state, addresses with the DHCP lease as a countdown, SFP diagnostics, and resolved neighbors. An ISP that quietly stops renewing gives no warning, and UniFi Network never shows how long your lease is good for. (#1054, thanks @cypherstream for the idea and the command)
+
+## Alerts & Schedule
+
+- **Device Offline now fires, and the new Device Recovered closes it out** - the seeded Device Offline rule never had anything publishing to it. Both events now publish as a paired cycle and ship enabled, so an outage announces itself and then tells you when it's over.
+- **An upgrade no longer looks like an outage** - devices UniFi reports as upgrading, provisioning or adopting are never announced as offline, and an outage that turns out to be an upgrade closes as recovered.
+- **Device Restarted** - a new rule whose severity follows the reason: quiet when someone meant it, a warning when nobody did.
+
+## Security Audit
+
+- **Return-traffic rules are no longer flagged** - established and related return rules are deliberate, and are now classified as intentional exceptions. (#1056, thanks @jimstrang)
+
+## Performance Tweaks
+
+- **SFP 2.5G mode retries at boot** - the SGMII+ mode set retries instead of warning once and giving up, so a port that comes up slow gets another chance. (#1053, thanks @Optic00)
+- **UniFi OS 5.1.27 supported** - community tested and verified.
+
+## Multi-Site
+
+- **On-gateway agents get the right upgrade command** in the agent list, instead of instructions that don't apply to a gateway.
+- **The native installer refuses to run on a UniFi OS gateway** - that's the wrong install for that box, and it now says so.
+
+## Fixes
+
+- **Uptime reads "1 day, 2 hours"** instead of "1 days".
+- **Client WAN Test max box** shows both directions of the bottleneck link when it lands on the AP feeding a Wi-Fi client.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.3.1
 
 More Monitoring depth and multi-site polish. Speed-test results now replay in Live View, ISP Health grades latency stability per access technology, and every Device Monitoring integration gets a Disable/Enable toggle. See [v2.3.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.3.0) for what's new in v2.3.0+.
