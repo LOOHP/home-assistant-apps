@@ -1,3 +1,87 @@
+## 2.5.1
+
+Quick fixes for v2.5.0. The full v2.5.0 notes are included below - if you're coming from v2.4.x or earlier, that's the whole picture in one place.
+
+## Fixes in v2.5.1
+
+- **Monitoring - Live View** - The **Port Statistics** table renders on multi-device sites again. The device filter and its **Clear filter** control are now scoped to the tab in view (**Gateways & Switches** vs **APs**), and a stale saved filter that hid every device is dropped instead of leaving the table blank.
+- **Monitoring - ISP Health** - Partial-loss detection now weighs every monitored internet destination, not just the two rows the waterfall displays, so the same event reads the same at every site - and several regional endpoints of one provider count as one network, not several. Long outage waterfalls collapse to their first and last rows with the hidden middle a click away.
+- **Security Audit** - **Firewall: Internet Block Bypassed** no longer flags return-only allow rules (RESPOND_ONLY, or legacy ESTABLISHED/RELATED) or rules aimed at a non-external zone - neither can carry new internet traffic (#1076, thanks @jimstrang for the report and the fix).
+
+*Everything below is v2.5.0, republished:*
+
+Identity, SSO and RBAC. **Security that scales to your install: stay with a single administrator, or add roles, MFA and SSO as you need them.**
+
+This release adds accounts, roles, per-site access, MFA and passkeys, single sign-on and an audit log - none of it required to keep running the way you do today.
+
+## Identity, SSO and RBAC
+
+- **Accounts with roles** - Admin, Operator or Viewer, globally or per site, so someone can watch a site without being able to change it.
+- **Per-site access** - grant a person one site, several, or all of them.
+- **MFA and passkeys** - sign in with a passkey, or require an authenticator app for a given role. Recovery codes included.
+- **Single sign-on** - add an OpenID Connect or SAML 2.0 provider, with the redirect and metadata URLs ready to paste. New accounts are either created on first sign-in or required to exist already; roles are set on this side.
+- **Audit Log** - every change recorded with who, where, and whether it succeeded, kept for a year, filterable and exportable. It records whether or not you set up any of the above.
+- **The UI follows your role** - controls you cannot use are hidden or read-only, rather than failing when you click them.
+
+## Managed SSH Key
+
+- **Generate or upload a keypair per site** in Settings - Connection, instead of shelling into the container to place a key file.
+- **Install on gateway** puts it on a Cloud Gateway in a couple of clicks, which is the one place UniFi Network cannot place a key for you.
+
+## Monitoring
+
+- **Chart tooltips list every series**, ordered to match how the lines sit on the plot, with a dot on each line at the point you are reading. Across Network Performance, Device Stats, SFP Stats, CM Stats, Cellular Stats, Starlink Stats and ONT Stats.
+- **New data streaming in no longer pulls the tooltip away.**
+- **ISP Health's latency chart gets all of the above**, plus its own series filter: click a chip to isolate one provider, click again for all, Ctrl-click to drop just one.
+- **A clear-filter control on the chip rows**, to get every series back in one click.
+- **ISP Network hops show their address** - hover a hop for the IP it answered on and its reverse-DNS name, so you can line our reading up against your own traceroute (#1070, thanks @cypherstream).
+- **An outage now shows as a gap on the ISP Health chart** instead of the line running through it.
+- **SFP Stats temperature** - a temperature line could double back on itself after an outage.
+- **WAN Live Chart** - clicking the timeline inside the last minute parks the cursor where you put it instead of jumping back to live.
+- **Packet Loss Events** - following a loss event from ISP Health opens the Investigate card every time, not just after the first page load.
+- **Switches that offset their ifXTable index report traffic again** - affected ports read as zero and the switch eventually dropped out of polling. This is specific to legacy UniFi Network devices that index this way, the US-8 being the known case (#1071, thanks @jimstrang for the report and the walk data).
+
+## WAN Speed Test
+
+- **A path-analysis retry loop could pin the server** - a narrow combination to land on, but anyone who did had a pegged server and no idea what was doing it. Retries are now bounded per result.
+
+## Alerts & Schedule
+
+- **Acknowledge All followed by Resolve All works in one click**, instead of resolving one alert per click and appearing stuck.
+
+## Security Audit
+
+- **UniFi domain-group firewall destinations resolve** instead of being reported as unresolved (#1063, thanks @jimstrang).
+
+## On-Site Agent
+
+- This release ships a new agent build carrying the SNMP fix above. The update is **optional**: it only matters if you have legacy UniFi Network devices like the US-8. Nothing prompts you, and enrolled agents keep working as they are.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.5.0
 
 Identity, SSO and RBAC. **Security that scales to your install: stay with a single administrator, or add roles, MFA and SSO as you need them.**
