@@ -1,3 +1,62 @@
+## 2.5.2
+
+> **⚠️ On-Site Agent update recommended for this release.** The agent gained a self-healing watchdog for a rare failure where it could go silent for hours while its process stayed alive, plus disk-backed result spooling and probe isolation. Enrolled agents below 2.5.2 will show an **Update agent** prompt in the Multi-Site agent list. One-time for this release; sites running fine today aren't at risk, but the fix is worth taking.
+
+More fixes and refinements on top of v2.5.1, with smarter ISP Health scoring for PPPoE connections. See the [v2.5.1 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.5.1) for what's new in v2.5.0+
+
+- **_Coming Soon_** - a hosted Network Optimizer, for people who don't have a home server or don't want to set up the infrastructure. $15/month for up to 3 sites, with a 14 day free trial and enterprise-grade security. The commercial hosted plan is $25/month per site, adding full management and consulting - see [pricing and licensing](https://ozarkconnect.net/network-optimizer/licensing). The on-site agent runs on your gateway, so the only thing you give up is LAN speed testing. WAN speed testing is included, with some data limits.
+
+## Multi-Site
+
+- **On-Site Agent self-heals a wedged async I/O engine** - an agent went dark for hours while its process stayed alive: the gateway's kernel lost an epoll wakeup, freezing .NET's socket event loop so every async operation timed out while the network was fine. The agent now runs a loopback canary that detects this (a 127.0.0.1 connect can't time out for network reasons), spools its backlog to disk, and exits for systemd or Docker to relaunch. Recovery in about 3 minutes instead of indefinite silence, with no data lost - and that same spool now carries the backlog across deliberate restarts and updates too. Real WAN or server outages never trip it.
+- **One hung probe can't freeze the rest** - the incident took every target dark from a single stuck pipe read. Each probe now gets a hard deadline, and a probe whose output can't be read is recorded as a gap rather than as a fabricated 100% loss. This hardening applies to server-side probing as well.
+- **LAN speed test relights with the agent** - on native installs the speed test nginx stopped whenever the agent stopped and never came back without a manual start. It now follows every agent start automatically.
+
+## Monitoring
+
+### ISP Health
+
+- **PPPoE connections are scored for what they actually cost** - a PPPoE session terminates on a BNG, and the BNG usually sits deeper in the network than the OLT or DSLAM, so your first hop is further out through no fault of the line. ISP Health now detects the session from the gateway itself and widens what it expects across latency, jitter, RTT stability, loaded loss and loaded latency, on top of your access medium's own expectations. The latency allowance is tuned per medium (2 ms on PON, 1 ms where the BNG is typically a local hop), and the jitter and stability allowances are composed so they count on a quiet line and fade on one that is already noisy. The header reads **Scored as GPON (PPPoE)**, so a widened threshold is never invisible.
+- **Bufferbloat is still called out on PPPoE** - the loaded-latency allowance is deliberately small. The BNG's per-subscriber shaper is a bufferbloat source, and a line that buffers badly should still grade down for it rather than be told it's normal - that's what **Adaptive SQM** is for.
+
+### Network Performance
+
+- **Access network technology asks only for the medium** - PPPoE is no longer offered in **Upstream path discovery**. It isn't an access medium: it rides GPON, DSL or Active Ethernet, and choosing it meant giving up that medium's tuned thresholds for a generic band. Pick what the session rides and the session itself is detected for you. Connections already set to PPPoE move to the detected medium where the first upstream device identifies one.
+
+### Live View
+
+- **WAN chart hover and crosshair behave** - the crosshair now only tracks inside the plot area, hover-hold reads the real plot rectangle instead of a stale estimate, and a leftover hover state can no longer freeze the chart mid-redraw.
+
+## Fixes
+
+- **Nothing trusts the UniFi Console until it answers** - a failed console request was cached as though it were real data, so the app could briefly believe your site had no devices or no networks, and ISP Health would score in that window without expected WAN speeds or PPPoE detection, then cache that for 15 minutes. Most likely right after a restart, when the first request is the one that fails.
+- **Export PDF fixes** - the Score Breakdown claimed "No data for this dimension in the window." under **ISP Network** despite printing its score right above, and the summary line named your access technology twice ("DOCSIS (DOCSIS (Cable))").
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.5.1
 
 Quick fixes for v2.5.0. The full v2.5.0 notes are included below - if you're coming from v2.4.x or earlier, that's the whole picture in one place.
