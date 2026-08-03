@@ -1,3 +1,110 @@
+## 2.5.3
+
+> **On-site agents: update recommended.** Two fixes. Stopping or restarting an agent could leave a false packet-loss spike in your monitoring history: the restart cut off in-flight measurements and the incomplete results were counted as loss. And a site reaching its UniFi Console, gateway SSH, or modem / ONT pages through an agent by hostname rather than IP could be refused outright, with a misleading SSH error. IP-addressed sites were unaffected by the second. Enrolled agents will prompt to update.
+
+Mostly Monitoring this time: a site whose UniFi Console is unreachable is now readable rather than hidden behind a banner, ISP Health gains Uptime and scores outages against the window you are looking at, and every Monitoring setup action is audited. See the [v2.5.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.5.0) for what's new in v2.5.0+.
+
+## Monitoring
+
+- **A site whose console is down is still readable.** Losing the UniFi Console used to replace the whole page with a banner. The banner now sits above the page and everything built on stored history keeps working: Live View plays back its timeline, and the WAN chart, gateway CPU/memory/temperature and fabric ingress/egress all fill in. The history was already there; the page just refused to show it without the console.
+- **ISP Health grades an offline site.** The expected ISP speeds come from the UniFi Console, so an unreachable console meant no grade. The last successful read is now remembered per WAN and used when the console cannot answer, labeled as remembered rather than current. A site that has never had a successful read still waits, having nothing to score against.
+- **Monitoring setup actions are audited.** Adding, pausing, deleting and retiming a latency target, saving alert thresholds, turning collection on or off, resetting the InfluxDB connection, running or committing Upstream path discovery: none of these left an audit entry. They all do now. Failed edits say so, too: pause and delete used to swallow errors, so a rejected change looked like a row that simply refused to move.
+- **A site's own admin can finish that site's InfluxDB setup.** Setting up the installation's InfluxDB server stays an instance-wide Admin task; adding one site to a connection that already exists does not. A site admin could previously reach the wizard and never be able to complete it.
+- **A main site can hand its collection to its on-site agent.** Probes, path discovery and SNMP run at the site and this server stands down. For installs where the server is not on the network it monitors. Off by default, and the toggle only appears once an agent is enrolled.
+
+### ISP Health
+
+Outages and congestion were scored on absolute counts, so a 15 minute disruption cost the same whether you were looking at 24 hours or 30 days. Both now scale to the window.
+
+- **Uptime** - New, above the three dimension gauges on the score card, and leading the dimension grades in Export PDF. It counts partial path disruptions, not just total blackouts, so a path that lost most of its targets for ten minutes shows up instead of reading as a clean 100%.
+- **Outage and congestion penalties are relative to the window.** One brief outage no longer takes double digits off a 30 day score, and outages straddling the window edge only count the part inside it. Nine congested hours used to bottom out the curve regardless of window length, quietly costing healthy networks around 30 points on a month view.
+- **Stability and Congestion on the network cards and hop rows.** The two aspects that fed the grade invisibly now sit next to P90 Jitter and Loss%, so a low grade points at its own cause. Where that cause is congestion, the event count jumps to Path & Congestion Events and highlights the entry.
+- **Packet loss inside your own network is subtracted.** Network Optimizer also measures loss to your own gateway. If packets are being lost on your side - a bad cable, a marginal SFP, a saturated uplink to the gateway - that same loss appears in every measurement to the internet. It is now subtracted, matched in time, so your ISP is not graded for a problem inside your own network. A window with no gateway readings grades exactly as before.
+- **Flat-lined targets stay out of Loaded Loss.** A target sitting at 100% loss all window says nothing about behavior under load, but it dominated the average.
+- **Implausible throughput samples no longer define Loaded Loss.** A single bogus WAN rate reading, several times your plan speed, could mark a quiet window as loaded on its own - which is how a counter artifact turned a healthy month into a double digit Loaded Loss figure.
+- **Faster on long windows.** 30 day compute on a large site dropped from roughly 13 seconds to under 7, at the same resolution and with the same results.
+
+### Setup
+
+- **The status stays current while you watch it.** The page used to be a snapshot from load time: fix the problem and nothing changed until a reload. InfluxDB reachability, SNMP poll health, collection state and agent presence now update live, and updates hold off while a custom OID or Monitoring Interfaces edit is in flight rather than tearing the form away mid-edit.
+- **Collection status reports both collectors.** It could read "Agent running" when the agent died an hour ago, and on an agent site it credited this server for work it does not do. A site with an agent now gets a second line for the agent's own state, since the two fail independently.
+
+### Upstream path discovery
+
+- **Better first-run targets, calmer card.** Candidate verification is stricter on a WAN's first run - the run that seeds your monitoring targets - and the card now follows discovery smoothly and lands on the top instead of jumping section to section.
+
+### Monitoring Interfaces
+
+- **Management VLAN** - The VLAN field is relabeled and its help text rewritten. It sets the modem or ONT's management VLAN, not the WAN's own VLAN tag, and is rarely needed.
+
+## Multi-Site
+
+- **The Sites table updates itself.** A site removed by another admin, or your own access being granted or revoked, used to leave the table showing the old list until you navigated away and back.
+- **A Site Admin can see the Multi-Site tab.** It asked for an instance-wide Admin while everything inside it already answers per site, so a site's own admin could reach Multi-Site by link but never see the tab.
+- **Tightened up several edge cases in the site creation and removal lifecycle.**
+
+## Settings - Audit Log
+
+- **Every event says which site it acted on.** Most events - everything done through the normal UI - were written with no site at all, so filtering by the default site returned nothing while other sites worked. Historical rows stay blank and are not backfilled: the site was never recorded, and guessing would put something false in a compliance log. Instance-wide actions like licensing and auth policy stay off a site rather than filing under whichever one happened to be open.
+- **Every event says what it acted on.** An entry used to say a monitoring target had been paused without saying which one. There is now a Target column reading "Latency Target: Test".
+- **Export CSV/JSON returns the whole log again.** Export quietly filtered to the current site and dropped every event with no site of its own - which was most of them.
+- **Filters match regardless of case.** Searching an actor as "Kira" found nothing for a user stored as "kira", and a capitalized Site ID returned an empty log.
+
+## Adaptive SQM
+
+- **Larger download burst** - New per-WAN setting raising the download burst from roughly 40 µs of line time to 1 ms, so senders arriving in clumps are not clipped by the shaper. Helps downloads that fall short of full speed, especially to Wi-Fi clients and from distant servers. Upload is unaffected. (#1009, thanks @Optic00)
+- On by default for WANs configured from here on. Existing configurations keep what they have, so no deployed connection changes behavior on upgrade.
+- **Trying it on a connection you already run** takes two steps: tick **Larger download burst** on the WAN, then deploy Adaptive SQM again. The setting lives in the script on your gateway, so ticking it alone changes nothing until you redeploy.
+
+## Performance Tweaks
+
+- **Firmware gate raised to UniFi OS 5.1.28.** Verified on the bench: 5.1.28 changes nothing the tweaks depend on.
+
+## Deployment
+
+- **Non-standard reverse-proxy port** - Installs fronting Network Optimizer with a reverse proxy on a port other than 443 can declare it with `REVERSE_PROXIED_PORT`, and the speed test link, results callback, nginx configuration and CORS allow-list all pick it up consistently. Deployments that do not set it behave exactly as before.
+- **A local health check stays on the local listener.** With a canonical hostname configured, `http://127.0.0.1:8042/api/health` was redirected to the public hostname, so a check that never needed to leave the box depended on public DNS and the proxy being reachable from inside the host. Installers and process supervisors could report a healthy install as failed. Browser traffic is still redirected as before. (#1091, thanks @Jason-Morcos)
+- **macOS keeps its privacy approvals across updates.** The native installer signed the app in a way that gave it a new identity on every rebuilt install, so macOS treated a routine update as a different app and the approvals you had granted stopped applying. (#1090, thanks @Jason-Morcos)
+
+## On-site agent
+
+- **A stop no longer plants a false loss spike.** See the note at the top; this is the fix worth updating an agent for.
+- **A hostname whose DNS answer includes a placeholder address is reachable again.** The agent only connects to addresses inside its own site, and a resolver returning `::` alongside the real address got the whole name refused.
+- **SNMP configuration reaches a reconnecting agent immediately**, instead of the agent polling with stale settings until the next refresh.
+- **The LAN speed test page port is configurable** - `--speed-test-port` natively, `AGENT_SPEEDTEST_PORT` on the container - for a host where the default is taken, or where 443 is free and you would rather use it.
+
+## Fixes
+
+- **WAN Steering boot script on Windows installs** - The boot script was written with Windows line endings, so the gateway could not execute it: WAN Steering ran fine after deployment and then silently never came back after a gateway reboot. Docker and macOS-native installs were never affected. **If you run Network Optimizer on Windows and use WAN Steering, redeploy it once after upgrading** - upgrading the app does not rewrite the script already on your gateway.
+- **udm-boot service unit** - Installed with the same exposure. It runs everything in `/data/on_boot.d/` at boot, so Adaptive SQM, Performance Tweaks and Monitoring Interfaces all depend on it. Every file Network Optimizer writes to a gateway now gets correct line endings.
+- **A revoked MFA requirement stays revoked.** Being promoted to a role that requires MFA sends you to Account Security, and being put back to a role that does not could not clear the requirement, so you kept being told you owed a factor you did not.
+- **Also fixed:** several smaller issues in the guided tour (steps behind collapsed cards, a stray Skip on the final step), chart resolution rounding, two sources of spurious audit log entries, and button and tooltip styling.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.5.2
 
 > **⚠️ On-Site Agent update recommended for this release.** The agent gained a self-healing watchdog for a rare failure where it could go silent for hours while its process stayed alive, plus disk-backed result spooling and probe isolation. Enrolled agents below 2.5.2 will show an **Update agent** prompt in the Multi-Site agent list. One-time for this release; sites running fine today aren't at risk, but the fix is worth taking.
