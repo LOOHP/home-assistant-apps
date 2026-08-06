@@ -1,3 +1,127 @@
+## 2.6.0
+
+> **On-site agents: update required for multi-WAN monitoring.** The agent gained the ability to bind its probes to a specific WAN, which is what lets it serve as that WAN's vantage. Enrolled agents will show an **Update agent** prompt. If you run a single-WAN site, or monitor every WAN from the server, the update is optional.
+
+Multi-WAN monitoring. **Every WAN at a site now gets its own vantage, its own targets, and its own ISP Health grade.** UniFi Network tells you a second WAN is up; this tells you what it is actually delivering, whether or not you are currently routing out of it.
+
+Starlink dishes raise their own alerts, a WAN going down pages once instead of once per target, Device Stats charts mark restarts and alerts on the timeline, and Config Optimizer catches the Smart Queues toggle that UniFi Network accepts without provisioning the shaper.
+
+## What you missed on v2.5.x
+
+- **Identity, SSO and RBAC** - accounts with roles, per-site access, MFA and passkeys, OpenID Connect and SAML single sign-on, and an audit log. None of it required to keep running the way you do today.
+- **On-Site Agent self-healing** - an agent could go silent for hours while its process stayed alive, from a wedged kernel event loop on the gateway. It now detects that, spools its backlog to disk and restarts, and that spool carries the backlog across deliberate restarts and updates too.
+- **ISP Health gained Uptime**, scores outages and congestion against the window you are looking at rather than absolute counts, subtracts packet loss happening inside your own network, and got roughly twice as fast on 30 day windows.
+- **A site whose UniFi Console is down is still readable** - stored history keeps playing back instead of the page being replaced by a banner, and ISP Health grades against the last known plan speeds.
+- **PPPoE connections are scored for what they actually cost**, detected from the gateway, on top of your access medium's own expectations.
+- **A main site can hand its collection to its on-site agent**, for installs where the server is not on the network it monitors.
+- **Adaptive SQM larger download burst** - raises the download burst so senders arriving in clumps are not clipped by the shaper (#1009, thanks @Optic00).
+
+See the [v2.5.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.5.3), [v2.5.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.5.2) and [v2.5.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.5.0) release notes for the full detail.
+
+## Monitoring
+
+### Multi-WAN Monitoring
+
+Every WAN at a site is now monitored, not only the one carrying your traffic right now. (#1098)
+
+- **Each WAN gets a vantage, which names how its probes get out.** Either a source IP the gateway policy-routes out that WAN, or an agent sitting behind it.
+- **An agent on the gateway is the recommended vantage.** It binds probes to each WAN's own interface, so nothing depends on a policy-based route per WAN existing and staying correct. It is supplemental: your site keeps collecting exactly the way it does today.
+- **If you already run an on-site agent, update it before setting this up.** Binding a probe to a WAN is new in this release, so an agent below 2.6.0 cannot serve as a vantage. Enrolled agents will show an **Update agent** prompt.
+- **Latency & Packet Loss filters by WAN** - one alone, several compared, or all of them. A host probed from every WAN lines up side by side, one color per host and one line pattern per WAN. **Live View** has its own selector with its own saved selection, so watching one WAN never moves your analysis views.
+- **Jump from a moment on the live timeline straight to the charts, and back again.** The moment you were looking at, the WAN and the category all carry across, and neither view's saved filter is touched on the way.
+- **Latency Targets, Flaky Monitoring Targets and Network Tools all name the WAN.** Network Tools can run a probe from any vantage, which is how you confirm a policy-based route or an interface bind is doing what you think.
+- **ISP Health grades each WAN on its own counters, plan speeds, targets and hops**, instead of pairing one WAN's traffic with another's expectations. Upstream Path Discovery runs per WAN.
+- **Metered WANs cost less to monitor.** Continuous probing runs about 5.4 GB a month at 25 targets on the 10 second default, which is most of a small satellite or cellular plan. Satellite, cellular and fixed wireless each get fewer targets and a slower cadence, and a configured Data Usage cap tightens it further. What is left rotates across access hops, transit and path endpoints, so you keep a view of the whole path rather than detail on your first mile and nothing beyond it.
+
+### ISP Health
+
+Several of these apply to single-WAN sites too.
+
+- **Loaded latency measures the line, not its worst responder.** Samples are now collapsed by instant across every internet target on the WAN, since a queue on the access link sits in front of all of them. One ICMP-deprioritized host no longer sets the figure on its own, and the figure no longer drifts as you add targets.
+- **A line that stays clean under load is graded clean**, rather than as an absence of evidence, and a run of clean load episodes after bad ones reads as the line having been fixed. Evidence is weighed by how recent, how loaded and how sustained it was.
+- **A WAN speed test can raise the figure** where it read higher and actually saturated the link. Probes sample on their own cadence, and a short event's peak queue can build and drain between two of them unseen.
+- **Off-path access hops stop feeding packet loss**, unless they are all a site has. A hop that answers pings but appears in no trace carries none of your traffic.
+- **Starlink is graded on measured dishes rather than estimates.** Idle latency: 23 ms is the best the medium does and scores full, 42 ms is where a healthy Backup dish sits. Loaded: 3 ms excellent, 12 ms acceptable, replacing a ceiling that could not fail anything. A dish reporting a reduced-speed plan tier is graded on whether it carries usable traffic rather than on ratio, so a backup doing its job in an emergency stops reading as a failure.
+- **GPON upstream loaded loss is graded against 1.5%, up from 1.0%.** A PON's upstream is shared on TDMA grants and a gig plan alone is most of it, so contention loss while an upload saturates is the medium behaving normally rather than a fault. It is also where Adaptive SQM does its work, since an AQM controls a queue by dropping - at the old ceiling a correctly shaping line was graded down for it. A genuinely oversubscribed segment still fails. Downstream, XGS-PON, DOCSIS and Starlink are unchanged.
+- **A report is recomputed when the inputs behind it change** - a target edit or a discovery run on any WAN, and the moment a site's agent and console are both finally up, since a report computed before that saw only part of the site.
+
+### Upstream Path Discovery
+
+- **A UniFi Cellular Modem WAN is known to be cellular before anything is probed**, so you are not asked. It is the one topology that can be settled without asking; a third-party modem or a bridged carrier router is equally cellular but looks like any other WAN, so those still ask.
+- **The modem's own tunnel endpoint is no longer offered as a first-mile hop.** It sits on your side of the radio and answers every trace in a fraction of a millisecond, so monitoring it measured the tunnel rather than the carrier. Carrier hops past it, CGNAT included, are still offered.
+- **Discovery no longer stalls on a CGNAT first mile.** A run could hang indefinitely on the step that attributes hops to networks, with nothing in the log to say why.
+
+### Device Stats
+
+- **Restarts and alerts are marked on the charts.** Every chart on the tab carries a mark on the time axis for each restart and each alert raised against a charted device, hoverable for the reason behind it: power loss, a firmware upgrade, a kernel panic, a watchdog reset. Unexpected restarts show in the warning color and planned ones are muted, marks fold together when they would collide onto one another, and they filter with the legend badges, so hiding a device drops its marks the same way it drops its line. (#1105)
+- **SFP Stats and ONT Stats carry their own.** A temperature or RX/TX power breach marks the module and port it belongs to, so a switch with several modules marks only the one that breached. An attached ONT's alerts sit on the PON charts where the counters they explain are plotted, with PON link down raised to the optics charts as well, since it is what the RX and TX traces are usually being read against.
+
+### Live View
+
+- **A download and an upload read the same color everywhere.** The rate tiles, the live chart, the **Network Performance** throughput chart and **Fabric Ingress** / **Fabric Egress** all take the same pair a speed test result uses, so a rate no longer changes color depending on which card it is on. The **Dashboard** live card shares the change.
+- **The tiles read better on a phone**, and round-trip figures hold two decimals below 100 ms and one at or above it, which also stops the tile width jumping as the number crosses over.
+
+## Alerts & Schedule
+
+- **One outage pages once, and names the WAN rather than the hosts behind it.** An access-layer break used to raise an alert per monitored target, so a single first mile going down arrived as a notification for every host behind it. There is now one open alert per WAN and per kind, classified partial or total, with a site-level alert when every WAN of a multi-WAN site drops together. A confirmed total supersedes the partial it grew out of, so the two never stack in **Active Alerts**, and Fabric and Custom targets keep their per-target alerts. Three rules ship enabled. (#1101)
+- **Rule seeding is one-time per install**, so a rule you delete stays deleted instead of returning on the next restart.
+- **The dish raises its own alerts.** Starlink reports more about itself than any other source we poll and was the only one with nothing alerting on it. Six conditions now fire from the dish poll: its own alert codes and disablement state, a sustained obstruction or persistently low SNR, alignment departing from the dish's own 7 day baseline, an Ethernet link negotiated below what that dish has been seen to reach, outage seconds accumulating over a rolling day, and the transition into a service rate limit. Their severity deliberately does not soften for a backup: a Starlink usually has no vantage, no agent and no monitored targets, so the dish is the only sensor on that link, and a degraded backup is silent by construction until the moment you need it. (#1102)
+
+## Config Optimizer
+
+- **Smart Queues Not Shaping on \<WAN\>** - UniFi Network regularly accepts the Smart Queues toggle on a WAN without provisioning the shaper: the setting reads as on, and the connection runs unshaped with nothing on screen to say so. Network Optimizer now reads the gateway's traffic control over SSH and raises a recommendation when the shaper is not actually there, with the fix - add any QoS rule in UniFi Network, which makes it provision the queues. A WAN shaped in only one direction is reported naming the direction that is not. It runs with the existing **Performance Suggestions** option, and stays silent whenever it cannot see the answer. (#1100, closes #1083, thanks @SamanthaFFM for the report and @Optic00 for the PPPoE detail)
+
+## Multi-Site
+
+- **A site with more than one WAN is told where the second one gets monitored.** A card on **Settings - Multi-Site** names the steps and names the site it means. It appears only where it is news - more than one WAN, and nothing yet monitoring the second - so a site already covered never sees it. Dismissed per user rather than per install.
+- **A deliberately disabled agent stops counting against its site.** The site card read "0/1 agents online" for a site whose only agent had been turned off, so a choice read as an outage.
+- **The Site ID preview shows the ID the site will actually get**, including the suffix added when the name collides with an existing site.
+
+## Dashboard
+
+- **A restart reason that belongs to an earlier boot is not shown.** A device that had just restarted could be shown the reason for its previous run - an AP that was power cycled kept reporting a firmware upgrade from days earlier. The **Device Status** card now resolves the reason against the boot the device is currently reporting. Nothing about how reasons are probed, classified, stored or alerted on changed. (#1099)
+
+## Settings - Audit Log
+
+- **The Admin requirement now sits on the log itself**, including the CSV and JSON exports, rather than only on the pages and endpoints in front of it. Nobody who could read it before is affected. (#1096)
+
+## Fixes
+
+- **Handing collection back from a main site's agent takes effect immediately.** Unchecking "an agent collects for this site" left the UniFi Console still being reached through the agent tunnel, so every console read failed once that agent stopped. Turning it on or off now moves the console straight onto the right path, and the device routing setting no longer appears to do nothing for up to a minute. The **Settings** hints that describe tunnel routing agree with each other again.
+- **A covered site is known to be covered before collection starts.** For up to a minute after a restart, and periodically after that, a site whose agent collects for it could behave as though it did not: probes ran from this server, device access went direct instead of through the tunnel, and a console connecting in that window stayed direct. On a server that is not on the network it monitors, that meant measuring the wrong network entirely.
+- **Probing follows the setting, device polling follows the agent.** One question used to gate both, and they are not the same question. SNMP reads a device's own counters, identical whoever asks, so this server carries on while the agent is offline and keeps the site's device history. A probe measures the path from wherever it runs, so probing and upstream traces now stand down and report that they are waiting for the agent, rather than storing this server's route under the site's name. Results from an agent still probing a site it no longer covers are discarded rather than written alongside the server's.
+- **Device SSH says it is waiting for the agent**, instead of reporting the underlying socket error, which showed up on cellular modem polling. The gateway message no longer names Adaptive SQM, since it is shown for every use of gateway SSH.
+- **Removing a main site's last agent clears its tunnel routing**, since with no agent left those settings could only point at something that would never answer. Secondary sites keep theirs, because the tunnel is their only way in.
+- **Run Test from Gateway says why it cannot run.** It needs the WAN interface list from the site's UniFi Console, and with the console unreachable the button did nothing at all.
+- **A site's name shows as soon as multi-site is turned on.** Enabling it left the header's site badge and everything else that names the current site blank until you navigated away and back.
+- **The Upstream Path Discovery link in the access technology prompt goes somewhere.** It rendered its own address as text, so it led nowhere.
+- **The QoS rule menu path reads the same everywhere.** The app gave the path to UniFi Network's QoS Rules three different ways. (#1100)
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.5.3
 
 > **On-site agents: update recommended.** Two fixes. Stopping or restarting an agent could leave a false packet-loss spike in your monitoring history: the restart cut off in-flight measurements and the incomplete results were counted as loss. And a site reaching its UniFi Console, gateway SSH, or modem / ONT pages through an agent by hostname rather than IP could be refused outright, with a misleading SSH error. IP-addressed sites were unaffected by the second. Enrolled agents will prompt to update.
