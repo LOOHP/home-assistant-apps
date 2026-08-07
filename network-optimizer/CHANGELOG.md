@@ -1,3 +1,62 @@
+## 2.6.1
+
+Accuracy fixes for ISP Health scoring and per-WAN monitoring, plus a fix for first-time Adaptive SQM deploys. See the [v2.6.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.0) for what's new in v2.6.0.
+
+## Monitoring
+
+### ISP Health
+
+- **Loaded Loss was blaming the wrong direction** - During a scheduled WAN speed test, packet loss measured while the line was saturated downloading was counted as upload loss, on every test. Loss and latency under load now go to the phase of the test that was actually running, and a measurement genuinely spanning the switch from download to upload counts toward both.
+
+- **One dropped ping no longer sets the whole figure** - A probe that loses one of its five pings reports 20% loss. On a quiet line whose only load that day was two scheduled speed tests, that single probe was the entire number - a real case read 2.1%. A direction now needs a second probe that saw loss, or a second period of load, before it reports a rate, and says so on the card when it is holding back. A line with no loss under load still reports 0%.
+
+- **A direction with no measurement no longer pulls the score with it** - When only one direction had data the other read "n/a", while the factor still counted in full toward Access Layer and took the surviving direction's value as its own. It now counts for half.
+
+- **Loaded Loss quotes the range it actually used** - The card showed the downstream range even when it had only graded upstream.
+
+### Network Performance
+
+- **A metered WAN was slowing every other WAN's targets** - Marking a WAN metered drops its own targets to a slower probe rate so it does not burn through the data plan. On a multi-WAN site it was also slowing targets belonging to other WANs, and LAN targets whose traffic never touches that plan. Upgrading repairs the affected targets automatically. **One case cannot be repaired:** a target you set to 30 or 60 seconds by hand and never assigned to a WAN is indistinguishable from one slowed by mistake, and will be returned to the faster rate.
+
+- **Targets not tied to a WAN now say so** - A target probed over whatever route the box takes reads **Not pinned to a WAN** instead of carrying the primary WAN's name. On a site that load balances, that probe measures no single WAN, and the old label promised something we cannot stand behind.
+
+- **A new vantage on your primary WAN picks up the targets it measures** - They were sitting in a bucket that vantage's own report could not see. Deleting the vantage puts them back.
+
+- **Zooming a chart no longer cancels an investigation** - Selecting a time range while investigating **Packet Loss Events** or **Loaded Loss Events** discarded the range and jumped back to the event.
+
+## Multi-Site
+
+- **A Monitoring Agent on your UniFi gateway gets the right update command** - Gateway-hosted agents on the main site were shown the bare metal, Docker and Proxmox instructions, none of which apply to them. The right command now appears even when the UniFi Console is unreachable, which is often the situation for the agent you are trying to update.
+
+## Adaptive SQM
+
+- **A first deploy no longer times out while installing** - The first deploy installs its dependencies before it can do anything else, and on a cold package cache or a slow connection that ran past the time limit. The deploy was torn down and reported as a failed boot script while it was in fact still working. Later deploys were never affected.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.6.0
 
 > **On-site agents: update required for multi-WAN monitoring.** The agent gained the ability to bind its probes to a specific WAN, which is what lets it serve as that WAN's vantage. Enrolled agents will show an **Update agent** prompt. If you run a single-WAN site, or monitor every WAN from the server, the update is optional.
