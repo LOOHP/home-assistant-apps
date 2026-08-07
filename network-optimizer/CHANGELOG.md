@@ -1,3 +1,57 @@
+## 2.6.2
+
+> **On-site agents: v2.6.x needs the v2.6.0 agent.** Nothing here changes the agent, but multi-WAN monitoring needs the WAN binding it gained then. Older agents show an **Update agent** prompt; optional on a single-WAN site.
+
+Guidance fixes for monitoring a second WAN, Monitoring cards on a phone, and a current nginx under the speed test. See the [v2.6.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.1) and [v2.6.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.0) release notes for what came before.
+
+## Multi-WAN Monitoring - Vantages
+
+- **Clearer guidance toward the right agent for your deployment** - the card now points at an agent on your UniFi gateway as the simplest way to monitor a second WAN, and the Help box gives advice that matches the prober you actually have instead of opening on the hardest path.
+- **If you set up a vantage with a LAN agent before this release, check it has a policy-based route** - that advice was previously hidden from that setup.
+
+## Monitoring
+
+- **Upstream Path Discovery no longer merges a discovered host into a hand-added target probed a different way** - an HTTPS check could be taken over by a discovered ICMP target and renamed. **If one of yours changed its name or probe type on its own, set it back by hand.**
+- **Investigate** - Loaded Loss Events works with the chart scoped to LAN, and a first search that finds nothing no longer reports "No older events".
+- Card headers, the SNMP device row caret and the Investigate buttons now fit a phone screen.
+
+## Speed Test
+
+- **Bundled nginx moved to 1.30** - picks up the current CVE fixes, and leaves a legacy 1.26 branch that had stopped getting rebuilds, which had frozen the whole container base image along with it. Docker and Windows pick this up on upgrade.
+- **External WAN speed test servers update separately** - they are built from the same image and are the ones on a public address:
+  ```bash
+  cd /opt/netopt-speed-test && curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/deploy-external-speedtest.sh | bash -s -- --update
+  ```
+
+## macOS Installer
+
+- **Homebrew's nginx is left alone unless you pass `--upgrade-nginx`** - it may be fronting other sites on that Mac. An available update is reported at the end of the run instead.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.6.1
 
 Accuracy fixes for ISP Health scoring and per-WAN monitoring, plus a fix for first-time Adaptive SQM deploys. See the [v2.6.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.0) for what's new in v2.6.0.
