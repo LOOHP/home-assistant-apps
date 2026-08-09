@@ -1,3 +1,81 @@
+## 2.6.3
+
+> **Agent update: optional this release.** The new DNS Lookup tool can run from an on-site agent's vantage, and that needs the updated agent binary. An older agent tells you so rather than answering wrongly. Everything else here works with an agent of any version, so update only if you want lookups from an agent. One time, for this release.
+
+Cellular monitoring gets its tower distance back and a way to recover a modem stuck on LTE, Network Tools gets a DNS lookup, and several recommendations that were firing when they shouldn't have been now stay quiet. See the [v2.6.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.0) for what's new in v2.6.0+. See patch notes [v2.6.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.1) and [v2.6.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.2) for other fixes and enhancements.
+
+## Monitoring
+
+- **Hover one chart, read the same instant on all of them** - point at any chart on a tab and the rest follow, crosshair and tooltip together, across Live View, Device Stats, SFP Stats, CM Stats, ONT Stats, Cellular Stats and Starlink Stats. Reading a spike against what the link was carrying no longer means lining two charts up by eye. Tooltips on the charts you are not pointing at stay short, so a tab with many series is still readable.
+- **The day is named under the axis** - the tick labels are times, so a window that crossed no midnight never said which day it was showing.
+- **Charts sit closer together, and jumping keeps your place** - less scrolling per tab, and a jumping to/from Live View/Dashboard and Network Performance is now consistent and correct for single-WAN sites.
+
+### Cellular Stats
+
+- **Reset Radio** - a 5G modem can settle on a tower that offers only LTE and stay there for days, where the only fix was rebooting it. Reset Radio cycles the radio for about seven seconds to make it pick again. It only lights up when your network permits 5G and the tower is the thing withholding it; otherwise it sits disabled and tells you why, so it will not tempt you into a pointless reset when 5G simply is not available where you are.
+- **Tower distance, site and sector** - the estimated distance to your serving tower is back, alongside the tower's site and sector identifiers. Neighboring cells that belong to the same physical tower now read as such, and signal, tower identity and 5G availability are recorded, so a modem drifting off a 5G-capable tower is something you can see the date of rather than notice weeks later.
+- **5G that is not connected explains itself** - a 5G modem sitting on LTE says why in place of the empty 5G panel, and points at Reset Radio when that is what would help.
+
+### ISP Health
+
+- **5G connections are no longer reported as dropping to LTE** - a 5G NSA connection reports on both its 5G and its LTE leg, and the score was reading the LTE leg as the whole story. A connection that never left 5G was marked as downgraded, losing points and labeling its Physical Link factor LTE. A real drop is still caught.
+- **Analyze the window Per-Network RTT is showing** - the card takes the same magnifier as the Live surfaces, opening Latency & Packet Loss on the same WAN and the same window.
+
+### Network Performance
+
+- **Rename a target in place** - the Latency Targets name takes an inline edit, so fixing a name no longer means deleting the target and adding it back.
+- **WAN Throughput draws every WAN you are comparing** - comparing two WANs was answered with one WAN's throughput. Each selected WAN now has its own download and upload.
+- **Upstream Path Discovery no longer names a regional carrier as your ISP's upstream** when your ISP is one of the large national carriers, which do not buy transit from regional ones. Discovery is otherwise unchanged, and if your ISP genuinely does buy from that carrier it is still found.
+
+### Device Stats
+
+- **UPS-2U-Pro is recognized, and UniFi power appliances are named consistently** - UniFi reports them inconsistently, with some UPS, PDU and RPS models arriving as switches and the plug and strip arriving as access points. They now all read as Smart Power wherever devices are listed. (#1112, thanks @jimstrang)
+
+### Network Tools
+
+- **DNS Lookup** - resolve a name, or an address in reverse, from any vantage you can probe from. Useful for telling a DNS problem apart from a routing one, that DNS namespaces are properly segregated, and for checking a device is getting its answers from where you expect. Where the device reports which server answered, you get that too.
+- **Ping shows what a hostname resolved to**, which traceroute already did for every hop.
+- **Verify and Run Probe land on the right vantage** - they open Network Tools on the specific WAN vantage they belong to, and the picker reliably shows it however you arrived at the page.
+
+## Wi-Fi Optimizer
+
+- **Significant Load Imbalance stops firing on client counts too small to mean anything** - the check read the spread between APs as a ratio, so three clients against one counted the same as thirty against ten. A two-AP home with four clients between them was being told an AP was overloaded and to turn its power down. It now expects the busiest AP to be carrying a real load and to be meaningfully ahead of the quietest before it says anything, and the percentage it reports comes from your APs' own client counts, where before every client on the site, wired included, inflated it.
+
+## Performance Tweaks
+
+- **UniFi OS 5.1.29 is supported.**
+
+## Fixes
+
+- **One unreachable device could take a site's Console connection down (Multi-Site Agent)** - a monitored device on an address that answers nothing, a typo'd IP or a device that had gone away, was enough to make a site with an on-site agent report its Console as disconnected temporarily. The agent was fine throughout and continued collecting and pushing data to the server.
+- **Provider Settings links are now restricted to site admins** - instead of showing the Settings links which result in an access denied error to Operators and Viewers, they're now hidden.
+- **Also fixed:** **Network Tools** shows device types by name in the vantage selector instead of raw enum members, **Latency Targets** filtering now works properly and intuitively, and AS14593 reads as SpaceX instead of "Space Exploration" wherever it appears in ISP Health and Upstream Discovery.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.6.2
 
 > **On-site agents: v2.6.x needs the v2.6.0 agent.** Nothing here changes the agent, but multi-WAN monitoring needs the WAN binding it gained then. Older agents show an **Update agent** prompt; optional on a single-WAN site.
