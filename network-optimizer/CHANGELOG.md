@@ -1,3 +1,53 @@
+## 2.6.4
+
+More useful failures, and monitoring targets that survive the device moving.
+
+See the [v2.6.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.0) for what's new in v2.6.0+, plus [v2.6.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.1), [v2.6.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.2) and [v2.6.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.3).
+
+## Monitoring
+
+- **Failed polls say what went wrong** - The **Cable Modem Stats**, **ONT Stats**, **Cellular Stats** and **Starlink Stats** cards now say whether the device never answered, refused the saved sign-in, or answered with something unreadable. Same on the **Test** button in Settings, which used to print raw framework text at you.
+
+### Network Performance
+
+- **Latency Targets survive a device moving or leaving** - A device that changes management IP or drops off the console no longer has its target rewritten or left stranded. The old target is retired with its measurements intact, and a replacement carries over the cadence and whether you had it paused. **Remove** now takes a target off the list instead of destroying what it recorded.
+- **Inactive series on the Latency and Packet Loss charts** - A toggle brings back retired, removed and paused targets, drawn faded. A device that moved keeps its earlier stretch by default, so a long history draws as one line handing over at the move.
+
+### Cable Modem Stats
+
+- **Vodafone Station (ARRIS TG3442DE)** - Vodafone's German cable gateway, selectable under **Provider**. Reports channels like any other modem. (#1087, thanks @njoerd114 for the reference implementation and firmware detail)
+- **Technicolor CGA Series** - Technicolor CGA gateways, as shipped by VOO and Vodafone among others. Not yet confirmed against a physical unit, so treat it as new support to try and tell us how it goes. (#1124, thanks @srialmaster for the interface capture)
+
+## Fixes
+
+- **Upstream Path Discovery review banner opens the right WAN** - On multi-WAN sites it could open a different WAN's trace than the banner named. Single-WAN sites were never affected.
+- Also fixed: button alignment and mobile spacing in **Latency Targets**, spacing on the **Starlink Stats** action row, and the "Set up a monitoring interface" hint, which stopped appearing on the failures it is meant for.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.6.3
 
 > **Agent update: optional this release.** The new DNS Lookup tool can run from an on-site agent's vantage, and that needs the updated agent binary. An older agent tells you so rather than answering wrongly. Everything else here works with an agent of any version, so update only if you want lookups from an agent. One time, for this release.
