@@ -1,3 +1,159 @@
+## 2.7.0-preview1
+
+Preview release, not a normal one. This isn't a permanent channel - it's a one-off for a feature
+worth putting miles on before it ships to everyone. Firmware Rollout upgrades a whole site's firmware
+in an order that keeps the network up, at the hour your own traffic says nobody will notice, and
+verifies every device actually landed on the version it was told to install. It works. We want it
+running on more hardware than we own before it goes GA.
+
+Everything else in here is finished work that would have shipped in a normal release.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Firmware Rollout
+
+New under Config Optimizer: plan a rollout for the whole site, watch it run on the topology map, and
+get a report at the end.
+
+If you run a couple hundred devices you already know better than to hand UniFi Network the whole
+site at once and hope. So firmware waits - sometimes for months - on exactly the networks where
+staying current matters most. A home lab has smaller stakes, but a mid-day outage is still a mid-day
+outage. Firmware Rollout gives you one click's worth of effort with the ordering, timing, and
+verification a careful operator would do by hand (minus the evening babysitting it).
+
+The way most people will end up running this is Autopilot: turn it on once and staying current stops
+being a task. When updates are waiting, a rollout gets planned and booked into the quietest window at
+least your configured notice ahead, announced before it starts with a link to postpone or stop it.
+It can also hold new firmware back until it's aged a while. Off by default, and everything below
+works just as well as a one-off you drive yourself.
+
+- **Plan a Rollout** - three steps with working defaults, so Next is always one click. Pick a
+  release channel, pick a schedule, review the plan before anything happens.
+- **The quiet window comes from your site** - four weeks of your LAN and WAN activity in your
+  timezone, proposed as a start window you can move with a slider.
+- **The order keeps the network up** - leaves first, gateway last, mesh children before parents, and
+  APs paired by coverage so clients always have somewhere to roam.
+- **One device per model goes first, alone** - the rest of that model wait on its verdict. It passes
+  if it kept reporting health, CPU and memory didn't come back heavier than the hour before the
+  upgrade, and (where the device is a monitored latency target) it isn't losing more probes than it
+  was. Thresholds are relative moves with absolute floors, so a device that settles slightly higher
+  or a target that was already flaky can't abort its whole model for standing still. A canary that
+  fails stops its own model and nothing else.
+- **Upgraded means verified, not commanded** - UniFi Network reports an upgrade as accepted long
+  before anything has flashed, and sometimes when nothing will. A device only counts as upgraded when
+  it comes back on the version it was sent. A down-and-up that returns on the old version is a
+  failure; a command that produces no visible transition escalates to SSH. The first five minutes
+  after a boot get discarded as reboot noise, then the same health comparison runs across an
+  hour-long soak where a regression notifies you instead of stopping the rollout.
+- **Watch it happen** - the plan plays back on the 2D topology map before you commit, and runs live
+  during the rollout with Pause, Approve Next Wave, Postpone, Abort, and per-device rollback.
+- **Console updates are part of it** - UniFi Network application first, UniFi OS last, each only
+  when an update is actually waiting. UniFi OS on a self-hosted Server is deliberately left alone;
+  the Network application and your devices are still covered.
+- **No downgrades** - switching to a less aggressive channel makes UniFi offer an older build as an
+  available update. A device only upgrades when the build is genuinely newer than what it runs,
+  checked again right before install.
+
+## Monitoring - ISP Health
+
+- **One line per incident in Path & Congestion Events** - a bottleneck shows on every hop behind it,
+  so one incident used to arrive as several rows covering the same hours. Overlapping events with the
+  same disposition now collapse to one line, named after the hop where the bottleneck actually sits,
+  with per-hop readings a click away. Confirmed incidents also absorb overlapping events that
+  couldn't be verified on their own.
+- **Congestion lines show what the line was carrying** - median WAN utilization across the event
+  window, once it hits 10% of your plan speed.
+- **Path shifts keep every path they were seen on** - each path carries its own before and after now,
+  folded under Show N paths, instead of one path's reading and a count of the rest.
+- **Events follow the chart's filter** - isolating a line with the filter chips narrows the event
+  list and chart annotations to match.
+- **Export PDF carries the transit weights** - a 25%-weighted 40 no longer reads as a 40 the average
+  somehow ignored. The printed report also gains hop addresses, an off-path marker, and the limiting
+  factor for each network.
+
+## UniFi Console Connection
+
+- **Pages draw immediately** - a page used to be held back by its slowest call. A console waiting
+  out a timeout, an SSH probe, an SNMP poll, a large history query... any one of them stalled
+  everything, and that's where most of the app's unexplained lag was coming from. Pages now appear
+  right away and each card fills in behind its own spinner; a slow dependency only delays its own
+  card.
+- **Consoles that stop answering fail fast** - a console that's paused, restarting, or upgrading
+  completes the connection and then never replies, which used to cost the full timeout on every call.
+  Those now fail fast and retry on a cooldown. A console reached through an agent recovers on its own
+  after a brief outage instead of needing something to un-stick it.
+- **Live View stays on the page when the console is down**, says so, and points at the Monitoring tab
+  whose timeline still plays back.
+- **Coming soon** - generate a full UniFi OS support file for a site and download it without leaving
+  Network Optimizer, so opening a ticket with Ubiquiti doesn't mean going and fetching fresh evidence
+  by hand. Landing in the next preview build (#1129, thanks @SemoTech for the idea).
+
+## Performance Tweaks
+
+- **UniFi OS 5.1.30 supported** - security and maintenance patch over 5.1.29, verified against the
+  performance tweaks and the SGMII+ module.
+
+## Fixes
+
+- **Monitoring charts no longer leave hover dots behind** when you leave a chart by the axis or
+  legend, or dismiss a synced sibling.
+- **SSH.NET updated for GHSA-q939-rpr3-3284** - the advisory covers recursive SCP downloads, which
+  this app has never done, so there was no exposure. Updated so the build is clean of it regardless.
+
+## What we'd like back
+
+If you run a rollout, tell us what your gear did - starting with how long each model took to go down
+and come back, because that's data we can't get from hardware we don't own. Also useful: which
+console you're on (Cloud Gateway or self-hosted Server), anything that stalled and whether the alerts
+fired around it, and whether the proposed quiet window matched your own sense of when your site is
+idle.
+
+You can go back to v2.6.4 at any time. This release only adds new tables, so the older build just
+ignores them.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker**:
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && sed -i -E 's#(network-optimizer|speedtest):(latest|preview)#\1:preview#' docker-compose.yml && docker compose pull && docker compose up -d"
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c "cd /opt/network-optimizer && sed -i -E 's#(network-optimizer|speedtest):preview#\1:latest#' docker-compose.yml && docker compose pull && docker compose up -d"
+  ```
+- **Windows**: install the v2.7.0 MSI over the top
+- **macOS**: `git checkout main && ./scripts/install-macos-native.sh`
+
 ## 2.6.4
 
 More useful failures, and monitoring targets that survive the device moving.
