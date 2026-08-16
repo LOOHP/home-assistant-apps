@@ -1,3 +1,88 @@
+## 2.7.0-preview2
+
+This is the second preview of v2.7.0. Start with the [v2.7.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview1) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
+
+v2.7.0 is shaping up as two things. Firmware Rollout is the headline: it upgrades a whole site's firmware in an order that keeps the network up, at the hour your own traffic says nobody will notice, and it verifies every device actually landed on the version it was told to install. Alongside it, Network Tools becomes where you go when a gateway is misbehaving, with the kernel's own account of what happened and the support bundle Ubiquiti asks for when you file a ticket.
+
+This build delivers the support file preview1 said was coming, adds gateway kernel diagnostics next to it, and fixes a handful of Firmware Rollout issues that only turned up on real sites. If you're already on the preview, it's just a pull.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Network Tools
+
+- **Console Support File** - generate the full UniFi Support File from your console and download it, so opening a ticket with Ubiquiti doesn't mean going and fetching fresh evidence by hand. It's the same bundle the UniFi Console produces under Settings - Control Plane - Console. It defaults to Network and UniFi OS, which keeps the archive manageable on a console running Protect; tick **Include all applications** when you need everything. Needs a username and password connection with the Super Admin role or the Control Plane - Full Admin permission (an API key can't do this, and the card tells you so). Site Admin only. (#1129, thanks @SemoTech for the idea)
+- **Gateway Diagnostics** - read the gateway's kernel log and get it back sorted: link and SFP events, resets and their reasons, out-of-memory kills, kernel panics, PCIe and storage errors. High-volume noise is counted rather than listed line by line, and if there's so much of it that your boot events have been pushed out of the ring buffer, it says so. Raw output is a click away. It reads over SSH and changes nothing, so any role can run it, and it needs your gateway SSH credentials set in Settings - Connection.
+
+## Firmware Rollout
+
+- **A device's color variants count as one model** - Ubiquiti ships the same hardware in more than one shell, and a U7-Pro-XG and the black U7-Pro-XG-B arrive as different models even though they take the same firmware. Exclusions, channel pins and canary selection all saw two. The canary is where that cost something: a canary only exists where a model has more than one device, so a site with one of each color got no canary on either, and two identical APs upgraded with nothing gating them. Exclusions and channel pins you've already saved keep working, and now cover the other color. (#1141)
+- **Excluding a model in the wizard does what the rollout does** - exclude a U7-Pro-XGS and the black one stayed ticked, still offering Exclude model, while the plan was going to exclude both. The screen and the rollout agree now. (#1144)
+- **A model rule outranks the individual ticks it covers** - tick two devices, then exclude their model, and both checkboxes stayed live. Unticking them did nothing. Those rows are disabled with the reason now, like any other exclusion the plan derives.
+- **The UniFi OS checkbox stays hidden on API key connections** - it was offering an update it had no way to carry out. The UniFi Network application checkbox was already gated that way.
+- **The wizard tells you when console upgrades need more permission** - updating the UniFi Network application or UniFi OS needs the console user to hold Super Admin, or Control Plane - Full Admin. Tick either box and it says so, rather than letting you find out when the step fails.
+
+## Proxmox
+
+- **New containers get a 20 GB disk** - Docker never reclaims the image an upgrade replaces, so every update leaves a full copy behind (~650 MB) for the life of the container. On the old 10 GB default that eventually fills the disk, and a full disk reaches the app as a SQLite "disk I/O error" at startup, which points you at the database rather than the disk. The documented upgrade commands now clean up what they replace.
+- **An existing Proxmox container keeps the disk it was built with.** Run `docker image prune -a -f` in it once to reclaim whatever has already stacked up; it touches no data. The preview upgrade command below already does this for you.
+
+## Fixes
+
+- **A tooltip no longer outlives what it described** - clear a model exclusion and the "excluded by the rule" tooltip kept hovering over a checkbox that wasn't excluded any more. Fixed for every tooltip in the app that comes and goes with what's on screen, not just that one.
+
+Also dropped a commented-out InfluxDB block from the Docker compose file that never configured anything: InfluxDB is set up in Settings - Monitoring, through the UI.
+
+## What we'd like back
+
+If you run a rollout, tell us what your gear did - starting with how long each model took to go down and come back, because that's data we can't get from hardware we don't own. Also useful: which console you're on (Cloud Gateway or self-hosted Server), anything that stalled and whether the alerts fired around it, and whether the proposed quiet window matched your own sense of when your site is idle.
+
+New this build: if you generate a Support File, tell us your console model and roughly how long it took. And if Gateway Diagnostics turns up something you recognize on your gateway (or misses something it should have caught), that's worth a line.
+
+You can go back to v2.6.4 at any time. This release only adds new tables, so the older build just ignores them.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+- **Windows**: install the v2.7.0 MSI over the top
+- **macOS**: `git checkout main && ./scripts/install-macos-native.sh`
+
 ## 2.7.0-preview1
 
 Preview release, not a normal one. This isn't a permanent channel - it's a one-off for a feature
