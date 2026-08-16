@@ -1,3 +1,76 @@
+## 2.7.0-preview3
+
+This is the third preview of v2.7.0. Start with the [v2.7.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview2) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
+
+This build is about making the rollout work on real-world UniFi accounts, not just the idealized ones. Local admin users (which is most of them now that Ubiquiti removed local Super Admin creation) were getting blocked at every turn: the pre-flight backup, the release channel switch, and console updates all need permissions a local admin doesn't have. Those paths now fall back to SSH when the API won't cooperate, and the backup runs best-effort instead of gating the entire rollout.
+
+The other half is timing: the post-upgrade verification window was 15 minutes per wave, which meant a 3-switch rollout took 45 minutes longer than the actual upgrades. Real boot spikes settle in about 2 minutes, so the window is now 5 minutes for APs and switches (gateways keep 10 minutes since they restart the whole console). The timeline the wizard shows used to not include the cooldown at all. It does now.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Firmware Rollout
+
+- **SSH fallback for console updates** - if the API trigger for a UniFi Network or UniFi OS update is refused or the console can't see the update (because the channel switch needs Super Admin), the rollout falls back to SSH through your configured gateway credentials: `apt-get install` for the Network application, `ubnt-systool fwupdate` for UniFi OS. The download URLs are captured when the plan is built, so autopilot has them too. If SSH also fails, device upgrades go ahead rather than stalling.
+
+- **The pre-flight backup no longer blocks the rollout** - the backup endpoint needs Super Admin, which a local admin account can't hold. It now runs best-effort when the plan includes a console update: if it works, great; if it doesn't, the rollout notes it in the report and moves on. Device-only rollouts skip it entirely.
+
+- **Faster verification, accurate timeline** - the post-upgrade cooldown was 15 minutes per wave; it's now 5 minutes for APs and switches (3 minutes of boot settle, 2 minutes of clean sampling). Gateways keep 10 minutes since they restart the whole console. The timeline in the wizard and the live view now include the cooldown, so the displayed ETA actually matches what happens.
+
+- **Alerts stay quiet during the rollout** - a switch reboot takes everything behind it dark, and a console update takes the whole site dark. Device-offline and monitoring-target alerts are now suppressed site-wide while any device is mid-upgrade, not just for the device being firmware-upgraded. Aborting mid-upgrade keeps suppression open for devices still finishing their cycle.
+
+- **Cooling down shows as Cooling down** - the map was labeling post-upgrade verification as "Upgrading." It gets its own state and color now.
+
+## Security Audit
+
+- **Missing firmware download access on isolated management networks** - the audit already checked for `ui.com` access (cloud management) on isolated management VLANs with internet disabled. It now also checks for `ubnt.com` (firmware downloads). Without it, devices on that VLAN can talk to their console but can't download firmware updates.
+
+## What we'd like back
+
+Same as preview2: model timings, console type, anything that stalled. New this build: if a rollout fell back to SSH for a console update, tell us - we want to know how common the permission gap is and whether the fallback behaved.
+
+You can go back to v2.6.4 at any time. This release only adds new tables, so the older build just ignores them.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+
 ## 2.7.0-preview2
 
 This is the second preview of v2.7.0. Start with the [v2.7.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview1) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
