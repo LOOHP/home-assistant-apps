@@ -1,3 +1,84 @@
+## 2.7.0-preview4
+
+This is the fourth preview of v2.7.0. Start with the [v2.7.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview3) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
+
+preview3 was about getting rollouts to actually run on real UniFi accounts. This one is about what you see on either side of the run: the settings Autopilot is going to use, and a report that finally accounts for the gateway.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Firmware Rollout
+
+- **Autopilot settings are on the page** - when Autopilot is on and nothing is scheduled, the page shows your channel configuration and exclusions with a Save button. Previously the only way to see them was to walk back through the wizard.
+
+- **Autopilot stops switching itself off** - scheduling a one-off rollout used to turn Autopilot off silently, and that one-off's scope quietly became your standing configuration. There are proper Turn off Autopilot and Re-enable Autopilot controls now, and turning it off keeps your channels and exclusions.
+
+- **The gateway is in the report** - your console was the one device the post-rollout report ignored. It now gets a row with the UniFi OS version it went from and to, its downtime, and its CPU and memory before and after, in the PDF as well.
+
+- **Console updates show versions** - the report said "updated" for the UniFi Network application and UniFi OS. It now says what they went from and to.
+
+- **Your saved Autopilot channel survives the wizard** - opening the wizard reseeded the global channel from the console, so a saved Early Access setting came back as Release Candidate. Canceling now reloads what you have saved rather than leaving unsaved edits on screen.
+
+- **Correct connection type on agent-served sites** - a slow agent tunnel returning an empty response was read as API key auth, so a site reached through a Multi-Site agent could be told it used an API key when it didn't. It now reads the connection's actual authentication method.
+
+- Firmware version links to Ubiquiti's changelog have been removed. They pointed at the wrong place and wanted a sign-in for anything on Early Access.
+
+## Security Audit
+
+- **Firmware download check now covers management networks that can't be isolated** - the preview3 check only fired when the network had UniFi's isolation toggle on, and VLAN 1 cannot have that toggle at all. It now fires on any management network without effective internet access, and names `fw-download.ubnt.com`.
+
+## Fixes
+
+- **LAG ports no longer flagged as misconfigured trunks** - only the LAG's parent port was recognized as an uplink, so the other members fell through every exemption and were flagged for excessive tagged VLANs. Config Optimizer also stops suggesting individual port profiles for LAG members. (#1142, thanks @RichardD012 for the report and the diagnosis)
+
+## What we'd like back
+
+Same as preview3: model timings, console type, anything that stalled, and whether a console update fell back to SSH.
+
+New this build: the gateway's row in the post-rollout report. The downtime and the before/after numbers for the console are measured differently than they are for a switch or an AP, so if yours look wrong, or the row is missing entirely, we want the report. And if you were already running Autopilot before this build, check that its channels and exclusions look right on the page after upgrading.
+
+You can go back to v2.6.4 at any time. This release only adds new tables, so the older build just ignores them.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+
 ## 2.7.0-preview3
 
 This is the third preview of v2.7.0. Start with the [v2.7.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview2) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
