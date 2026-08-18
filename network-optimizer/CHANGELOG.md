@@ -1,3 +1,88 @@
+## 2.7.0-preview5
+
+This is the fifth preview of v2.7.0. Start with the [v2.7.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview4) and go back from there for more detail.
+
+This build is mostly about firmware rollout speed. A device cooling down after its upgrade used to hold up the entire rollout, and AP waves were capped at a handful no matter how big the site was.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Firmware Rollout
+
+- **Unrelated devices no longer wait on each other** - a wave can start while an earlier one is still cooling down, unless something links them: the same model, APs covering the same space, one device above the other in the uplink path, or a pending channel switch.
+
+- **AP waves are sized by coverage** - where the site has AP placements, the rollout upgrades as many APs at once as coverage allows instead of capping at a handful. Big sites get the share whether or not they are placed, since placement is optional and a 200-AP site cannot roll three at a time.
+
+- **A device is no longer failed for an outage it didn't cause** - the post-upgrade check treats silence as failure, but telemetry stops for plenty of reasons that have nothing to do with the device. It now waits for the site to come back before judging.
+
+- **Console-only rollouts read as rollouts** - one covering just the console announced "0 devices across 0 waves", and its report row named a generic Cloud Gateway rather than your gateway.
+
+- **Better gateway time estimates** - the Cloud Gateway seed was 18 minutes and had never actually been measured. Five real upgrades since came in under 5 minutes.
+
+## Monitoring - Live View
+
+- **Devices you place stay where you put them** - a placed device drifted back to the layout's guess when it roamed to another AP, when it came back after being offline, or anywhere in playback.
+
+- **Playback shows the clients that were actually connected** - scrubbing back drew every client connected right now at every past instant, at whatever rate it was last running. A client that was offline now comes back with its traffic rather than a dead line.
+
+- **Each WAN's globe shows its own latency** - during playback both globes on a multi-WAN site read whichever measurement sat nearest that instant, so the RTT could land on the wrong WAN. Live was always right.
+
+- **Clients sit in the room their AP is in** - they were spread on a ring around the AP, and scattered wider still on big rooms. They now fill the room they belong to, staggered by height, with the overflow stepping outside when it runs out of space.
+
+- **Wi-Fi link speeds play back** - a client's signal and band moved with the timeline but its link speed showed today's rate at every instant.
+
+- **Bridges show their throughput in playback** - a UniFi Device Bridge had ingress and egress live and nothing while scrubbing.
+
+- **Infrastructure links stay drawn when you filter by name** - filtering for a client was cutting the switch and AP links out with it.
+
+## Fixes
+
+- **Site admins can act on their own site** - placing a device on the map, editing floor plans, writing UPnP notes and adding custom OIDs all demanded install-wide Admin, so a Site Admin or Site Operator got refused on work the screens offered them.
+
+## What we'd like back
+
+How the faster rollouts behaved on real fleets: whether anything went down together that shouldn't have, and how the estimate compared to the clock.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+
 ## 2.7.0-preview4
 
 This is the fourth preview of v2.7.0. Start with the [v2.7.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview3) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
