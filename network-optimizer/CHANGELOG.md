@@ -1,3 +1,68 @@
+## 2.7.0-preview6
+
+This is the sixth preview of v2.7.0. Start with the [v2.7.0-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview5) and go back from there for more detail.
+
+This one is about channel recommendations: how much Network Optimizer trusts what it measured on each channel, and what your clients got while they were on it.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Wi-Fi Optimizer - Channel Recommendation
+
+- **Channel changes now consider how your clients were actually doing** - the optimizer judged a channel by what the radio saw of it: airtime, interference and retries. Where you have monitoring history it now also weighs the link rates your clients were negotiating there, which fold in signal, noise and interference at once. A channel that measured clean but ran your clients slower will not be recommended.
+
+- **What the optimizer learned on a wide channel is no longer split up** - on 5 and 6 GHz a bonded channel covers the same spectrum whichever number it goes by, but time on 149 and time on 157 were remembered separately, and each half alone was often too thin to use. They count together now, so wide channels get recommended on everything actually measured there.
+
+- **Old measurements are trusted according to how much has probably changed since** - on a band crowded with neighbors things move fast, so last month's reading counts for less than the same reading on a quiet band. A fading memory of a bad channel also beats no memory at all: an AP could previously be moved onto its worst channel because the evidence against it had simply expired.
+
+- **The channel analysis is quicker to open** - the plan is worked out once and kept for an hour rather than recalculated on every visit. The card tells you which view you are looking at and when the plan was computed, and Recompute rebuilds it whenever you want.
+
+## Fixes
+
+- **Coming back to the app no longer refreshes the page out from under you** - mostly on mobile with Network Optimizer installed to your home screen: it would open, work for a couple of seconds, then reload and throw away where you were.
+
+- **Your logs are much quieter** - a lot of routine polling chatter was being written at Info level, which is what installs run at by default.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the newest preview, never stable. Coming back is a change you make, not one that happens to you - and if you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+- **Windows**: install the v2.7.0 MSI over the top
+- **macOS**: `git checkout main && ./scripts/install-macos-native.sh`
+
 ## 2.7.0-preview5
 
 This is the fifth preview of v2.7.0. Start with the [v2.7.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview4) and go back from there for more detail.
