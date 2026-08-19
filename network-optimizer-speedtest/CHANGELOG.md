@@ -1,3 +1,78 @@
+## 2.7.0-preview8
+
+This is the eighth preview of v2.7.0. Start with the [v2.7.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview7) and go back from there for more detail.
+
+ISP Health congestion detection got significantly more accurate this round: brief bufferbloat under your own load is correctly suppressed from the ISP's score, and outage scoping no longer drifts between time ranges.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Monitoring
+
+### ISP Health
+
+- **Brief bufferbloat under load no longer scores as ISP congestion** - a download that saturates the line for a few minutes adds a uniform latency floor to every monitored path, but the bucket-padded event window diluted it into a per-hop Confirmed event that penalized the ISP. ISP Health now recognizes the uniform floor as your own access link under load and suppresses it from scoring (Loaded Latency, not Congestion).
+
+- **Loaded loss and latency recommendations account for how SQM rates compare to measured throughput** - when Adaptive SQM nominal rates are already close to what the line delivers, the advice says so rather than telling you to keep lowering them.
+
+- **LAN/Gateway outages classify consistently across all time ranges** - a brief outage where the gateway went dark could read as a whole-WAN outage or total loss on the 30-day view while the 7-day view correctly showed LAN/Gateway. Now consistent regardless of the window.
+
+## Firmware Rollout
+
+- **Backup notice in the wizard** - an info notice explains that a Console backup will be attempted before the rollout starts, and that UniFi Network and UniFi OS take their own before applying each update. Dismissible per user.
+
+- **History table scrolls to the report** when you click Report.
+
+- **Autopilot Save and Turn off Autopilot** buttons moved to the right-hand side.
+
+- **Outcome chips** in the history table: Partial (yellow) and Failed (red).
+
+## Fixes
+
+- **Proxmox agent install command** no longer shows literal `\n` instead of line breaks.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+- **Windows**: install the v2.7.0 MSI over the top
+- **macOS**: `git checkout main && ./scripts/install-macos-native.sh`
+
 ## 2.7.0-preview7
 
 This is the seventh preview of v2.7.0. Start with the [v2.7.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview6) and go back from there for more detail.
