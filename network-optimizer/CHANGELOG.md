@@ -1,3 +1,74 @@
+## 2.7.0-preview7
+
+This is the seventh preview of v2.7.0. Start with the [v2.7.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview6) and go back from there for more detail.
+
+This one is about the rollout executor getting honest about what it knows, and a shared firmware catalog that makes EA ungating your problem to solve rather than Ubiquiti's.
+
+**Nothing moves you back to stable on its own. Read "Coming back to stable" before you install.**
+
+## Firmware Rollout
+
+- **Shared firmware catalog** - Ubiquiti progressively ungates EA and RC firmware: one console might see a build days before another on the same channel. The planner now pools every build it sees across your install and offers it to any site whose console hasn't noticed it yet, gated on model and channel. If you opted into EA, you get EA - without waiting for Ubiquiti's per-console rollout. Seeded from your existing rollout history on first startup, then maintained from every catalog refresh going forward.
+
+- **Drift detection and Deploy Now** - if new firmware lands after a rollout is scheduled, the page tells you what changed and offers Re-plan, which jumps straight to the preview with fresh data. Deploy Now kicks off a scheduled rollout immediately with a two-click confirmation.
+
+- **Alert suppression** - device offline/recovered and Console connection alerts stay quiet during the rollout: per-device while it upgrades, site-wide while the Network application or UniFi OS is updating, and for five minutes after so everything can reconnect. A rollout where nothing upgraded skips the soak entirely.
+
+- **Network application update detection overhauled** - the orchestrator now waits for the application to actually go down, then verifies the installed version matches the target before proceeding. Previously it settled "updated" the moment the console answered, even if the application was still downloading. The SSH fallback uses the correct command per device type (`ubnt-systool fwupdate` for gateways, `upgrade` for APs and switches) and no longer attempts console-level installs on standalone gateway sites where the gateway isn't the console. Cellular modems use the console-cached upgrade path (the modem pulls from the console over LAN rather than downloading directly from the CDN, which its management interface may not be able to reach).
+
+- **Scope counts and reports** - the wizard, history table, and rollout report now include console-level updates in their device and wave totals, and the report table carries a row for the Network application update. The console is one device regardless of how many surfaces update on it. Cellular modems have their own timing class with estimates based on measured upgrade cycles.
+
+## Adaptive SQM
+
+- **IFB device check is more resilient** - some gateways return a non-zero exit status from `ip link show` even when the device is present. The check now falls back to output matching.
+
+## Cable Modem Stats
+
+- **Technicolor CGA4233VOO** firmware variant support (#1152).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future preview builds are just a pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.6.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.6.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+### Coming back to stable
+
+The `:preview` tag only ever points at preview builds, so pulling it after v2.7.0 ships gets you the
+newest preview, never stable. Coming back is a change you make, not one that happens to you - and if
+you haven't turned on pre-release update notifications, nothing will tell you v2.7.0 is out either.
+
+When v2.7.0 releases, switch back to stable:
+
+- **Docker**: retag to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+  ```bash
+  pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+  ```
+- **Windows**: install the v2.7.0 MSI over the top
+- **macOS**: `git checkout main && ./scripts/install-macos-native.sh`
+
 ## 2.7.0-preview6
 
 This is the sixth preview of v2.7.0. Start with the [v2.7.0-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview5) and go back from there for more detail.
