@@ -1,3 +1,115 @@
+## 2.7.1
+
+**On v2.7.0 with multi-site enabled on a non-Docker install, and cannot reach the app in a browser? That is fixed here.** See Fixes below.
+
+Settings gets a search box, cable modem monitoring covers Comcast Business gateways, and an alert now takes you to the moment it fired instead of dropping you wherever you happened to be looking. See the [v2.7.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0) for what's new in v2.7.0+.
+
+## Settings
+
+- **Search box** - Settings is 25 cards across eight tabs, and finding the one you want has meant knowing which tab it lives on. Type what you are after and it takes you straight there, switching tabs and highlighting the card the same way an in-app link does.
+- **It answers questions, not just names** - "change password", "kiosk", "how do I allow my Apple TV on the main network" all land somewhere sensible, because the index carries the words people actually type rather than the words printed on the cards.
+- **Main-site settings are reachable from anywhere** - searching for Sign-In or Audit Log from a managed site finds them, labeled with the site they live on, and picking one switches you over and lands on the card in a single step.
+- **_Coming Soon_** - the same search across the entire app, not just Settings.
+
+## Monitoring
+
+- **Each tab remembers the time window you left it on** - working at 7d meant resetting from 24h on every single visit. The preset is now remembered per site and per tab, in that browser. A window you arrived at from a link or a custom range is not remembered, since both are pinned to a moment that has quietly aged by the time you come back.
+
+### SFP Stats and ONT Stats
+
+- **PON error and bandwidth charts** - HEC corrected, BWmap, and BWmap corrected were being collected all along with nowhere to appear, along with the host link mode. On a link whose OLT profile has FEC turned off, BIP was the only series that could move, so an ONT taking real errors looked quiet.
+- **A signal gauge on the Fiber ONT Stats card** - a gradient bar beside optical receive power on the Dashboard card. Receive power is a band with a fault at either end rather than a number that only climbs, so this one lights the stretch your reading sits in instead of filling from the bottom like the cable modem's.
+- **To keep getting BIP error notifications**, drop the **ONT: BIP Error Spike** rule's minimum severity to Info.
+
+### Cable Modem Stats
+
+- **Comcast Business gateways are supported** - the CGA4332COM and its siblings run Comcast's own web interface rather than the Technicolor firmware their hardware suggests, and they keep their DOCSIS tables somewhere residential firmware does not. Network Optimizer now finds the right page on its own instead of leaving you to work out the path, and reads the channel tables in either of the two layouts Comcast ships.
+- **The modem's model shows on the Dashboard card** - taken from the poll rather than from what you typed, so it names whatever actually answered.
+- **A signal gauge on the Dashboard card** - a gradient bar beside the SNR reading, so you can see how much margin you have without knowing the healthy range by heart. SNR only climbs, so the bar fills as it improves.
+
+### Device Stats
+
+- **UXG-Lite temperature no longer reads 48000 C** - it reports its thermal sensor in thousandths of a degree where other gateways report degrees, and nothing was reading the difference. History recorded at the wrong scale displays correctly too, so the chart is right going backwards as well as forwards. (#1158, thanks @UnbelievablyNoah for the report)
+
+### Multi-WAN Monitoring
+
+- **Probe source knows when a policy route is already steering an agent** - it reads the route rather than assuming, so an agent the gateway is steering is shown as steered instead of warned about. Where a warning is still warranted it now says what it costs you: the probes get recorded against this WAN either way, which is the part that bites.
+- **A steered agent still collects SNMP when it is the site's collector** - on a site where every agent sits behind its own WAN, the collector is necessarily a steered agent, and the rule standing steered agents down meant that site got no SNMP at all.
+
+### Upstream Path Discovery
+
+- **Verizon connections get curated upstream endpoints** - Verizon Business (AS701) and Verizon Wireless (AS6167 and AS22394), keyed to eight Verizon speedtest points of presence, for the case where nothing in your first mile answers ICMP and discovery has nothing to aim at. All eight were verified reachable before being added.
+
+## WAN Speed Test
+
+- **Pick which WAN an agent-run test measures** - on a site with more than one agent the test went to whichever agent had connected most recently, which on a mixed site could be the agent on your gateway. That one carries no speed test binary by design, so a site with a perfectly good speed test agent got told the binary was missing. You now choose the WAN, and the field works exactly like the one on Latency Targets.
+- **A WAN you cannot honestly measure is not offered** - if a test from that agent would leave by a different WAN than the one named, it refuses and says why rather than filing the number under the wrong WAN. An agent that is merely offline keeps its WAN listed, since it will be back.
+
+## Alerts & Schedule
+
+- **Alerts open on the moment they fired** - an SFP, ONT, cable modem, cellular, or Starlink alert used to link to its tab with no window at all, so following it dropped you wherever that tab was last left. Older alerts already in your history were repaired too, as far back as the 90 days of data behind them.
+- **Device offline, recovered, and restarted alerts have a View button** - those three carried no link at all, so there was nothing to follow from the alert or from its notification. Alerts already in your history get one built for them.
+- **A speed test alert opens the result it is about** - it now turns to the page holding that result, expands it, and highlights the row, instead of leaving you to find it in the history yourself. A WAN speed alert also carries the WAN it is about, which on a multi-WAN site it did not, so following one opened whichever WAN the page was last left on.
+- **Internet service alerts open the Internet chart** - they were linking to **Custom**, the chart for targets you added yourself. A custom target left on **Default path** now opens showing every WAN, rather than whichever one the filter was last left on, and existing alerts are repaired the same way.
+- **The History source filter lists every source** - it offered seven of the fourteen in use, so ONT, SFP, cable modem, and rollout alerts, among others, could not be filtered for at all.
+
+## Performance Tweaks
+
+- **[UniFi OS 5.1.31 is supported](https://github.com/Ozark-Connect/unifi-perf-tweaks/blob/main/docs/compat-5.1.31.md)** - the compatibility notes cover what was verified on it.
+
+## Multi-Site
+
+- **Running multi-site or multi-WAN agents behind a reverse proxy? Add the tunnel route.** Agents dial home over a long-lived gRPC tunnel that needs a route of its own. On a [NetworkOptimizer-Proxy](https://github.com/Ozark-Connect/NetworkOptimizer-Proxy) install set up before that route shipped, add it in place:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer-Proxy/main/add-agent-tunnel.sh | bash
+```
+
+  Running your own proxy instead? The [agent README's Reverse proxy section](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/src/NetworkOptimizer.Agent/README.md#reverse-proxy) has what to route where, and the read timeout to raise: most proxies default it low enough to sever a perfectly healthy tunnel on a timer.
+
+- **The Sites table lays out better on a phone** - each site takes two lines with its buttons on their own row, rather than three action buttons squeezing the name and site ID to share one.
+
+## Fixes
+
+- **Enabling multi-site could make the app unreachable** - on a native install, Windows, macOS, and Linux alike, turning multi-site on sent every browser request redirecting to the agent tunnel's port, which speaks gRPC rather than serving the web UI. Docker installs were never affected, nor were single-site installs, which do not bind the tunnel at all. Reverse-proxied installs were hit too unless `TRUSTED_PROXIES` was set.
+
+## Coming back to stable
+
+If you were running the `:preview` Docker tag during the v2.7.0 preview line, it only ever points at preview builds. Pulling images on that tag gets you the next future preview, not v2.7.1. Changing back to the stable channel is explained below:
+
+- **Docker**: retag your images to `:latest`, then `docker compose pull && docker compose up -d`
+- **Proxmox**:
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:preview#network-optimizer:latest#" -e "s#speedtest:preview#speedtest:latest#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+- **Windows**: install the v2.7.1 MSI over the top
+- **macOS**: `git checkout main && ./scripts/install-macos-native.sh`
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.7.0-preview8
 
 This is the eighth preview of v2.7.0. Start with the [v2.7.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0-preview7) and go back from there for more detail.
