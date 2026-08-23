@@ -1,3 +1,71 @@
+## 2.7.2
+
+Turning on Multi-Site no longer means restarting the server. The rest is mostly monitoring: GL.iNet 5G routers that never reported anything now do, and every stats tab gets a status table and a current reading alongside the averages.
+
+See the [v2.7.1 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.1) and the [v2.7.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.0) for what came before.
+
+## Multi-Site
+
+- **Enabling Multi-Site no longer needs a server restart** - The Agent tunnel only opened its port at startup, so turning Multi-Site on wrote a setting that nothing read until the next restart. Agents enrolled, dialed home, and got a 502 from the reverse proxy that looked for all the world like a broken proxy route. The port is now open from startup on every install.
+
+## Monitoring
+
+- **Cable Modem Stats, Cellular Stats and Starlink Stats gain the status table** that SFP Stats and ONT Stats already had: downstream and upstream power with SNR for a cable modem, RSRP, RSRQ and SNR for a cellular modem, and obstruction, alignment and signal quality for a dish.
+- **Every statistics table gains a Latest column** - the reading right now, next to the mean, min and max, so you can tell a value that is drifting from one that just moved. Error counters also gain a total for the window you are looking at.
+
+### Cellular Modem
+
+- **GL.iNet 5G routers with the modem on the SoC now report** - These carry the modem on the system-on-chip rather than over USB, and needed a different call than the one we sent, so every poll came back as "the modem did not respond". The addressing is now worked out per modem and re-checked if it stops being accepted.
+- **Bandwidth was wrong on every GL.iNet modem** - Quectel reports channel bandwidth as an index into a table rather than a figure in MHz, so band n41 running at 90 MHz was recorded as 11 MHz. Not just the SoC models: this affected all of them.
+- **Cellular modems now report their hardware identity** - Vendor, model, and radio module - alongside both firmware versions: the cellular module's own, and its host modem device or router. The two are tracked separately because they update independently. UniFi and GL.iNet modems for now; Netgear Nighthawk didn't make this round. Firmware is re-read on every poll, not cached, since Firmware Rollout can change it out from under you.
+- **_Coming Soon_** - the same firmware version recording for Cable Modem and ONT monitoring.
+
+## Firmware Rollout
+
+- **A reminder now goes out 12 hours before an unattended start** - Autopilot announced a plan when it booked it, which for a Sunday 3 AM window picked on a Monday was nearly a week ahead, and a manually scheduled plan was never announced at all. Postponing a plan re-arms the reminder, and a plan booked at short notice is not announced twice.
+
+## Security Audit
+
+- **Dismiss is now Acknowledge** - Dismiss implied the finding was written off. It only hides the issue from the list, and it stays scored exactly as before, which the button's tooltip now says outright.
+
+## Settings
+
+- **Settings sections link to the pages they configure** - Monitoring, Adaptive SQM Monitor, LAN Speed Test Settings, External Speed Test Servers, Security Audit, Alert Channels and Threat Intelligence all gained the link icon.
+- **Speed Test Settings is now LAN Speed Test Settings** - iperf3 is all it configures, and the old name suggested it covered the WAN tests too.
+
+## Fixes
+
+- **Dashboard editor UX improved** - The Dashboard edit mode was awkward in that it didn't show you cards to stack that were already part of another stack. Now it lets you "steal" cards seamlessly from any other stack.
+- **The signal reading on Client Performance was clipped to an unreadable sliver** - A change made for the Cable Modem and ONT level bars reached it by accident. It reads normally again.
+- **Event icons on charts were nearly impossible to hover or press** - You had to catch the icon almost exactly; the whole box now works. On SFP Stats and ONT Stats they also stopped responding entirely once the PON charts refreshed, until a time range change redrew them.
+- **A deep link to an off-screen tab left the tab strip parked at the start** - Clicking into ONT Stats from its Dashboard card landed on the right tab, but on a phone the strip stayed aligned at the first tab. The open tab is now brought into view when it changes, and hand-scrolling the strip is never overridden.
+- Also fixed: a few modem polls that could report success when the command behind them had actually failed.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.7.1
 
 **On v2.7.0 with multi-site enabled on a non-Docker install, and cannot reach the app in a browser? That is fixed here.** See Fixes below.
