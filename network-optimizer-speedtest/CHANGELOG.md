@@ -1,3 +1,49 @@
+## 2.7.3-preview2
+
+Preview of what's coming in the next patch. See [v2.7.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.2) for the latest release.
+
+
+## Cellular Stats
+
+- **More GL.iNet modems** - v2.7.2 added the Mudi 7 (GL-E5800). This round reaches the Spitz AX (GL-X3000), Puli AX (GL-XE3000), Spitz Plus (GL-X2000), Mudi V2 (GL-E750V2), and possibly others, and fixes empty-bus discovery that left some routers unreported.
+
+## Firmware Rollout
+
+- **Alert suppression during UniFi OS updates** - a rollout that includes a UniFi OS update reboots the gateway, which briefly takes every device and the WAN offline. The rollout's own alerts cover it, but the standard monitoring target and WAN outage alerts were also firing. Suppressed now.
+
+- **Autopilot uses the site's timezone** for the plan page and the 12-hour reminder alert, instead of server time on remote sites.
+
+## Dashboard
+
+- **[+] card to enter edit mode** - a placeholder at the end of the grid (site-admin only) that opens layout editing on click, with Done and Cancel duplicated at the bottom.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.7 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.7.2
 
 Turning on Multi-Site no longer means restarting the server. The rest is mostly monitoring: GL.iNet 5G routers that never reported anything now do, and every stats tab gets a status table and a current reading alongside the averages.
