@@ -1,3 +1,85 @@
+## 2.8.0-preview1
+
+This is a preview release of v2.8.0. Network Optimizer can read Wi-Fi data straight from your access points now, and most of what is here follows from it: faster live client data, roaming you can drive from the page, and traffic that never crossed the gateway so the Console never saw it. There is plenty other than Wi-Fi too: a wired client now names its switch and port along with the errors and drops on it, Firmware Rollout gained an SSH retry for a device that comes back on its old firmware and no longer loses a UniFi OS build the moment it goes Official, and signal colors now have more range and are consistent in all places. See [v2.7.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3) for the latest release.
+
+## AP Telemetry
+
+New Settings tab that deploys and supervises the AP Agent, a small Go binary pushed to each access point over SSH. Everything below it is optional: without it every page behaves exactly as it does today.
+
+- **Ephemeral by design.** The agent installs into tmpfs and Network Optimizer redeploys it after a reboot or firmware update. The access point keeps zero footprint, and uninstalling is a reboot.
+- **Requests are signed, and the token never travels.** HMAC-SHA256 over method, path, timestamp, nonce and body, inside a five minute clock window. The secret crosses the wire once, over SSH, at install, and a new one is minted on every binary deploy.
+- Turning the feature off removes the agent from every access point.
+- 32-bit ARM only today (armv6l, armv7l, armv8l). An aarch64 access point is refused with a message rather than half-working.
+- **A native Linux install builds the AP Agent binary itself.** Docker, the MSI and the macOS installer all ship it; a from-source Linux install needs the extra step in the [Native Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/v2.8.0-preview1/docker/NATIVE-DEPLOYMENT.md#build-gateway-speed-test-binary-optional), or AP Telemetry loads with nothing to deploy.
+
+**One thing I could use help with:** every access point I have been able to measure is U7-class, and they all report armv7l, which is what the agent is built for. U6 series should be the same, but I have not put my hands on one. If you have U6 access points, turn AP Telemetry on and tell me what happens - either it deploys and you start seeing the data, or it refuses and names the architecture it found. Both answers are useful.
+
+## Client Performance
+
+- **Live client data straight from the access point, twice a second.** Half a second to two seconds ahead of WiFiman, measured side by side on the same device, and it follows a client across a roam instead of stalling on the handoff. Falls back to WiFiman and then the Console exactly as before.
+- **Roam offers Change Band or Change AP**, and skips the choice when only one applies. Not every client cooperates, and one that will not can end up disconnected, so it is only offered for clients we have already seen roam successfully.
+- **A client selector in the page header**, listing every client on the site plus anything seen in the last two days, wireless first. Search by name, by MAC in any shape, or by vendor.
+- **Wi-Fi 7 MLO clients show their per-link breakdown on Client Performance and Client Stats.** Client Stats could previously only tell you the SSID had MLO enabled, not whether a client was using it. One measured client's links spanned 56 dB, so the signal and rate readings beside it now always describe the active link.
+- **Live download and upload for the client you are watching**, wireless or wired, read from that device's own byte counters on the same poll that produced the PHY rates beside them.
+- **A wired client now names its switch and port** and shows the negotiated link speed with that port's errors and drops, where before it just said "Wired". Needs monitoring configured, and the counters are the port's, so an unmanaged switch or a daisy chain behind it counts there too.
+
+## Firmware Rollout
+
+- **A device that reboots and comes back on its old firmware gets a second try over SSH**, rather than failing on the spot. Some devices burn the reboot without installing the image the Console handed them. One retry per device, and if that fails the model still stops like any other failure.
+- **A UniFi OS build promoted to Official is offered again, rather than disappearing.** A console set to Early Access or Release Candidate is only told about newer pre-releases, so a build dropped out of the answer the moment it graduated and the site missed it entirely. Firmware Rollout now finds it.
+
+## Monitoring - Live View
+
+- **Per-client Wi-Fi traffic that UniFi Network cannot show.** UniFi Network counts what crossed the gateway, so a client copying to a NAS, streaming from a media server, or running a LAN speed test reads as idle. Reading the counters on the access point measures what is actually on the air.
+- **A client that leaves disappears from the map at the access point's speed, not the Console's**, and one that reconnects appears without waiting for a topology rebuild.
+- **The LAN Topology Flow Map runs left to right on a portrait screen**, so the tree stacks down a phone or rotated monitor instead of squeezing sideways.
+
+## Alerts & Schedule
+
+- **A wedged radio raises an alert.** Radio health is recorded per radio and the measured CCA wedge signature is what fires it. Reset alerting compares a radio against its own history rather than the other radios in the same access point, because on U7 hardware 6 GHz resets continuously while 2.4 and 5 GHz sit at zero.
+- **A Fabric device going offline sent two notifications**, one from ICMP monitoring and one from UniFi device state. Whichever fires first wins now, within a five minute window: ICMP declares offline in about fifteen seconds while device state routinely takes three minutes or more.
+
+## Wi-Fi Optimizer
+
+Client data now comes from the access points first, with the UniFi Console filling in whatever they do not cover. That fixes Band Steering, whose list of steerable clients was always empty.
+
+### Signal Map
+
+- **The simulated heatmap models what a device will report**, not the field at an ideal antenna. It read 5 to 10 dB stronger than measurements everywhere, open air included. Access point to access point paths are unchanged, so interference checks and channel recommendations are not affected.
+
+## Fixes
+
+- **Wi-Fi signal colors disagreed between surfaces and went flat at the strong end.** Four separate band-blind ramps painted dBm readings, so one value drew differently depending on the page. There is one band-aware ramp now, anchored to the class boundaries, reaching 25 dB above the excellent boundary - on 6 GHz everything stronger than -57 dBm had been one identical color.
+- **Settings fields sent stale or empty values when you clicked a button without leaving the field first.** Reported as a Local Account connection test failing authentication with correct credentials typed (thanks @djmaxwell1975), and the same gap was closed across gateway and device SSH, SSH key upload, InfluxDB, modem, ONT, cable modem and Starlink configs, iperf3, external speed test servers, notification channels, security audit thresholds, MaxMind, CrowdSec, and Mapbox.
+- **Reboot Reasons: a device that crashed during a commanded restart was reported as an abrupt stop.** When UniFi says the restart was initiated, that now wins, with the unclean shutdown noted in the detail.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.7.3-preview2
 
 Preview of what's coming in the next patch. See [v2.7.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.2) for the latest release.
