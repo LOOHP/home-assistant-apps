@@ -1,3 +1,69 @@
+## 2.8.0-preview2
+
+This is the second preview of v2.8.0. Start with the [v2.8.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview1) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
+
+Mostly Firmware Rollout judgement. It planned an Early Access build on a site pinned to Release Candidate, and it failed a healthy access point over a two second blip. Both are fixed, along with an MLO roam that could never have worked.
+
+## Firmware Rollout
+
+- **Plans follow the channel you set** - a Release Candidate plan was carrying an Early Access build. Targets are checked against what that channel actually offers for the model now.
+- **A brief blip no longer fails a device** - a healthy access point was failed, and its whole model dropped, over a couple of lost pings during the check that follows an upgrade.
+- **Failing to upgrade and failing a health check are separate alerts** - both carry the reason now, and name the product rather than the SKU.
+- **A device that comes back at the edge of its budget is no longer failed** - one switch was running the new firmware thirteen seconds before the deadline and still had its whole model dropped.
+- **Access point downtime estimates** - U7 and E7 were quoted at nearly double the time they actually take, which stretched the whole plan.
+
+## Monitoring
+
+- **PON error totals** on **SFP Stats** and **ONT Stats** - cumulative BIP, HEC, FEC, BWmap, allocations lost, GEM drops, FCS errors, TX drops, and buffer overflows. Columns hide themselves when nothing reports them.
+- **PLOAM Uptime** next to PLOAM State. It was already being written to InfluxDB and never read back.
+- **LAN Topology Flow Map** - the left-to-right layout is far less spread out vertically.
+
+## Client Performance
+
+- **A View button when a device is remembered** - the picker opened with your device already selected and nothing to click to accept it.
+- **Picking your own device lands on the bare URL** instead of stamping an address that only means you, from that browser.
+- **Managed sites ask the on-site agent who you are** - a managed site arrives over the WAN, so the server sees its public address, which with colliding private ranges could match a different client.
+
+## Client Speed Test
+
+- **Channel width on speed test results** - the Wi-Fi client's width now shows on the path trace and the Speed Map tooltip, which also gained the channel and MLO links it was missing. Results recorded before this show the channel alone.
+
+## Wi-Fi Optimizer - Roaming
+
+- **Steering an MLO client works** - a roam sent to a client running Multi-Link Operation always failed, because the access point could not find it by the address we were using. Access points pick the fix up on their own.
+- **A failed roam says why** - it used to report only that something had gone wrong.
+
+## Security Audit
+
+- **The firmware access check needs both Ubiquiti hosts** - it passed on any ubnt.com substring, so a rule naming one host satisfied it while the other stayed blocked.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview1
 
 This is a preview release of v2.8.0. Network Optimizer can read Wi-Fi data straight from your access points now, and most of what is here follows from it: faster live client data, roaming you can drive from the page, and traffic that never crossed the gateway so the Console never saw it. There is plenty other than Wi-Fi too: a wired client now names its switch and port along with the errors and drops on it, Firmware Rollout gained an SSH retry for a device that comes back on its old firmware and no longer loses a UniFi OS build the moment it goes Official, and signal colors now have more range and are consistent in all places. See [v2.7.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3) for the latest release.
