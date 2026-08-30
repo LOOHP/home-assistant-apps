@@ -1,3 +1,55 @@
+## 2.8.0-preview3
+
+This is the third preview of v2.8.0. Start with the [v2.8.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview2) if you haven't read them, and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
+
+This one is about Client Performance: what a device actually used, a live throughput chart, and every figure on the page reading from the device's side. It has moved into the main menu to match. The 2D map's playback got some overdue attention too.
+
+## Client Performance
+
+- **Data tab** - a fourth tab showing what the device used over the page's time range. **WAN** is its usage as UniFi Network counts it at the gateway. **LAN + WAN** is everything through its access point or switch port, so local traffic your Console never sees is in it (a NAS copy, a stream from your media server), with the local share estimated underneath.
+- **Applications** - the WAN usage broken down by app the way UniFi Network identified it, largest first, with the brand marks you would expect next to Google, Apple, YouTube, Spotify and the rest.
+- On the Data tab, ranges up to 24 hours refresh every 30 seconds. 7 days, 30 days, and All read from an hourly rollup that builds itself in the background, so give a fresh install a few hours before those ranges fill in for the past month. _You'll notice increased InfluxDB CPU/HDD usage while this one-time downsampling backfill process runs._
+- **Live Throughput** on the Speed tab - a five-minute live chart of the device's download and upload in the same shape as the WAN live chart. Run a speed test and watch it climb.
+- **Download on the left, Upload on the right, from the device's side** - the identity row, the speed test result, Speed History, the results table, test details, and the Speed Map popups all read the way WAN Speed Test does now: Download is what the device receives, in blue, Upload what it sends, in green. AP TX leads AP RX for the same reason. The Speed Map on LAN Speed Test and Client Speed Test is unchanged.
+- **Now in the main menu**, under Monitoring, with its own icon. It covers wired clients as well as Wi-Fi and has outgrown being a Wi-Fi Optimizer sub-item.
+- **Client picker** - matches the words of a search in any order, so "living tv" finds "[TV] Living Room".
+
+## Monitoring - Live View
+
+- **Fix: A device that was offline stays off the 2D map in playback** - a client that had been gone for more than a few minutes came back onto its current access point with zeroed rates, at every instant it was away. It stays hidden until it was actually connected.
+- **Tooltips follow playback** - a device or client tooltip you are hovering updates as the timeline moves, live or historic, instead of needing the cursor off and back on.
+- **Fix: The map keeps its fit** - while you haven't zoomed or panned (or after pressing Fit), clients joining, leaving, or roaming re-fit the map instead of pushing part of it off screen.
+- **Fix: Left-to-right layout** - link throughput labels stack on the link and move clear of device names and rates instead of landing on them, sibling links spread across the gap, and a wired client of the gateway fills the gap between two switches instead of trailing off to the right.
+- **Port Statistics for switches without SNMP** - UniFi switches without SNMP now get their port stats from UniFi Network instead, so a USW-Flex-Mini shows up in **Port Statistics**, on the maps, and in its wired clients' LAN + WAN totals.
+- **Fix: Double-tap opens a client on a phone** - the maps' double-click to open a client in Client Performance never worked from a touch screen; it does now on both maps.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview2
 
 This is the second preview of v2.8.0. Start with the [v2.8.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview1) if you haven't read them - everything in that build is in this one, and this note only covers what changed since.
