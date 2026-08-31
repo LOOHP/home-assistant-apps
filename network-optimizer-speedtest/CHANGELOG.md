@@ -1,3 +1,57 @@
+## 2.8.0-preview4
+
+This is the fourth preview of v2.8.0. Start with the [v2.8.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview3) if you haven't read them, and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
+
+Who is eating the WAN right now, and who ate the most of it this week: a new Bandwidth Hogs card on Live View. Plus a polish pass on Client Performance, most of it on a phone.
+
+## Monitoring - Live View
+
+- **Fix: A spare WAN showed up in the WAN pills** - a WAN with a port assigned but nothing plugged in started appearing on Live View, Network Performance, and ISP Health after a UniFi Network update. It stays out of the way now until it actually comes up. Thanks @bondskin for the report (#1183).
+- **Double-click a WAN globe** on the 2D map to open that WAN's ISP Health report, and use **the Live View icon from Client Performance** to go to the 2D or 3D map w/ the client highlighted.
+- Also fixed: a roam from a few minutes ago that played back only half way; a Wi-Fi client that went quiet but kept its last throughput on the maps while its Client Performance page was open; and the WAN live chart not filling its card on a phone.
+
+### Bandwidth Hogs
+
+- Who is using the WAN right now, and who used the most of it over the last day, week, or month. A new card above the second map lists the busiest clients, biggest first, each linking to its Client Performance page; scrub the maps and the list follows.
+- WAN is the client's share of what left the site; LAN + WAN is everything through its radio or switch port. UniFi Network's per-client figures are WAN-only and lag a little, so at any given moment the WAN split is a best guess when clients are busy locally at the same time, and the card says so when it is one.
+- A server or hypervisor with several addresses on one switch port shows as the port, the way the map already draws it, and opens the busiest thing behind it. Double-clicking that node on either map does the same.
+- Devices that never touch the internet, a camera streaming to a local NVR for one, stay out of the WAN view instead of being guessed onto it. Anything that hits the WAN shows up on the top consumers list almost immediately.
+- _Coming next preview release_: Gateway Agent enhancement to pull live conntrack data for more accurate per-client and per-WAN throughput and data usage stats.
+
+## Client Performance
+
+- **Fix: LAN + WAN usage read far too high** - the Data tab's LAN + WAN totals (and the Local figure under them) could come out tens of times larger than reality, worst on wired devices and on sites with AP Telemetry: a phone at 300 GB a day, a camera at 7 TB. The stored hourly history is rebuilt on this build, newest first, so the last day reads right within minutes and the month within a few hours; expect InfluxDB to be busier while that runs, as it was for the first backfill.
+- **Fix: WAN usage on a Wi-Fi client included its local traffic** - a speed test against a NAS showed up as WAN, and Local read zero. WAN now uses the same UniFi Network traffic report as the Applications list, and both now include the traffic UniFi Network could not identify.
+- **This device** beside the picker jumps to the device you are browsing from, when it is on the site and not already the one on screen. The Live Throughput card gets the Live View eye, top right, like Latency & Packet Loss.
+- Also fixed: Live Throughput trailing the figures above it on Wi-Fi; Select Your Device staying empty on a remotely monitored site; the Data tab's chart coming up blank on a first visit, trailing its own totals by a refresh, and loading much slower than it should on the longer ranges; the Applications list telling traffic UniFi Network could not identify apart from applications we have no name for yet; and the phone layout across the page (charts fill their cards, the Data totals sit side by side, the picker fits).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview3
 
 This is the third preview of v2.8.0. Start with the [v2.8.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview2) if you haven't read them, and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
