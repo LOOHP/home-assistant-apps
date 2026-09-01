@@ -1,3 +1,61 @@
+## 2.8.0-preview6
+
+> **On-Site Agent update (Gateway installs):** the measured WAN accounting from preview5 needs a 2.8.0 preview Agent on your UniFi Gateway - if you already updated it on preview5, you're set and there's nothing to do again. Otherwise, open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command to have the app run it over SSH - or SSH to the Gateway and run it yourself. Either way the install script fetches the newest 2.8.0 preview binary for you and keeps your existing enrollment.
+
+Start with the [v2.8.0-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview5), and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
+
+This build is about Wi-Fi 7 MLO mesh. Network Optimizer now shows the backhaul in full - each link on its own, and the combined capacity they add up to - on the AP cards, the topology maps, and speed test traces. You'll need a Wi-Fi 7 mesh pair with UniFi Network's **Mesh MLO STR** setting on to see any of it; classic single-link mesh is unchanged throughout.
+
+## Wi-Fi Optimizer
+
+- **Overview** - a meshed AP's **Mesh Uplink** and **Mesh Child** blocks now show each MLO link on its own row: band, signal, and link rates, with **(MLO)** on the label. The child's card gets the full picture even when UniFi Network doesn't report it there.
+- **Channels** - an MLO backhaul shares a channel on every band it runs on, and that's the link working, not a conflict: **Co-Channel Interference** and **High Power Overlap** no longer flag the pair on those channels, and the **Mesh** badge shows on every band the backhaul occupies, not just the one the child reports.
+- **Channel Recommendation** - recommendations treat every band of an MLO backhaul as a mesh pair, so they won't move one end of the link without the other.
+- The 6 GHz 320 MHz narrowing suggestion no longer fires for APs carrying a mesh backhaul on 6 GHz - narrowing that band would halve the backhaul.
+
+## Monitoring - Live View
+
+- The 2D and 3D maps show a mesh backhaul at the pair's combined link speed, live and during playback - the hover tooltips tag the reading **(MLO)** - and the traffic crossing it counts every link.
+
+## Speed Test Tracing
+
+On LAN and WAN speed test results with a mesh AP in the path:
+
+- The AP-to-AP hop is rated at the pair's combined capacity - the links run at the same time, so that's what a test can actually push through - and the bottleneck and expected-speed math use the same figure.
+- The mesh link's tooltip reads **Wireless Mesh (MLO)**: the combined rate, then each link with its band, channel and width, signal, and rates.
+
+## Multi-Site
+
+- Each site agent now shows its LAN IP next to its name, or **Gateway** when it runs on the UniFi Gateway itself, so you can tell at a glance which box an agent is on.
+- Also changed: the outdated-agent warning now reads **Agent needs update**; and the button beside it is just **Upgrade**, since on Gateway installs it opens a one-click run rather than only a command to copy.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview5
 
 > **On-Site Agent update (Gateway installs):** the measured WAN accounting below needs this build's Agent on your UniFi Gateway. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command to have the app run it over SSH - or SSH to the Gateway and run it yourself. Either way the install script fetches the newest 2.8.0 preview binary for you and keeps your existing enrollment. One-time for this preview; everything else in the build works with the Agent you have.

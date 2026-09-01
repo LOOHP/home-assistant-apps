@@ -25,6 +25,12 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 
 Genuinely, thank you so much to everybody for taking the time to use Network Optimizer and have it find a place on your network(s). It really means a lot to receive all of the bug reports, feature requests, feedback, support, and donations from everybody. Totally a whole new experience from writing code in a dayjob, and it greatly motivates me to keep on going!
 
+## Current Preview Release
+
+For those brave among us - looking at you eager EA testers - I've got a Preview release channel with a bunch of new features baking right now. It's completely stable, don't worry, and brings some really cool AP Telemetry features w/ truly real-time signal levels and roaming feedback when walk testing (and a feature to poke a client to roam to the nearest AP), real-time bandwidth usage stats per client, rolls up a lot of data/application info from UniFi Network so you don't have to go over there to see those details for client devices, and a whole bunch of enhancements and fixes. Oh, and it even adds support for the brand new Mesh MLO STR feature in UniFi Network! Check it out here: [v2.8.0-preview releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases).
+
+This will probably hit the GA release channel at the end of the week as v2.8.0, but the more people I can get to test it, the quicker I can ship :)
+
 ## Coming Soon: Hosted Network Optimizer
 
 For people who don't have a home server or don't want to set up the infrastructure, a fully hosted Network Optimizer is coming soon: $15/month for up to 3 sites, with a 14 day free trial and enterprise-grade security. The commercial hosted plan is $25/month per site, adding full management and consulting - see [pricing and licensing](https://ozarkconnect.net/network-optimizer/licensing). The [on-site agent](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/src/NetworkOptimizer.Agent/README.md) runs on your gateway, so the only thing you give up is LAN speed testing. WAN speed testing is included, with some data limits.
@@ -119,10 +125,6 @@ For the full changelog, see the [v1.17.0 release notes](https://github.com/Ozark
 ![3D LAN Flow Map](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/monitoring-3d-map.png)
 
 ![2D LAN Topology Flow Map](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/monitoring-2d-map.png)
-
-## New: API Key auth to console
-
-Connect to your UniFi Console using an API key instead of username and password. Generated in UniFi Network under Integrations -> Create New API Key. The key is encrypted at rest and never exposed in logs or the UI. Useful for sites where you don't necessarily want to create a Local Admin, or when you're using UniFi Fabrics which no longer lets you create Local Admin users.
 
 ## New: WAN Steering
 
