@@ -1,3 +1,72 @@
+## 2.8.0-preview5
+
+> **On-Site Agent update (Gateway installs):** the measured WAN accounting below needs this build's Agent on your UniFi Gateway. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command to have the app run it over SSH - or SSH to the Gateway and run it yourself. Either way the install script fetches the newest 2.8.0 preview binary for you and keeps your existing enrollment. One-time for this preview; everything else in the build works with the Agent you have.
+
+This is the fifth preview of v2.8.0. Start with the [v2.8.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview4), and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
+
+Per-client WAN usage stops being an estimate. An On-Site Agent running on your UniFi Gateway now measures each client's WAN traffic right at the Gateway, and Bandwidth Hogs, its playback, and Client Performance all read the measurement instead of the estimate.
+
+## Multi-Site
+
+- **Run It for Me** - the gateway agent install and upgrade commands in **Settings - Multi-Site** now come with a button that runs them for you over SSH, showing the output live in the page. It needs the Gateway's SSH details configured; sites monitored through the agent tunnel can use it too, and the copy-paste commands stay as they were.
+
+## AP Telemetry
+
+- **AP Agent on U6 - call for testers** - U6 access points on firmware before 8.8.5 failed the AP Agent deploy: that firmware doesn't ship the SFTP piece the transfer used. The deploy now checks what each access point actually has and falls back to SCP or a plain direct copy, so those builds should get the agent too. We don't have a U6 on the old firmware to prove it against, so if you do: turn it on under **Settings - AP Telemetry** and let us know how it went in [#1182](https://github.com/Ozark-Connect/NetworkOptimizer/issues/1182).
+
+## Monitoring - Live View
+
+### Bandwidth Hogs
+
+- **Measured WAN from your Gateway** - with an On-Site Agent on the UniFi Gateway, every client's WAN figure is measured at the source: live, at the playhead, and in Data usage. The Share column tooltip says "measured on the Gateway" when it is, and the estimate stays as the fallback for sites without a Gateway Agent. Gateway CPU impact < 1% on a UXG-Fiber and UCG-Fiber fleet, tested over 2 days.
+- Data usage picks one source per stretch: the measurement for the hours the Agent covered, UniFi Network's traffic report for the history before it - never both for the same hour.
+- The Agent counts bytes per client and nothing else: no destinations, no ports, no per-flow records ever leave your Gateway.
+- Also fixed: a WAN filter carried in from another page sticking on the live tiles after tabbing away and back; remotely monitored sites showing WAN rates without the "% saturated" line (and missing WAN pills) until a page refresh; and the Data view switch flashing "no data" instead of a spinner.
+
+## Client Performance
+
+- **Live Throughput** now shows the measured WAN share inside the totals: a dashed pair in the same download and upload colors, filled darker, so you can see how much of what a client is moving is internet traffic and how much is local. Needs the Gateway Agent; without it the chart is unchanged.
+- **Fix: a link to your own device now lands in own-device mode** - following a Client Performance link that carried your own address kept the page in remote view, holding back the walk-test features until you pressed **This device**. It now recognizes your own address and lands in own-device mode directly.
+
+### Walk Test: Roam
+
+- **Fix: steering now plays clean with 802.11r (fast roaming)** - **Roam** briefly guards against the client hopping straight back, and that guard is a short ban - which answers even fast transitions with a refusal that clients read as a hostile AP, so a client could sit out on a weak AP for minutes rather than retry. On 802.11r networks the guard is a re-ask instead of a ban - the client is steered again, with the AP it bounced back to off the candidate list so a same-AP band change can't satisfy it. Networks without fast roaming keep the temp ban as it was. The update reaches your access points automatically.
+- **Fix: the page could flash between 5 GHz and 6 GHz** - after a same-AP band hop the departed link's stats lingered for a moment and kept winning the "which link is active" pick, so the page flip-flopped bands for half a minute. The fresh link wins now.
+
+### Data Usage
+
+- The WAN chart reads the measured series wherever the Agent covered the hour; earlier history stays on UniFi Network's report. The **Local** figure is the counter total minus WAN, so it sharpens wherever WAN is measured.
+- Measured totals count whole connections: the Gateway reconciles each flow's final byte count when it closes, so even a short burst - a quick speed test, a one-off download - lands in full. Cross-check it with your own iperf3 run; it adds up now.
+- **Fix: inflated Local usage for clients on switches without SNMP** - on a site with an On-Site Agent relaying monitoring, a switch read from the UniFi port table had its counters written twice, and a client behind it could show usage several times its real total (throughput was always right). One writer owns a switch's counters now. SNMP-read switches and Wi-Fi clients were never affected.
+- **Fix: multi-gig LAN transfers undercounted** - a guard against a rare SNMP counter misread also ate real traffic at multi-gig rates, so a 46 GB transfer from a wired client could show as 15 GB here and in Bandwidth Hogs' wired totals. The guard now catches only the misread; heavy transfers count in full.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview4
 
 This is the fourth preview of v2.8.0. Start with the [v2.8.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview3) if you haven't read them, and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
