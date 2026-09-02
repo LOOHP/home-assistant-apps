@@ -1,3 +1,112 @@
+## 2.8.0-preview7
+
+Start with the [v2.8.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview6), and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
+
+Preview6 was about Wi-Fi 7 MLO mesh, and this one picks up where it left off: filled in a gap when UniFi Network reports the child's side of the backhaul, so the child card, the maps, and the trace read the child's own numbers. Also an AP Agent fix for client channel width, a round of fixes to the measured WAN accounting, one pick for which agent serves a speed test on a two-agent site, and UniFi Building Bridge pairs on both flow maps.
+
+## Fix: Wi-Fi 7 MLO mesh from child AP
+
+When UniFi Network reports an MLO backhaul from the child's end, everything that shows that perspective now uses it.
+
+### Wi-Fi Optimizer
+
+- A child's **Mesh Uplink** block shows each link as the child measures it; the 6 GHz link had been showing the parent's reading.
+
+### Monitoring - Live View
+
+- The 2D and 3D maps take the child's own readings for the backhaul.
+
+### LAN Speed Test
+
+- The mesh hop's trace tooltip reads the child's own links.
+- A test to a mesh AP whose backhaul is faster than its wired uplink now grades against the wire, and the tooltip says which link bounds each direction. It was grading against the backhaul and coming out Poor.
+
+## Fix: Client channel width
+
+On an access point running the AP Agent, a client's channel width was the radio's, not the client's: a phone on a 320 MHz radio read as 320 MHz when it had connected at 160. Your access points pick up the updated AP Agent on their own.
+
+### Client Performance
+
+- The width in the header and the **Connection** history is now the client's. History recorded before this build keeps the old value.
+
+### Monitoring history
+
+- Every client sample from an AP Agent access point stores the client's width, so anything reading it back, including the client rate history behind **Channel Recommendation**, sees clients at their real width.
+
+## Wi-Fi Optimizer - Channel Recommendation
+
+- A channel move UniFi Network never logs (Channel AI's moves, it turns out) now starts its soak on the next refresh instead of hours later.
+
+## Client Speed Test
+
+- A client Wi-Fi test graded against the link rate seen at trace time, not the rate the test ran at, so a phone could grade at 565% of its link. It now grades against the wire that actually bounds the path.
+
+## Monitoring - 3D LAN Flow Map and LAN Topology Flow Map
+
+- UniFi Building Bridge pairs are on both maps: both units, the wireless span between them, and the far building's switches, APs, and clients behind it. Before, the far building's gear hung off nothing.
+- The span carries its own band, signal, PHY rates (60 GHz, or 5 GHz when it has fallen back), and live and timeline throughput. Built against a captured site, not my own - if yours draws oddly, tell me what you see.
+
+## Measured WAN accounting
+
+### Monitoring - Live View - Bandwidth Hogs
+
+- Rows UniFi Network can't put a name to no longer appear; the one you may have seen was your ISP's edge device as a bare MAC.
+- A shared-port row (a hypervisor's interfaces on one switch port) counts only the devices that live on that port, and is named after the port.
+- Uplink and backhaul ports never appear as clients; over a long window one could show up carrying terabytes.
+- The 24h, 7d, and 30d LAN + WAN views load faster.
+
+### Client Performance - Data Usage
+
+- A wired client that has gone offline keeps its LAN figures, opened directly or from its **Bandwidth Hogs** row. A PC that was busy all day read zero after it shut down.
+
+## Fix: Speed test host on a two-agent site
+
+A site with an agent on the UniFi Gateway and another on a separate box now makes one pick for which agent serves its speed test, and every surface uses the same one.
+
+### Client Speed Test
+
+- Clients are sent to the agent that hosts the speed test; before, the link could change from one visit to the next.
+
+### LAN Speed Test
+
+- The **Gateway Speed Test** is back, and it and the UniFi Device and Custom LAN tests run from the separate box rather than the Gateway. A site whose only agent is on the Gateway is unchanged.
+
+### Speed Test Tracing
+
+- **Only if you've set a speed test URL override:** traces now start at that box, so they follow the path the test actually took.
+
+### Multi-Site
+
+- The auto-detected URL hint in **Settings - Multi-Site** agrees with the link.
+- Also fixed: a freshly installed Gateway agent's row showed its WAN IP instead of **Gateway** until the site panel was reopened; and the **Run It for Me** hint says whether it runs the install or the upgrade command.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview6
 
 > **On-Site Agent update (Gateway installs):** the measured WAN accounting from preview5 needs a 2.8.0 preview Agent on your UniFi Gateway - if you already updated it on preview5, you're set and there's nothing to do again. Otherwise, open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command to have the app run it over SSH - or SSH to the Gateway and run it yourself. Either way the install script fetches the newest 2.8.0 preview binary for you and keeps your existing enrollment.
