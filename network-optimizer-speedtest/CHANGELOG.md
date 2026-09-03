@@ -1,3 +1,98 @@
+## 2.8.0-preview8
+
+> **On-Site Agent update (optional):** this build's Agent stops a switch port changing names after a passing SNMP failure (see Monitoring below). It only matters on a site whose Agent does the SNMP collection. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command, or run the upgrade command yourself; the app will offer the update either way. Everything else in the build works with the Agent you have.
+
+Start with the [v2.8.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview7); this note only covers what changed since.
+
+The AP Agent goes to work in the Wi-Fi Optimizer: issues graded by what the radios measure, a pin to hold a radio on its channel, and Acknowledge for the issues you've decided to live with. A console-only site sees the same Wi-Fi Optimizer as before.
+
+## Wi-Fi Optimizer
+
+Anything the agent adds is per access point; APs without one keep the console's data. Your access points pick up the new AP Agent on their own.
+
+### Overview - Health Issues
+
+- **Acknowledge** - hides an issue under the **Acknowledged** tab but keeps it scored, like Security Audit. A weak-signal device stays acknowledged wherever it roams.
+- **Deliberate configuration** - a fixed channel, fixed TX power, or per-AP width you set yourself becomes an Info-level check with a hint, not a correction.
+- **Fix: Apply to All APs on mesh sites** - width advice on a band with a mesh backhaul is per-AP now, and the backhaul radio is never asked to narrow.
+- **Co-Channel Interference** - groups radios by the spectrum they share, so overlapping 320 MHz radios on different channel numbers are caught; agent-covered radios grade it by measured airtime.
+- **High TX Retry Rates** - per-band thresholds (2.4 GHz gets more slack than 6 GHz), and one bad device no longer raises a whole radio.
+- **Measured issues** (AP Agent) - **Raised Noise Floor**, **High Radio Utilization** says whose airtime it is, **Sticky Clients** that joined weak and never left, **High Latency Despite Good Signal**, and **Unused Width** for a 160 MHz radio no roaming client has used more than half of this week.
+
+### Channels - Channel Recommendation
+
+- **Pin** - holds a radio where it is; the plan works around it until you unpin.
+- **Measured 320 MHz blocks** (AP Agent) - a 320 MHz channel number doesn't indicate which block the radio occupies, so the map, **Bonded** range, overlap warning, and RF Environment were guessing. The agent reads it off the radio now.
+- **Width recommendations** (AP Agent) - the plan can propose narrower (no roaming client used more than half of it this week) or wider (clients can use it and the air is quiet), never on 2.4 GHz or a backhaul radio.
+
+### RF Environment - live neighbors and spectrum
+
+- Covered APs contribute their own scan tables: neighbor sightings seconds old instead of minutes, and quick-scan skips APs already scanning.
+
+## Monitoring
+
+- **Fix: a switch port could change names after an SNMP hiccup**, showing as 0/3 instead of its label with its history split. It keeps its name now, and history written under the raw name still reads back everywhere.
+
+### Live View
+
+- A speed test result's time link opens Live View with the tested client or device picked out on both maps.
+- **Fix: playback drew links idle that live showed busy** - an AP-to-switch link, wired clients just after a restart, and anything a fast scrub had not loaded yet.
+- **Fix: Bandwidth Hogs WAN shares add up** - a client's **Share** in **Live** - **WAN** is its share of the listed clients' WAN traffic now, so the column totals 100% instead of reading high or low.
+
+## WAN Speed Test
+
+- The Speed, Latency, Loaded Latency, and Jitter charts (and **Client WAN Test**) get Client Performance's tooltip: one dot per line, rows in the order the lines sit.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.5 EA** - verified and supported on the UXG line. UCG ceiling unchanged.
+- **UXG-Max** - supported, with Fan Control Tuning and Logging Offload.
+
+## Firmware Rollout
+
+- **Fix: a UXG gateway upgrade no longer alerts on itself** - its reboot raised a WAN outage and an offline alert per device behind it. Suppressed now, as a Cloud Gateway OS update already was.
+- **Fix: a waiting plan no longer offers a downgrade** - the "since this plan was scheduled" check could count a device the console offers an older build than it runs, and Re-plan put that in the plan. Only newer builds count now.
+- **Autopilot plans when you turn it on** - the plan lands with the save instead of on a later tick, and when there is nothing to plan the page says why (a build still aging, nothing newer, the console not answering).
+
+## Security Audit
+
+- **Fix: isolation by firewall rule is judged in rule order** - an allow ahead of the block used to still read as isolated, so a Security or IoT VLAN with an earlier allow could pass. First match wins now, as on the console.
+
+## Fixes
+
+- **Input hardening** - from a private security review: certain values that reach gateway commands and InfluxDB queries that had injection potential are now input-validated, alert channel configs are no longer returned to Viewers by the API, and an agent tunnel can only act on its own connections. Note: the only Gateway security attack surface that was present was for admins to inject into their own managed Gateways, or for an authenticated Viewer (only applies if you have multiple users) to inject malicious commands to their site Gateway via Network Tools TCP ping feature. Thanks to @Optic00 for the review.
+
+## Device Support
+
+- **ECS-24S, ECS-48S, Enterprise NAS, and Travel Router Long-Range** - named and pictured wherever they appear, instead of showing a raw model code.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout release/2.8 && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.7.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.7.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview7
 
 Start with the [v2.8.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0-preview6), and go back from there for more detail - everything in those builds is in this one, and this note only covers what changed since.
