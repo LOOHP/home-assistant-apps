@@ -1,3 +1,65 @@
+## 2.8.1
+
+> **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0 or v2.8.0-preview8, you're set.
+
+A multi-site hardening patch: the UniFi Console certificate check now applies through an On-Site Agent, enrollment tokens are short-lived with a one-click reissue, and re-enrolling an agent is just the install command with a new token. Also a scheduled Firmware Rollout drops anything you updated by hand in the meantime, the Client Selector keeps up with devices coming and going, and the app makes fewer calls to your UniFi Console. See the [v2.8.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0) for what's new in v2.8.0+.
+
+## On-Site Agent
+
+- **Console certificate validation through an agent** - **Ignore SSL certificate errors** now applies the same whether a site's UniFi Console is reached directly or through its On-Site Agent. Agent sites used to have the box pinned on with a note that validation wasn't available through the agent, so the pin is gone and your setting is honored on both paths. A site that had the box unchecked before it moved behind an agent simply goes back to validating, as it did on the direct connection.
+- **Enrollment tokens expire after one hour**, down from 24, and the install panel has a **New token** button that reissues one and updates every install command with it, including **Run It for Me** on the gateway. To rotate an enrolled agent's key, remove the agent and add a new one.
+- **Re-enrolling an agent is the install command with a fresh token** - re-running an agent installer with a token re-enrolls only when that agent has been removed in the app; otherwise it upgrades in place, so the install command you saved is a safe upgrade command. All three installers now print their uninstall command when they finish.
+- **Fix: Turning off "An agent collects for this site" stops the agent's SNMP polling** - on the default / main site, switching it off handed SNMP back to the server but never told the agent to stop, so a gateway agent kept polling every device at the fast cadence alongside the server until it was restarted. It now stops within a minute.
+
+## Client Performance
+
+- **The Client Selector keeps up** - devices that come online or drop off while the page is open now show it in the roster and the online dots without a reload. Before, the list was whatever page load saw.
+- **Speed test results refresh on your own device over VPN** - viewing your own client over Tailscale, Teleport, or a VPN, new speed test results didn't appear until a manual refresh. They do now.
+
+## Firmware Rollout
+
+- **A waiting rollout drops what you already updated** - update a device or the Console yourself while a rollout is scheduled, and within the hour it leaves the plan with a note saying why. A rollout with nothing left cancels itself and tells you.
+
+## Client Speed Test
+
+- **Fix: macOS native installs behind a reverse proxy save results again** - results from the browser speed test were not saving, and its View Results link pointed at the speed test host instead of Network Optimizer. Re-run the native installer and both work as they always have on Windows and Docker (thanks @Jason-Morcos for the report, #1092).
+
+## Monitoring - Live View
+
+- **Double-click always opens the client** - on the **3D LAN Flow Map** and **LAN Topology Flow Map**, double-clicking a client the map had drawn before the console knew its address (a client that just associated, or a client during playback) did nothing. It now opens that client's page using its last known address, for clients seen in the past two days.
+- **Fix: Bandwidth Hogs stops polling when you leave** - leaving Live View while the **Bandwidth Hogs** card was still loading could leave it polling your UniFi Console in the background, roughly doubling the Console's background calls until the next restart. If your Console has looked busier since v2.8.0, this was it.
+
+## Fixes
+
+- **Fewer calls to your UniFi Console** - the network configuration is now read once a minute and shared, instead of on every device and topology discovery. On agent-fed sites that was several calls a minute for a document that only changes when you edit a network. Adaptive SQM's deploy and a Security Audit re-run still read it fresh, so a change you just made is what gets checked.
+- **A missing credential key stops the app instead of silently orphaning your passwords** - if the file that encrypts stored credentials can't be read or created, the app now refuses to start and says which file. Before, it quietly fell back to a key that changed on every container restart, and every stored password decrypted to nothing. No working install is affected: the only way to hit it is a data directory the database can't use either.
+- Also: a handful of small UX improvements to the agent panel on Settings - Multi-Site, and to Users and Access on Settings - Identity.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.0-preview8
 
 > **On-Site Agent update (optional):** this build's Agent stops a switch port changing names after a passing SNMP failure (see Monitoring below). It only matters on a site whose Agent does the SNMP collection. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command, or run the upgrade command yourself; the app will offer the update either way. Everything else in the build works with the Agent you have.
