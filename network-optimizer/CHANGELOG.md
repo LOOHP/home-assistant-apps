@@ -1,3 +1,51 @@
+## 2.8.2-preview
+
+Preview of what's coming in the next patch. See [v2.8.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1) for the latest release.
+
+Adaptive SQM can now learn your line's own weekly congestion curve instead of assuming one for the connection type, and on cellular, satellite, and fixed wireless the upload rate follows the schedule too. UniFi OS 6.0.7 EA, the first 6.0.x release for the UCG line, also gets Performance Tweaks support.
+
+## Adaptive SQM
+
+- **Congestion Profile Learning** - a week of brief hourly gateway speed tests, taken only while the WAN is idle, builds the congestion curve from what your line actually does hour by hour and day by day. One odd reading never becomes a dip in the schedule, and **Severity** tunes a learned curve exactly as it tunes the built-in one.
+- Each sample moves real data: about 150 MB on a 250 Mbps line, so up to 25 GB across the week. The card shows the estimate for your speeds before you start, which matters on a capped cellular plan.
+- **Deploy Settings once after updating, before you start learning.** Adaptive SQM's own adjustments stay out of the way during a sample only with the updated scripts on the gateway; the card tells you while that is still needed.
+- **Upload Strength** - on Fixed LTE/5G, Starlink, and Fixed Wireless (WISP), the upload rate can follow the congestion schedule too, never below half of nominal. Existing setups keep a static upload rate until you move the slider.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.7 EA on the UCG line** - verified and supported (bench-verified and lab-tested on UCG-Fiber). The UXG line's ceiling stays at 6.0.5.
+
+## Monitoring - Live View
+
+- **Fix: Bandwidth Hogs during playback** - scrubbing back showed one set of figures, then replaced them a couple of seconds later. It shows one answer now, and on a site with a Gateway Agent it arrives seconds sooner.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build - after the first time, `git pull && ./scripts/install-macos-native.sh` is enough:
+```bash
+cd NetworkOptimizer && git fetch && git checkout dev && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.1
 
 > **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0 or v2.8.0-preview8, you're set.
