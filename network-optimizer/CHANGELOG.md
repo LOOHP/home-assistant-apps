@@ -1,3 +1,44 @@
+## 2.8.3
+
+> **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1, v2.8.2, and v2.8.3):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0, v2.8.0-preview8, v2.8.1, or v2.8.2, you're set.
+
+Two Firmware Rollout fixes for some UniFi OS / Network upgrade edge cases, and some small fixes to the Client Performance - Data Usage charts. See the [v2.8.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0), [v2.8.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1), and [v2.8.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.2) release notes for what's new in v2.8.0+.
+
+## Firmware Rollout
+
+- **Fix: a UniFi Network update the Console accepted but never installed** - UniFi OS 5.1.31 can accept the update command, fail inside its own installer without anything upgrading, and report no error, from the UniFi Console's own Update button as much as from us (a UniFi OS flaw, fixed in 5.1.33). The rollout used to wait fifteen minutes and move on. It now notices the Console reporting the failure within a couple of minutes, installs the correct Network build over SSH, and carries on once the Network app is up.
+- **Fix: a refused UniFi OS channel switch installed the wrong build** - if the Console would not take the channel the plan asked for (ours answered No permission), the rollout installed whatever the Console was already offering, which on a Console sitting on Early Access meant an EA build would get installed. It now declines a build from any other channel, tells you why, and installs the planned image over SSH when the plan captured one.
+
+## Client Performance - Data Usage
+
+- **Fix: the chart lagged a time range picked on another tab** - changing the range on Speed or Signal and coming back to Data drew the old range's chart while the new totals loaded.
+- **Fix: two quick range changes flashed the empty state** - the cards keep their spinner now and show the range you ended on.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.2-preview2
 
 Preview of what's coming in the next patch. See [v2.8.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1) for the latest release.
