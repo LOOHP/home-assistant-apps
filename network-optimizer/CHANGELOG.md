@@ -1,3 +1,60 @@
+## 2.8.4-preview
+
+Preview of what's coming in the next patch. See [v2.8.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.3) for the latest release.
+
+This one is out early to get the Fan Control Tuning fix to anyone on UniFi OS 6.0.x Early Access: on 6.0.5 and 6.0.7 the gateway has been running UniFi's factory fan setpoints whatever you deployed, so a tuned 65 C setpoint did nothing. Also in the build: the Wi-Fi Optimizer stops recommending a narrower channel off a bad width reading, and SFP ONT sticks with a known DDM read glitch can have it filtered out of alerts and charts.
+
+## Performance Tweaks
+
+- **Fix: Fan Control Tuning had no effect on UniFi OS 6.0.x EA** - UniFi OS 6.0 changed which service controls the fan, so the gateway kept UniFi's factory setpoints. **Redeploy it on UniFi OS 6.0.x EA or later.**
+
+## Wi-Fi Optimizer
+
+- **Fix: a false Unused Width recommendation** - a client that had negotiated 160 MHz could be read as 80 MHz, and the AP would be told to narrow. Channel Recommendation shared the same bad reading. Both now look back two weeks of per-client history, kept in a daily rollup (InfluxDB is a little busier for about fifteen minutes after updating, once).
+
+## Monitoring - SFP Stats
+
+- **Ignore single-poll DDM spikes on SFP ONTs** - a known DDM read pattern on some SFP ONT sticks: temperature and RX power jump together for one poll, then return to normal, raising High Temperature and RX Power Low alerts and drawing spikes on the charts. **Off by default; turn it on under SFP Alert Thresholds.** Anything that holds for two polls still alerts.
+
+## Firmware Rollout
+
+- **Fix: Device Offline alerts right after a Network application update** - devices re-adopt for a minute or two after the rollout reports complete, and that minute fell outside the quiet window even with **Skip the usual offline and restart alerts** ticked.
+
+## Dashboard
+
+- **Fix: a Console upgrade recorded as a power loss** - on a slow boot, a UniFi OS Console's reason could be copied from a previous boot (seen on a UCG-Fiber upgrading to UniFi OS 6.0.7). Reasons already on file are re-read and corrected after updating.
+
+## Fixes
+
+- Also fixed: a repeated "'First'/'FirstOrDefault' without 'OrderBy'" warning filling the application log (#1210, thanks @bondskin); and on Multi-Site installs, each site's hourly usage rollups now run at their own minute instead of all on one.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.3
 
 > **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1, v2.8.2, and v2.8.3):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0, v2.8.0-preview8, v2.8.1, or v2.8.2, you're set.
