@@ -1,3 +1,61 @@
+## 2.8.5
+
+> **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1, v2.8.2, v2.8.3, v2.8.4, and v2.8.5):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0, v2.8.0-preview8, v2.8.1, v2.8.2, v2.8.3, or v2.8.4, you're set.
+
+Security Audit now recommends UniFi Network's new port lock and can alert you when a scheduled audit turns up new findings. On a switch you monitor over SNMP, a wired client's online state now comes from the port itself rather than from UniFi Network's client list, on Client Performance and the Live View maps. Plus fixes on Live View, Client Performance, and ISP Health. See the [v2.8.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0), [v2.8.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1), [v2.8.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.2), [v2.8.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.3), and [v2.8.4](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.4) release notes for what's new in v2.8.0+.
+
+## Security Audit
+
+- **Missing Port Lock** - recommends UniFi Network's new Lock Port to UniFi Device (Early Access, 10.6.101 or later, on UniFi switches running firmware 7.6.2 or later) for a port with one UniFi device on it, with a **Port Lock Available** note where it could replace a MAC Address Filter or a Port Profile. Clients behind an access point or downstream switch are not affected by the lock.
+- **Fix: port recommendations used setting names UniFi Network 10.6 retired** - on 10.6 or later they now name Port Security, the MAC Address Filter, and Port Profiles instead of Restricted and Ethernet Port Profiles.
+
+## Alerts & Schedule
+
+- **Security Audit: New Recommendations and New Info Findings** - two new rules, on by default, that alert when a scheduled audit finds more recommendations or Info findings than the one before it. Expect them on your first scheduled audit after updating if the port lock findings apply to your network.
+
+## Client Performance
+
+- **Wired clients online and offline by the port** - UniFi Network is slow to notice a wired client come and go. On a switch you monitor over SNMP, the switch port decides instead: online while the port is up and carrying the client's traffic, offline once the link drops. A port shared by more than one device is left to the Console. No SNMP, no change.
+- **Fix: coming back to the page on a phone replayed stale readings** - switch away from Client Performance and back, and the signal and PHY rates churned through a backlog of readings taken while you were gone, for as long as you had been away. The page now sits quiet while it is hidden and paints the current reading when you return.
+- **Fix: a wired client on a gateway port showed 10 Gbps** - the port card read the gateway's port capability rather than the negotiated speed. It now shows the same speed as Port Statistics and UniFi Network.
+
+## Monitoring
+
+### Live View
+
+- **Wired clients on the maps follow the port too** - live and in playback, both maps draw a wired client by the same rule: gone while its port link is down, back when it is up. The 3D map's playback now also hides a client that was not connected at the scrub instant, as the 2D map already did.
+- **Fix: a quiet wired client vanished from playback** - scrub to an instant between two of UniFi Network's per-client traffic updates (they are minutes apart) and a wired client that was there the whole time was drawn as gone. It now stays.
+- **Fix: a port that went quiet or down kept its last rate** - Port Statistics and a wired client's card on Client Performance held the last computed rate for minutes after the port's counters stopped moving. The rate now reads idle within a minute, and at once when the link is down.
+
+### ISP Health
+
+- **Target down** - a host you monitor directly, such as your ISP's speed test server, is not a hop on the path, so its going dark says the host was down, not that a route changed. It now gets its own Target down entry in Path & Congestion Events, named by the host, and its downtime no longer counts against that network's grade. Its packet loss was already kept out of the Packet Loss factor and still is. Traced hops are unchanged.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.4-preview
 
 Preview of what's coming in the next patch. See [v2.8.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.3) for the latest release.
