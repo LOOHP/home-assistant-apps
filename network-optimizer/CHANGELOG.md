@@ -1,3 +1,49 @@
+## 2.8.6
+
+> **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1-v2.8.6):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0-preview8, or on v2.8.0-v2.8.5, you're set.
+
+Performance Tweaks unlocked on UniFi OS 6.0.9 EA for the UCG line, plus fixes to Firmware Rollout and WAN speed tests. See the [v2.8.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.0), [v2.8.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.1), [v2.8.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.2), [v2.8.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.3), [v2.8.4](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.4), and [v2.8.5](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.5) release notes for what's new in v2.8.0+.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.9 EA on the UCG line** - verified and supported (live-verified on a UCG-Fiber). The UXG line's ceiling stays at 6.0.5.
+- **Fix: Update and Redeploy did nothing on firmware past the ceiling** - on a tweak you already had installed, the confirmation opened and then closed without deploying or saying why. The firmware check now applies to new deploys only, and a refused or failed deploy tells you the reason (#1226, thanks @sergiopadure for the report).
+
+## Firmware Rollout
+
+- **Fix: a switch upgrade still raised Device Offline and WAN outage alerts** - with the usual alerts set to skip, a rollout held them only for the devices directly behind the switch. It now holds them for everything that switch cuts off, which on a self-hosted UniFi OS Server can be most of the site.
+
+## Alerts & Schedule
+
+- **Fix: two WAN speed tests scheduled for the same time** - the second one failed with "WAN speed test returned no result". Scheduled WAN speed tests on a site now take turns, and one that finds a test already running waits for it instead of failing (#1225, thanks @marchingon12 for the report).
+- **Fix: a failed scheduled WAN speed test was recorded as Success with 0 / 0 Mbps** - it now fails the run with the test's own error.
+- **Fix: a failed Gateway (Direct) test showed a block of JSON as its error** - on a schedule and on the WAN Speed Test page. It now shows the error message itself.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.5
 
 > **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1, v2.8.2, v2.8.3, v2.8.4, and v2.8.5):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0, v2.8.0-preview8, v2.8.1, v2.8.2, v2.8.3, or v2.8.4, you're set.
