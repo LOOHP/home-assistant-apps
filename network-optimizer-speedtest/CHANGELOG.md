@@ -1,3 +1,43 @@
+## 2.9.0-preview1
+
+First preview of v2.9.0. Health checks you write yourself, and an Adaptive SQM fix for gateways where apt can't put `bc` back after a firmware upgrade.
+
+## Monitoring - Setup
+
+- **Health Checks** - open a device on the **Devices** card and add a command to run on it over SSH, what counts as a problem, and what to do about it: alert, restart a service, kill a process, or reboot. **Test** runs it once and shows what it read. Each check gets its own chart on Device Stats.
+- **UniFi Network JVM GC Thrash** - the first template, for Cloud Gateways: catches the Network application stalled in garbage collection (routing fine, UniFi Console unresponsive) and restarts it (#1224, thanks @jakerobb for the report).
+
+## Adaptive SQM
+
+- **Fix: the download shaper could drop to 0 Mbit after a firmware upgrade** - the rate scripts leaned on `bc`, an apt package that apt often can't restore after a UniFi OS upgrade; they use `awk` now, and never write a rate that isn't a positive number. **Redeploy Adaptive SQM once** (the Adaptive SQM page prompts you).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.9` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.9 && git reset --hard origin/release/2.9 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.8.6
 
 > **On-Site Agent update (the v2.8.0 Agent, unchanged in v2.8.1-v2.8.6):** if you skipped v2.8.0, the measured per-client WAN accounting needs the v2.8.0 Agent on your UniFi Gateway, and the switch-port naming fix needs it on any Agent that does your SNMP collection. Open **Settings - Multi-Site**, expand your site, and run the upgrade command there; on a UniFi Gateway, **Run It for Me** runs it for you over SSH. Your enrollment is kept, and the app prompts you when an Agent is behind. If you updated on v2.8.0-preview8, or on v2.8.0-v2.8.5, you're set.
