@@ -23,6 +23,14 @@ APP_BASE_URL = os.getenv('APP_BASE_URL', f"http://{os.getenv('HOME_ASSISTANT_IP'
 HA_TOKEN = os.getenv("HA_TOKEN", "")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "info")
 
+INPUT_SAMPLE_RATE = 48000
+INPUT_CHANNELS = 1
+INPUT_SAMPLE_WIDTH_BYTES = 2
+SILENCE_FRAME_SECONDS = 0.02
+PLAYBACK_SETTLE_SECONDS = 0.5
+RECENT_AUDIO_MAX_BYTES = 6000  # Approximately one second at 48 kbit/s.
+LISTENER_QUEUE_MAX_CHUNKS = 16
+
 
 def _load_targets() -> list[dict]:
     raw = os.getenv("TARGETS_JSON", "[]")
@@ -95,9 +103,11 @@ class AudioEngine:
         self.state_lock = asyncio.Lock()
         self.broadcast_task: Optional[asyncio.Task] = None
         self.stderr_task: Optional[asyncio.Task] = None
+        self.silence_task: Optional[asyncio.Task] = None
         self.listeners: set[asyncio.Queue[bytes]] = set()
         self.listeners_lock = asyncio.Lock()
-        self.recent_buffer: Deque[bytes] = deque(maxlen=256)
+        self.recent_buffer: Deque[bytes] = deque()
+        self.recent_buffer_bytes = 0
         self.active_ws_count = 0
         self.received_audio = False
 
@@ -107,6 +117,7 @@ class AudioEngine:
                 return
 
             self.recent_buffer.clear()
+            self.recent_buffer_bytes = 0
             self.received_audio = False
 
             self.proc = await asyncio.create_subprocess_exec(
@@ -145,6 +156,7 @@ class AudioEngine:
 
             self.broadcast_task = asyncio.create_task(self._stdout_pump())
             self.stderr_task = asyncio.create_task(self._stderr_pump())
+            self.silence_task = asyncio.create_task(self._silence_pump())
             print("Audio engine started")
 
     async def stop(self) -> None:
@@ -153,8 +165,15 @@ class AudioEngine:
             self.proc = None
             broadcast_task = self.broadcast_task
             stderr_task = self.stderr_task
+            silence_task = self.silence_task
             self.broadcast_task = None
             self.stderr_task = None
+            self.silence_task = None
+
+        if silence_task:
+            silence_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await silence_task
 
         if proc is not None:
             with suppress(Exception):
@@ -177,27 +196,53 @@ class AudioEngine:
                     await task
 
         self.recent_buffer.clear()
+        self.recent_buffer_bytes = 0
         print("Audio engine stopped")
 
     async def write(self, data: bytes) -> None:
-        proc = self.proc
-        if not proc or proc.returncode is not None or not proc.stdin:
-            raise RuntimeError("ffmpeg is not running")
-
         if data:
             self.received_audio = True
 
+        await self._write_pcm(data)
+
+    async def _write_pcm(self, data: bytes) -> None:
+        if not data:
+            return
+
         async with self.stdin_lock:
+            proc = self.proc
+            if not proc or proc.returncode is not None or not proc.stdin:
+                raise RuntimeError("ffmpeg is not running")
             proc.stdin.write(data)
             await proc.stdin.drain()
 
+    async def _silence_pump(self) -> None:
+        frame_size = int(
+            INPUT_SAMPLE_RATE
+            * INPUT_CHANNELS
+            * INPUT_SAMPLE_WIDTH_BYTES
+            * SILENCE_FRAME_SECONDS
+        )
+        silence = bytes(frame_size)
+        loop = asyncio.get_running_loop()
+        next_frame_at = loop.time()
+
+        try:
+            while not self.received_audio:
+                await self._write_pcm(silence)
+                next_frame_at += SILENCE_FRAME_SECONDS
+                await asyncio.sleep(max(0.0, next_frame_at - loop.time()))
+        except asyncio.CancelledError:
+            raise
+        except (BrokenPipeError, ConnectionResetError, RuntimeError):
+            return
+
     async def add_listener(self) -> asyncio.Queue[bytes]:
-        queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=128)
+        queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=LISTENER_QUEUE_MAX_CHUNKS)
         async with self.listeners_lock:
             self.listeners.add(queue)
             for chunk in self.recent_buffer:
-                with suppress(asyncio.QueueFull):
-                    queue.put_nowait(chunk)
+                self._put_latest(queue, chunk)
         return queue
 
     async def remove_listener(self, queue: asyncio.Queue[bytes]) -> None:
@@ -205,15 +250,27 @@ class AudioEngine:
             self.listeners.discard(queue)
 
     async def _broadcast_chunk(self, chunk: bytes) -> None:
-        dead: list[asyncio.Queue[bytes]] = []
         async with self.listeners_lock:
             for queue in self.listeners:
-                try:
-                    queue.put_nowait(chunk)
-                except asyncio.QueueFull:
-                    dead.append(queue)
-            for queue in dead:
-                self.listeners.discard(queue)
+                self._put_latest(queue, chunk)
+
+    @staticmethod
+    def _put_latest(queue: asyncio.Queue[bytes], chunk: bytes) -> None:
+        try:
+            queue.put_nowait(chunk)
+        except asyncio.QueueFull:
+            # Keep live listeners near the stream head instead of building
+            # an ever-growing delay or disconnecting them permanently.
+            with suppress(asyncio.QueueEmpty):
+                queue.get_nowait()
+            with suppress(asyncio.QueueFull):
+                queue.put_nowait(chunk)
+
+    def _remember_chunk(self, chunk: bytes) -> None:
+        self.recent_buffer.append(chunk)
+        self.recent_buffer_bytes += len(chunk)
+        while self.recent_buffer_bytes > RECENT_AUDIO_MAX_BYTES and len(self.recent_buffer) > 1:
+            self.recent_buffer_bytes -= len(self.recent_buffer.popleft())
 
     async def _stdout_pump(self) -> None:
         proc = self.proc
@@ -225,7 +282,7 @@ class AudioEngine:
                 chunk = await proc.stdout.read(1024)
                 if not chunk:
                     break
-                self.recent_buffer.append(chunk)
+                self._remember_chunk(chunk)
                 await self._broadcast_chunk(chunk)
         except asyncio.CancelledError:
             raise
@@ -518,7 +575,7 @@ async def wait_until_targets_ready(targets: list[dict], timeout_seconds: float =
                 state = state_obj.get("state", "unknown")
                 states[entity_id] = state
                 print("Target state:", entity_id, state)
-                if state in {"buffering", "playing"}:
+                if state == "playing":
                     pending.discard(entity_id)
             except Exception as exc:
                 print("State poll failed:", entity_id, exc)
@@ -656,6 +713,9 @@ async def api_start(payload: StartRequest):
             ok, states = await wait_until_targets_ready(targets)
 
             if ok:
+                # "playing" can be reported just before a physical speaker emits
+                # audio. Keep sending silence briefly before inviting the user to speak.
+                await asyncio.sleep(PLAYBACK_SETTLE_SECONDS)
                 await set_session_status("You can speak now", ready=True)
                 return {
                     "ok": True,
