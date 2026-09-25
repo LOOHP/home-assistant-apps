@@ -1,3 +1,49 @@
+## 2.9.0-preview4
+
+Fourth preview of v2.9.0. See the [v2.9.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview3) for what came before.
+
+An Active Alerts card on the Dashboard, Adaptive SQM calibration that comes straight back after a firmware upgrade, and Gateway CPU and memory alerts that honor your threshold.
+
+## Dashboard
+
+- **Active Alerts** - a new card with your three highest-severity unresolved alerts, each with **Acknowledge** and **Resolve** (Site Operator and above). **View All** opens the rest on Alerts & Schedule - Active Alerts.
+
+## Adaptive SQM
+
+- **Calibration comes straight back after a firmware upgrade** - the Ookla speed test is now a checksum-verified build kept on the gateway, so a boot after an upgrade no longer reinstalls it from apt, or fails to when the WAN isn't up yet. UniFi's own speedtest package is left alone, and it all switches over on your next redeploy (#1093, thanks @Jason-Morcos).
+- Also fixed: the **Speed test running...** indicator missed the calibration after a deploy when **Speedtest Boot Delay** was set longer than the default, and missed scheduled calibrations most of the time.
+
+## Alerts & Schedule - Rules
+
+- **Fix: Gateway: High CPU and Gateway: High Memory ignored their Threshold %** - both alerted at a fixed 70% and 95% whatever the rule said, and the alert still named the old value (#1232, thanks @Sub-lime-time for the report).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.9` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.9 && git reset --hard origin/release/2.9 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.0-preview3
 
 Third preview of v2.9.0. See the [v2.9.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview2) for what came before.
