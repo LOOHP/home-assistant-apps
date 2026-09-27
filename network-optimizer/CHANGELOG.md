@@ -1,3 +1,46 @@
+## 2.9.0-preview7
+
+Seventh preview of v2.9.0. See the [v2.9.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview6) for what came before.
+
+The Security Audit's IPv6 checks cover DNS now: the DNS servers your networks and WANs hand out over IPv6, and DNAT rules that redirect IPv6 DNS. Plus a fix for client speed tests run over IPv6 showing as WAN.
+
+## Security Audit
+
+- **Pi-hole bypassed over IPv6** - a network that gives devices a Pi-hole or other LAN DNS server over IPv4, but the gateway over IPv6 (**Auto DNS Server** on), is reported: devices with IPv6 usually ask the IPv6 server first (#180, thanks @cdheiser for the report).
+- **Custom IPv6 DNS servers are checked** - with **Auto DNS Server** off, a public IPv6 server joins **DNS: External DNS Bypass**, and a WAN running IPv6 has its IPv6 DNS checked against your DoH provider, the same as its IPv4 DNS.
+- **IPv6 DNAT rules and shared DNS** - an IPv6 DNAT rule for DNS is checked for the right translated address, and an isolated network sharing a Corporate network's IPv6 DNS server is flagged, as with IPv4.
+
+## Client Speed Test
+
+- **Fix: a test from an IPv6 address showed as WAN** - Test History showed the raw address, labelled WAN and traced out through the gateway. With Gateway SSH set up, it now names the device and traces it on your LAN, as for IPv4 (#568, thanks @ekobres for the report).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.9` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.9 && git reset --hard origin/release/2.9 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.0-preview5
 
 Fifth preview of v2.9.0. See the [v2.9.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview4) for what came before.
