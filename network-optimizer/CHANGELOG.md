@@ -1,3 +1,49 @@
+## 2.9.0-preview8
+
+> **On-Site Agent update (optional):** this build's Agent reads a UniFi Cable Internet's signal levels (see Monitoring below). It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command, or run the upgrade command yourself; from a preview build it installs this preview's Agent. Everything else in the build works with the Agent you have.
+
+Eighth preview of v2.9.0. See the [v2.9.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview7) for what came before.
+
+UniFi Cable Internet signal levels in Cable Modem Stats, and a Zyxel 5G CPE fix from the first round of testing on a live NR7302.
+
+## Monitoring
+
+### Cable Modem Stats
+
+- **UniFi Cable Internet (UCI)** support - channel power, SNR, and FEC errors (DOCSIS 3.1 OFDM and OFDMA too), the modem's own event log with T3 and T4 timeouts marked on the charts, and alerts for them. It needs the On-Site Agent on your UniFi Gateway, and a UCI shows up here by itself once that Agent is updated (#260, thanks @twodarek for the request, @b52src for pointing us at robry84's [uci-inform-exporter](https://gitlab.com/robry84/uci-inform-exporter), and robry84 for working out the format).
+- Nobody on our side has a UCI, so this build is its first run on real hardware: tell us how it goes on #260.
+
+### Cellular Stats
+
+- **Fix: a Zyxel NR7302 on 5G NSA showed its LTE band** - the **Band** line now shows the 5G band (n78, for example), and the band's bandwidth is read again (#1212, thanks @Mirabis for testing and the HAR).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.9` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.9 && git reset --hard origin/release/2.9 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.0-preview7
 
 Seventh preview of v2.9.0. See the [v2.9.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview6) for what came before.
