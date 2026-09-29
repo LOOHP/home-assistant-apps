@@ -1,3 +1,49 @@
+## 2.9.0-preview9
+
+> **On-Site Agent update (optional):** this build's Agent makes the UniFi Cable Internet capture lighter on the gateway (see Monitoring below). It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command, or run the upgrade command yourself; from a preview build it installs this preview's Agent. Everything else in the build works with the Agent you have.
+
+Ninth preview of v2.9.0. See the [v2.9.0-preview8 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0-preview8) for what came before.
+
+A lighter UniFi Cable Internet capture on the gateway, and Performance Tweaks on UniFi OS 6.0.10 EA for the UXG line.
+
+## Monitoring
+
+### Cable Modem Stats
+
+- **UniFi Cable Internet capture is lighter on the gateway** - the Agent's tap no longer makes the gateway copy the traffic it sends. We ran the capture on our own UniFi Gateways against an access point's informs, which use the same format, and saw no impact on WAN throughput, packet loss, or loaded latency.
+- We still have no UCI on our side, so tell us how it goes on #260.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.10 EA on the UXG line** - supported (live-verified on a UXG-Fiber).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.9` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.9 && git reset --hard origin/release/2.9 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.8.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.8.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.0-preview8
 
 > **On-Site Agent update (optional):** this build's Agent reads a UniFi Cable Internet's signal levels (see Monitoring below). It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command, or run the upgrade command yourself; from a preview build it installs this preview's Agent. Everything else in the build works with the Agent you have.
