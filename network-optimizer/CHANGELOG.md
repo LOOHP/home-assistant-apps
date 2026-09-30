@@ -1,3 +1,60 @@
+## 2.9.1-preview1
+
+> **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1-preview1):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0 or v2.9.0-preview9, you're set.
+
+Preview of what's coming in the next patch. See [v2.9.0](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0) for the latest release.
+
+The AP Agent now runs on older MIPS access points (U6-Lite, U6-Mesh, UAP-AC-Pro, and others), and every page gets a Back button. Also two Client Performance fixes, a Monitoring fix for an Express adopted as an AP, and the radio reset warning is limited to 6 GHz.
+
+## AP Telemetry
+
+- **MIPS access points** - the AP Agent now runs on older MIPS-based access points such as the U6-Lite, U6-Mesh, and UAP-AC-Pro, alongside the ARM-based U6 and U7 (#1203, thanks @dpackham for the request, @Confenet for the implementation in #1239 this builds on and production measurements across five UAP-AC-Pros, and @tusc for testing on a U6-Mesh).
+- _Running natively on Linux from source? The [Native Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/NATIVE-DEPLOYMENT.md) has the two new builds; Docker, the MSI, and the macOS installer already include them._
+
+## Client Performance
+
+- **Fix: no Wi-Fi data for a client that just joined** (AP Agent) - a phone rejoining the LAN could show no Wi-Fi data for up to about 40 seconds, until UniFi Network caught up. It now shows from the join, under the client's UniFi Network name rather than its DHCP hostname.
+- **Fix: stuck on your VPN client after coming back on the LAN** - opened over a VPN (Tailscale, UniFi Teleport, or a plain VPN), the page kept showing your VPN client after the browser reconnected on the LAN. It now switches to your Wi-Fi client device.
+
+## Monitoring
+
+- **Fix: an Express adopted as an AP was monitored at the gateway's address** - an Express (or Dream Router) adopted as an AP behind another gateway had its automatic target in **Latency Targets** and its SNMP polling pointed at the gateway's LAN IP. Both now use its own address (#1244, thanks @tempeduck).
+
+## Alerts & Schedule
+
+- **Fix: the radio reset warning could fire on healthy radios** (AP Agent) - **Wi-Fi: Radio Resetting** could fire on a 2.4 or 5 GHz radio that was serving clients fine. It now warns only on 6 GHz, the one band where a rising reset count has presented before a radio stopped transmitting, and **Wi-Fi: Radio Stopped Transmitting** still covers every band (#1242, thanks @Jason-Morcos).
+
+## Back Button
+
+- **Back** - every page now has a Back button beside its title, so an installed app with no browser chrome has a way back (#1243, thanks @KittyFarts for the request). It shows only when there is a Network Optimizer page to go back to.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.9` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.9 && git reset --hard origin/release/2.9 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.0)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.0-preview9
 
 > **On-Site Agent update (optional):** this build's Agent makes the UniFi Cable Internet capture lighter on the gateway (see Monitoring below). It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site** (your site's agent row) and press **Run It for Me** under the upgrade command, or run the upgrade command yourself; from a preview build it installs this preview's Agent. Everything else in the build works with the Agent you have.
