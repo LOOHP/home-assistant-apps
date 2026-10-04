@@ -1,3 +1,67 @@
+## 2.9.2-preview1
+
+> **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1 and v2.9.2-preview1):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
+
+Preview of what's coming in the next patch. See [v2.9.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1) for the latest release.
+
+AP Telemetry on UniFi gateways with built-in Wi-Fi, Firmware Rollout of builds before your own Console is offered them, fixes for devices polled through an On-Site Agent, for an Express adopted as an AP, and for installs built from source, plus Performance Tweaks on UniFi OS 6.0.11 EA for the UCG line.
+
+## AP Telemetry
+
+- **UniFi gateways with built-in Wi-Fi** - the AP Agent now deploys to the UDM, UDW, UDR, UDR7, UDR-5G-Max, UX, UX7, and UCG-Industrial, whether a UX or UX7 is your gateway or in AP mode, so clients on their radios get the same live telemetry as clients on your access points. A gateway deploys with your Gateway SSH credentials, and a UX or UX7 in AP mode falls back to them when your Device SSH login is refused (#1221, thanks @tempeduck for verifying the agent on a UX7).
+- **Fix: a missing AP Agent binary retried without end** (installs built from source) - when the build had no AP Agent binary for an access point, Network Optimizer logged into that AP over SSH and wrote an Audit Log entry on every retry, and the AP Telemetry status kept showing an older error. It now says the binary is missing and backs off between retries (#1203, thanks @dpackham for the report).
+- _Running natively on Linux from source? The update steps in the [Native Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/NATIVE-DEPLOYMENT.md) now rebuild the AP Agent and every other helper binary on each update, so a release that adds one is never missed. Docker, the MSI, and the macOS installer already include them._
+
+## Firmware Rollout
+
+- **UniFi OS builds shared between sites** (Multi-Site) - a UniFi OS build one of your Cloud Gateways is offered can now be rolled out on every site with the same hardware, over Gateway SSH. A newer shared device build also replaces an older one the Console offers.
+- **Deploy Firmware by URL** - paste a Ubiquiti download link to roll out a build on Early Access before your Consoles are offered it. **Plan Rollout Now** goes straight to the preview of a rollout that starts now and installs exactly that build, even an older one.
+
+## Monitoring
+
+- **Fix: a device that redirected was reached from the wrong network** (Multi-Site Agent) - on a site whose devices Network Optimizer reaches through its On-Site Agent, a cable modem, ONT, cellular modem, or Starlink that redirected a request had the redirect followed from the server's own network instead of the site's. It could land on a different device or the wrong port, and Netgear CM2050V and CM600 login never worked on such a site. Every connection, redirects included, now stays inside the site.
+- **Fix: an Alias IP in Monitoring Interfaces was unreachable from an On-Site Agent on the gateway** (multi-WAN) - on a multi-WAN site whose On-Site Agent runs on the UniFi Gateway, the agent could not reach a device on a non-primary WAN through its Alias IP: the traffic left through the primary WAN instead. **If a device was unreachable through a Monitoring Interface via your gateway's On-Site Agent, press Deploy on that interface in Monitoring - Setup.**
+- **Fix: Custom Health Checks on an Express adopted as an AP ran on your gateway** - a check on an Express (or Dream Router) adopted as an AP behind another gateway ran its command, and any remedy, on the site's gateway instead of on the Express. Both now run on the Express itself.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.11 EA on the UCG line** - supported, verified against the UCG-Fiber 6.0.11 firmware image.
+
+## WAN Speed Test
+
+- **Fix: no WAN speed test from the server on native x64 installs** - the [Native Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/NATIVE-DEPLOYMENT.md) only built the speed test binary for the gateway, so a WAN speed test run from the server reported "UWN speed test binary not found". The build and update steps now include the server's own binary.
+
+## Fixes
+
+- **An Express adopted as an AP that refused your Device SSH login** - when an Express (or Dream Router) adopted as an AP behind another gateway refuses the Device SSH login, LAN Speed Test, Custom Health Checks, reboot reasons, Network Tools, the Wi-Fi Optimizer's **Re-pair Uplink**, and Firmware Rollout's SSH retry now use your Gateway SSH credentials for it instead of failing (#1221, thanks @tempeduck for spotting the refused login).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.1-preview1
 
 > **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1-preview1):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0 or v2.9.0-preview9, you're set.
