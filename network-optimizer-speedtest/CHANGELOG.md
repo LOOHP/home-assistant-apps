@@ -1,3 +1,60 @@
+## 2.9.2-preview2
+
+> **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1, v2.9.2-preview1, and v2.9.2-preview2):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
+
+Preview of what's coming in the next patch. See [v2.9.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1) for the latest release.
+
+PostgreSQL on SSD joins Performance Tweaks for UniFi Network 11.0.81. Deploy Firmware by URL takes the download links from Ubiquiti's release notes, and one link covers every model that shares the image. Security Audit's firmware download check now covers `dl.ui.com` too, and ISP Health's Loaded Latency no longer lets one outlier WAN speed test set the figure.
+
+## Firmware Rollout
+
+- **Deploy Firmware by URL takes dl.ui.com links** - paste the download link from Ubiquiti's release notes as well as a `fw-download.ubnt.com` link. One image often serves a whole family (the U7-Pro image covers the U7 Pro line, E7, and E7-Campus), and the build now reaches every model that shares it. If the link's folder isn't a model code (it usually is) and none of your Consoles has been offered the build, use the per-model `fw-download.ubnt.com` link instead.
+- **Device firmware downgrades by URL** - a pasted device build older than what a device runs now downgrades it. Before, that device was left out of the rollout. UniFi OS and UniFi Network still never go backward.
+- **Rollout wizard** - each device in the preview has an **Exclude** button, so you can leave it out without going back to the first step. With Autopilot on, the wizard now starts on **Start now**, since Autopilot's own settings are edited on the Firmware Rollout card.
+- **Fix: a device model stayed on Early Access after its Deploy Firmware by URL rollout** (sites without a saved Autopilot configuration) - the next plan kept that model on Early Access. Its channel now goes back when the rollout ends.
+- **Fix: a UniFi OS link for a UCG-Ultra planned no update** - its download file carries a different model code than the Console reports, so the rollout found nothing to install on it. It now installs.
+
+## Monitoring - ISP Health
+
+- **Fix: one WAN speed test could set Loaded Latency on its own** - only some of your WAN speed tests counted toward it, so a single test that read high set the figure even when your latency monitoring saw a clean line at that moment. Every WAN speed test that filled the line now counts, and one your latency monitoring contradicts is left out.
+- **Fix: Loaded Loss and Loaded Latency missed most scheduled WAN speed tests** - a speed test's load often read as a one-off spike and was thrown out, so the loaded figures could come from a single test. Load during a recorded WAN speed test now always counts.
+
+## Performance Tweaks
+
+- **PostgreSQL on SSD** - UniFi Network 11.0.81 moved from MongoDB to PostgreSQL, so on a UCG-Fiber or UCG-Max this tweak replaces MongoDB on SSD, with daily SSD backups and weekly eMMC copies. Deploying it retires MongoDB on SSD first by copying the newest MongoDB data back to the eMMC, and UniFi Network stops for a minute or two while that runs (#1251, thanks @KittyFarts for raising it and testing the offload on hardware, and @jimstrang for the gateway findings and the PR that hardened the offload and added its backups).
+- **Fix: removing MongoDB on SSD reported success when its copy back to eMMC failed** - it now checks each step, keeps whichever copy is newest, and shows the error instead.
+
+## Security Audit
+
+- **Firewall: Missing Firmware Download Access now checks `dl.ui.com`** - Ubiquiti serves firmware from `dl.ui.com` as well as `fw-download.ubnt.com` and `fw-update.ubnt.com`, so a rule allowing only `ubnt.com` hosts is now flagged. **If this issue appears after updating, add `dl.ui.com` to that rule, or `ui.com` (which covers it, the same way `ubnt.com` covers the other two).**
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.2-preview1
 
 > **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1 and v2.9.2-preview1):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
