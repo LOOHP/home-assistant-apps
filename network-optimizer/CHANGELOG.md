@@ -1,3 +1,54 @@
+## 2.9.2-preview3
+
+> **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1, v2.9.2-preview1, v2.9.2-preview2, and v2.9.2-preview3):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
+
+Preview of what's coming in the next patch. See [v2.9.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1) for the latest release.
+
+Performance Tweaks' database tweaks no longer set off alerts while UniFi Network is stopped, a UniFi OS console that lost power no longer reads as an old firmware upgrade, **Roam** is no longer offered where the AP Agent can't steer, and Network Optimizer keeps your place on the page when it reloads on a phone.
+
+## AP Telemetry
+
+- **Fix: Roam failed for a client on an Express adopted as an AP** - the Express gives the AP Agent no way to steer clients, so Client Performance no longer offers **Roam** for a client on one.
+
+## Dashboard
+
+- **Fix: a power loss read as an old firmware upgrade** - when a UniFi OS console lost power, the restart reason on its Dashboard device card could name a firmware upgrade from weeks before (seen on an Express adopted as an AP). That old upgrade no longer explains a later restart (#1221, thanks @tempeduck for the report).
+
+## Performance Tweaks
+
+- **Database tweaks no longer set off alerts** - deploying or removing MongoDB on SSD or PostgreSQL on SSD stops UniFi Network for a minute or two, which raised device offline and Console connection alerts. The site's alerts now stay muted while it runs.
+
+## Fixes
+
+- **Coming back to Network Optimizer on a phone or tablet put you back at the top of the page** - it now opens where you were scrolled, and so does the reload after a restart.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.2-preview2
 
 > **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1, v2.9.2-preview1, and v2.9.2-preview2):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
