@@ -1,3 +1,70 @@
+## 2.9.2-preview4
+
+> **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1, v2.9.2-preview1, v2.9.2-preview2, v2.9.2-preview3, and v2.9.2-preview4):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
+
+Preview of what's coming in the next patch. See [v2.9.1](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1) for the latest release.
+
+More control over what and when Firmware Rollout runs, Channel Recommendation applying its own plan, and a fix for a changed Console password locking the account.
+
+## Firmware Rollout
+
+- **Deploy Known Firmware** - beside Deploy Firmware by URL, pick any build your sites have seen by device, model, or build, with no download link to find. That includes an Early Access build installed on one site going to a site that isn't on Early Access. **Plan Rollout Now** plans it exactly as a pasted link would.
+- **End Soak Early** - builds a soaking rollout's report from what has been measured so far, so you can plan the next one right away.
+- **Deploy Firmware by URL takes the UniFi Network links in Ubiquiti's community release notes** (`dl.ui.com/unifi/<version>-<id>/...`), which it turned away before.
+- **Fix: a UniFi Network update that did not install read Completed** - the rollout's report now shows it as Failed, with the reason.
+- **Preferred start time for Autopilot** - set a day and hour in the wizard's Schedule step and Autopilot starts its rollouts there. Tick **Flexible** and it can move up to 3 hours either side to a quieter hour.
+- **Autopilot stays out of Sunday evening and Monday morning** - on a site with more than 3 UniFi devices, Autopilot no longer starts a rollout between Sunday 5 PM and Monday 9 AM, or one it expects to still be running after Sunday 7 PM. A preferred time that isn't **Flexible** is used as you set it. A business site with no usage history yet now defaults to Saturday early morning instead of Sunday.
+- **Advance 24h and Set Time** - a scheduled rollout can now move a day earlier, or to any time you pick, alongside **Postpone 24h**.
+- **Turn off UniFi's own auto-updates** - the warning about UniFi updating devices, the UniFi Network application, or UniFi OS on its own schedule now names only what this rollout covers, and **Turn Off** switches those schedules off for you. The UniFi Network application and UniFi OS need a Console connected with an account rather than an API key.
+- **Fix: Autopilot settings changed in the wizard were ignored** - on a site that had run Autopilot before, turning Autopilot on from the wizard kept it planning from its earlier settings. What you set in the wizard now takes effect.
+
+## Wi-Fi Optimizer
+
+### Channel Recommendation
+
+- **Apply Recommended Channels** - moves your access points to the recommended channels, never two that hear each other at the same time, and shows each radio landing on its new channel. Like spectrum scans, it needs **Network: Full** (**Site Admin** in older versions) on the UniFi account Network Optimizer signs in with or an API Key.
+- **Fix: a stale-scan prompt that Re-scan could not clear** (AP Telemetry) - on an access point running the AP Agent, every spectrum scan was dated 1970, so the Channels tab could ask for a re-scan that never made the prompt go away. The scan's age now reads as unknown.
+
+### Site Health Score
+
+- **Fix: an access point with no clients pulled Client Satisfaction down** - UniFi scores an idle access point -1, and that counted as a real score, so a site with no Wi-Fi clients showed -1. It now counts as no score.
+
+## UniFi Console Connection
+
+- **Fix: a changed password locked the UniFi Console account** - after the account's password was changed on the Console, Network Optimizer kept signing in with the old one until the Console locked the account, and then the new password could not be saved either. It now waits several minutes between retries of a rejected password, and saving the new one in Settings connects right away.
+- **Fix: switching between an API key and a username and password could switch back** - a moment after the new sign-in was saved, the live connection could reconnect with the old one, while Settings showed the new one. It now reconnects with what you saved.
+
+## Fixes
+
+- **Coming back to Network Optimizer on a phone or tablet put you back at the top of the page** - it now opens where you were scrolled, and so does the reload after a restart.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.1)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.2-preview3
 
 > **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1, v2.9.2-preview1, v2.9.2-preview2, and v2.9.2-preview3):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0 or v2.9.1, you're set.
