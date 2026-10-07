@@ -19,7 +19,7 @@ Host the [Network Optimizer for UniFi](https://github.com/Ozark-Connect/NetworkO
 [![GitHub Stars](https://img.shields.io/github/stars/Ozark-Connect/NetworkOptimizer)](https://github.com/Ozark-Connect/NetworkOptimizer/stargazers)
 [![License](https://img.shields.io/badge/license-BSL_1.1-green)](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/LICENSE)
 
-**[Website](https://ozarkconnect.net/network-optimizer)** • **[Quick Start](#quick-start-linux-docker)** • **[Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md)** • **[Releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases)**
+**[Website](https://ozarkconnect.net/network-optimizer)** • **[Everything It Can Do](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/FEATURES.md)** • **[Quick Start](#quick-start-linux-docker)** • **[Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md)** • **[Releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases)**
 
 ## THANK YOU to all of my Sponsors
 
@@ -149,6 +149,8 @@ Network Optimizer answers those questions. It connects to your UniFi controller,
 
 ## Main Features
 
+These are the highlights. For the complete list, organized the way the app is navigated, see [Everything It Can Do](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/FEATURES.md).
+
 ### Wi-Fi Optimizer & Signal Map
 
 Site health scoring, RF environment analysis, client stats, roaming tracking, band steering, and airtime fairness across twelve analysis tabs. The Channel Recommendation engine models pairwise AP interference using signal propagation, live RF scan data, and triangulated neighbor networks, then factors in historical channel stress (utilization, interference, TX retries) to find the lowest-interference channel assignment across your entire network. It respects mesh uplink constraints, DFS preferences, and regulatory channel availability, and validates every recommended move against improvement thresholds so it won’t suggest changes that aren’t worth the disruption. Apply Recommended Channels then writes the plan to UniFi Network for you: access points that hear each other move at different times, so a client always has a neighbor to roam to, and the run finishes on the server even if you leave the page.
@@ -227,7 +229,7 @@ Run speed tests and security audits on a schedule, and get told when something g
 
 ## Requirements
 
-- UniFi Console (aka Controller) - UDM, UCG, UDR, CloudKey, or self-hosted UniFi Network Server
+- UniFi Console (aka Controller) - UDM, UCG, UDR, UniFi Express, EFG, CloudKey, or self-hosted UniFi OS Server (or the legacy UniFi Network Server)
 - Network access to your UniFi Console API (HTTPS)
 - A box (bare metal, container(s), VM/LXC) to host Network Optimizer, see Installation section below for options. [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md) lists general hardware requirements. Do not attempt to install NO on the UniFi Gateway or Console itself unless it's UDM-Beast, EFG, or EF-Core class.
 - A box to host InfluxDB if you want to run Time-Series Monitoring features. This is the one that needs a little more horsepower, so I recommend putting it on your most capable local server.
