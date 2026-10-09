@@ -1,3 +1,56 @@
+## 2.9.3-preview2
+
+> **On-Site Agent update (optional):** if your site uses only SNMPv3, upgrade your Agent so it polls over v3: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
+
+Preview of what's coming in the next patch. See [v2.9.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.2) for the latest release.
+
+SNMPv3 polling now works, and the Dashboard's ONT and cable modem error counters cover the last 24 hours, plus two Channel Recommendation fixes (a faster Apply Recommended Channels, and plans that move several access points together) and a fix for the speed test page looping on redirects.
+
+## Monitoring
+
+- **Fix: SNMPv3 never polled** (consoles with only SNMPv3 enabled) - UniFi Network's SNMPv3 user encrypts as well as authenticates, and Network Optimizer only authenticated, so every v3 poll failed. It polls now, on On-Site Agent sites after the Agent update above (thanks u/kronikwombat for the report).
+- **Fix: SNMP polling failed with no explanation on a View Only account** - UniFi Network withholds the SNMPv3 password from View Only accounts, and on Network 11 it also withholds the Community String from View accounts. Monitoring - Setup now says so and names the fixes, instead of reporting SNMP as not enabled (thanks u/kronikwombat for the report).
+
+## Dashboard
+
+- **Error counters cover the last 24 hours** - the **ONT Stats (GPON / XGS-PON)** and **Cable Modem Stats (DOCSIS)** cards count errors over the last 24 hours instead of since the device last rebooted, and a standalone ONT's card now shows them too. For the cumulative counts, uncheck **Limit error counters on Dashboard Cards to last 24 hours** in **Settings - Monitoring**.
+
+## Wi-Fi Optimizer - Channel Recommendation
+
+- **Fix: Apply Recommended Channels waited about a minute at every step** - each access point moves within seconds, but the run held the next ones until UniFi Network's live radio stats caught up. It now moves on as soon as the access point has taken the change.
+- **Fix: Channel Recommendation missed some plans that move several access points together** - when one access point barely gained from its own move, it was held in place, and the moves that needed its channel fell through with it, so the plan showed no change. Those plans now show when the site as a whole gains enough.
+
+## Fixes
+
+- **The speed test page looped on redirects** (Docker, speed test served without a TLS proxy) - with a capital letter in `HOST_NAME` or `OPENSPEEDTEST_HOST`, the browser stopped with `ERR_TOO_MANY_REDIRECTS`. The hostname now matches regardless of case.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.3-preview1
 
 > **On-Site Agent update (optional; the v2.9.0 Agent, unchanged in v2.9.1, v2.9.2, and v2.9.3-preview1):** if you skipped v2.9.0, its Agent reads a UniFi Cable Internet's signal levels. It only matters on a site with a UCI, for the Agent on your UniFi Gateway. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.9.0-preview9, or on v2.9.0, v2.9.1, or v2.9.2, you're set.
