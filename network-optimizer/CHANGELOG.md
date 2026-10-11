@@ -1,3 +1,58 @@
+## 2.9.3-preview3
+
+> **On-Site Agent update (optional):** if your site uses only SNMPv3, upgrade your Agent so it polls over v3: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on v2.9.3-preview2, you're set.
+
+Preview of what's coming in the next patch. See [v2.9.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.2) for the latest release.
+
+Roam for clients on a UniFi gateway with built-in Wi-Fi, plus fixes for Roam and AP Telemetry, a Custom Health Checks restart of UniFi Network that was reported as failed when it worked, a UniFi Console connection that stayed down behind the Console's login attempt limit, and ISP Health grading the first device upstream of your gateway on ping jitter your traffic never sees.
+
+## AP Telemetry
+
+- **Roam for clients on a UniFi gateway with built-in Wi-Fi** - **Roam** on Client Performance now works for a 5 GHz client on one of these (verified on a UX7 adopted as an AP). It asks rather than disconnects, so the client can decline and stay; MLO clients and **Change Band** aren't supported there (#1265, thanks @tempeduck).
+- **Fix: Roam wasn't offered for clients that stay put** - a client that sat on one Access Point for more than half an hour before moving was never recorded as having roamed (#1265, thanks @tempeduck).
+- **Fix: one incomplete reading paused an Access Point's client data** for about five minutes. It now re-reads once and carries on (#1265, thanks @tempeduck).
+
+## Monitoring
+
+### ISP Health
+
+- **Fix: the first device upstream of your gateway was graded on jitter your traffic never sees** - ISP Health clears an ISP router's own ping jitter when the paths past it measure smooth, but that first device was left out, so it could grade well below the rest of your ISP. It now gets the same treatment.
+
+### Custom Health Checks
+
+- **Fix: a service restart was reported as failed when it worked** - when the unifi service's first start attempt failed, the check alerted that the action failed, though systemd's automatic retry brought UniFi Network up seconds later. It now checks the service's state before reporting a failure (thanks @jakerobb for the report and timeline).
+
+## UniFi Console Connection
+
+- **Fix: the Console connection stayed down behind the Console's login attempt limit** (username and password connections) - once the UniFi Console refused logins for its login attempt limit, Network Optimizer kept retrying, and each retry kept the limit in force. It now backs off and reconnects within a minute of the limit clearing.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `dev` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout dev && git reset --hard origin/dev && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.3-preview2
 
 > **On-Site Agent update (optional):** if your site uses only SNMPv3, upgrade your Agent so it polls over v3: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
