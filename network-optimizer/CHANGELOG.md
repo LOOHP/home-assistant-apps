@@ -1,3 +1,106 @@
+## 2.10.0-preview1
+
+> **On-Site Agent update (optional):** if your On-Site Agent collects SNMP, upgrade it so a port's
+> link speed keeps up when it renegotiates: open **Settings - Multi-Site**, expand your site, and
+> press **Run It for Me** under the upgrade command.
+
+First preview of v2.10.0. Threat Intelligence goes from watching to blocking: a Web Application
+Firewall for your self-hosted apps, and Automatic Blocking on your gateway, the WAF, and Cloudflare.
+
+## Threat Intelligence
+
+### Web Application Firewall
+
+- **Threat Intelligence - Web Application Firewall** - a page for netopt-waf, the OWASP CRS firewall in [NetworkOptimizer-Proxy](https://github.com/Ozark-Connect/NetworkOptimizer-Proxy), the Traefik reverse proxy in front of Network Optimizer and whatever else you self-host. Its events feed Threat Intelligence and alerts like IPS events do. On Docker, turn it on with the `waf` compose profile.
+- **Windows** - the MSI ships netopt-waf with its Traefik. Set `TRAEFIK_WAF_MODE` to `detect` under `HKLM\SOFTWARE\Ozark Connect\Network Optimizer` and restart the service.
+- **Add Exclusion** on a false positive applies without a restart, and the **Mode** card switches between Detection Only and Block.
+- **Uploads over 10 MB get a 401** from Traefik before the WAF sees them, so a photo sync or a backup on a route behind `waf` fails with no event. The proxy README's [Large uploads](https://github.com/Ozark-Connect/NetworkOptimizer-Proxy#putting-your-own-apps-behind-it) shows the `waf-uploads` middleware with a bigger cap for those routes.
+
+### Automatic Blocking
+
+- **Automatic Blocking** - blocks sources the WAF and attack pattern detection flag, on your gateway, the WAF, and optionally Cloudflare. **Every site starts in Dry Run, which writes nothing to your gateway;** **Turn On Recommended** switches it to Enforce.
+- **Public Block Lists** - Spamhaus DROP and abuse.ch Feodo Tracker by default, with an optional outbound block so your devices can't reach listed addresses.
+- **Block** and **Release** in a public IP's details, and blocks shared between your sites (**Settings - Multi-Site** sets each site, or all of them at once).
+- **Protection Setup** on the Overview walks a site through it in order.
+
+### Trusted Sources
+
+- **Trusted Sources** - your sites' own public addresses are never blocked, become the WAF's `trusted` allow list, and can be kept as Network Lists in UniFi Network for your port forwards.
+
+### Top Sources
+
+- **Fix: internal hosts showed up as Google, Cloudflare, and the like** - existing events are corrected on upgrade (#670, thanks @jedis00).
+- **Noise filter categories** - Noise, Infrastructure, or Trusted User; only Noise is hidden, and the Security Audit PDF lists the other two in their own tables (#670, thanks @jedis00).
+
+### Multi-Stage Attack Sequences
+
+- **Fix: clients hitting your own egress block policies read as attack chains** - they're Monitored now, and alerts name an internal source by its client name and network.
+
+## Security Audit
+
+- **Firewall: Gateway Management Exposed** - flags networks that can reach the gateway's SSH or web UI, which UniFi Network's predefined Internal to Gateway policy allows from every VLAN. **If you manage UniFi from a dedicated network, give it the new Management Access purpose** so every other network is checked against it.
+
+## Monitoring
+
+### Network Tools
+
+- **Other sites as targets** (Multi-Site) - **Run a Probe** lists each of your other sites' latest WAN address under **Other Sites**, taken from Trusted Sources, so you can ping or traceroute between sites to trace an inter-site problem without looking up and pasting the address.
+
+### Live View
+
+- **Fix: Live View drained phone batteries** - the maps and the WAN chart kept drawing off screen and in background tabs.
+- **Fix: Bandwidth Hogs lost rows on a quiet network**, and the map below it jumped.
+- Also fixed in playback: an offline wired client showed "Port N" and a rate that barely moved; wired link speed showed today's value at every instant; and a client stayed on the map after its port went down.
+
+### SNMP
+
+- **Fix: a port's link speed lagged up to 5 minutes after it renegotiated** (a PC waking on LAN), and faster traffic was thrown out meanwhile.
+
+### On-Site Agent
+
+- **Fix: an On-Site Agent on a UniFi gateway that stopped reporting took three minutes to restart itself** - about a minute now, and the restart no longer raises a **UniFi Console: Connection Failed** alert for a Console that was fine.
+
+## Client Performance
+
+- **Fix: application icons never loaded**, and some applications (GeForce Now, Discord, DNS over HTTPS, and more than 200 others) showed as "Application N".
+
+## Firmware Rollout
+
+- **Fix: no Early Access in the wizard** when **Early Access Release Channels** was off in UniFi Network's **Device Updates & Settings**, even with UniFi OS and the UniFi Network application on Early Access.
+- **Fix: a UniFi OS install over Gateway SSH died with the SSH session** (On-Site Agent sites) - an agent tunnel drop mid-install stopped the write, and the step read Refused with no reason. The install now runs on the gateway on its own, a dropped session is checked against the gateway's own log, a chosen build the Console offers itself falls back to the Console's update command, and the report says why when it does fail.
+- **Fix: a Console that would not change channel was planned from the wrong channel** - with a Console account that cannot change update channels, Autopilot set to Release Candidate planned the UniFi Network application from the Early Access offer. That surface is now left out of the plan with a note saying why, and the UniFi Network step declines a build from another channel, as UniFi OS already did.
+
+## Fixes
+
+- **Fix: the `./logs` folder every compose file mounts stayed empty** - the daily log file Windows installs always had lands there now (and in the install folder on macOS and native Linux), seven days kept, so a log outlives a container rebuild. On macOS the unrotated `stdout.log` is no longer written; `tail` the dated file instead.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.9.3-preview3
 
 > **On-Site Agent update (optional):** if your site uses only SNMPv3, upgrade your Agent so it polls over v3: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on v2.9.3-preview2, you're set.
