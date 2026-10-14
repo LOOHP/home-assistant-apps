@@ -1,3 +1,68 @@
+## 2.10.0-preview2
+
+> **On-Site Agent update (optional):** the v2.10.0-preview1 Agent, unchanged in preview2. If your On-Site Agent collects SNMP and you skipped preview1, upgrade it so a port's link speed keeps up when it renegotiates: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on v2.10.0-preview1, you're set.
+
+Second preview of v2.10.0. See the [v2.10.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview1) for what came before.
+
+Fixes from preview1 feedback for Automatic Blocking and Cloudflare Edge Blocking, and Realtek ONT sticks on SFP Stats.
+
+## Threat Intelligence
+
+- **Fix: Turn On Recommended for All Sites looked stuck** - in **Settings - Multi-Site** the banner stayed up after it had worked, with "Enforcing on 2 sites." under the button. It now goes away once every site you administer is Blocking (#1272, thanks @KittyFarts for the report).
+- **Fix: no Automatic Blocking for the main site in Settings - Multi-Site** - its **Configuration** panel now has the same Automatic Blocking section as your other sites.
+- Also fixed: a site's count of blocked sources in **Settings - Multi-Site** left out blocks shared from your other sites and public list entries; **Check** under Gateway said to connect a UniFi Console that was only reconnecting; and **Cloudflare Edge Blocking** kept warning that no rule used the list after you had added one (Cloudflare does not report custom rules there, so the rule steps are now an **Add the rule to each domain** guide, which opens after **Set Up Cloudflare**).
+
+## Monitoring
+
+### SFP Stats
+
+- **Attach a Realtek ONT stick to its SFP module** - **Settings - ONT Device Monitoring** offers **Attach to SFP Module** for **Realtek ONT Stick (HTTP)**, merging the stick's PON state, ONU ID, registration, and OLT into its module's card (#1274, thanks @gpborges).
+- **Both temperatures** - an attached ONT with its own sensor shows **SFP Temp** and **ONT Temp**, and **SFP Alert Thresholds** picks which one the PON temperature alert checks.
+- **Refresh works for SFP ONTs** - on the Dashboard's ONT Stats card it reads the module and its attached ONT right away, and an attached one gets **ONT Settings** next to **SFP Monitoring** (thanks @gpborges for the layout).
+
+### ONT Stats
+
+- **Fix: Realtek ONT sticks never showed their PON status** - no **PON Status** row, an orange dot on a healthy stick, and no **ONT: PON Link Down** (#1273, thanks @gpborges).
+- **Uptime and firmware from Realtek sticks** - read from the stick's `admin/status.asp`: **ONT Uptime** fills in and a new **Firmware** column shows the version.
+- **Registered and OLT** in the **PON Status** table (OLT vendor decoded) and on the Dashboard card. On Realtek sticks they need the DFP-34X-2IY3 SFU firmware.
+- **Network Optimizer Custom (HTTP JSON)** - optional `olt_vendor_id` and `sfp_fw_version` fields fill the same OLT and Firmware columns, and `olt_model` and `olt_version` add the OLT model ("Calix E7 (CALX)") and an **OLT Version** column.
+
+## Alerts & Schedule
+
+- **ONT: Management Unresponsive** - an attached ONT's page stops answering while its SFP module still reads light. On once an ONT is attached.
+- **ONT: Rebooted** - an ONT's uptime went backwards. Off by default; Realtek sticks and Network Optimizer Custom report uptime.
+
+## Multi-Site
+
+- **Fix: Run It for Me popped in late** - the space under the gateway command now shows a spinner while Network Optimizer checks it can reach the gateway over SSH, then the button or nothing.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview1
 
 > **On-Site Agent update (optional):** if your On-Site Agent collects SNMP, upgrade it so a port's
