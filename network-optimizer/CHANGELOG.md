@@ -1,3 +1,53 @@
+## 2.10.0-preview3
+
+> **On-Site Agent update (optional):** if you run WAN Speed Tests from an On-Site Agent, upgrade it to get packet loss testing. If your On-Site Agent collects SNMP and you skipped preview1, the same upgrade keeps a port's link speed current when it renegotiates. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
+
+Third preview of v2.10.0. See the [v2.10.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview2) for what came before.
+
+WAN Speed Test now measures packet loss, idle and under load, and calls out a test that other traffic on your WAN spoiled. Also, deleting a monitored device in Settings - Monitoring asks first.
+
+## WAN Speed Test
+
+- **Packet loss** - every test measures loss with the line idle and while it's saturated in each direction, on the new **Packet Loss** chart tab and on each result next to the latency. Tests take about 12 seconds longer for the idle measurement.
+- **Not a valid test** - when a test lands well under your plan and Monitoring saw enough other traffic on that WAN to explain the gap, the result says so and ISP Health leaves it out.
+- **Fix: loaded latency and jitter could read the test server's own congestion** - they're now checked against a separate host, so a busy server no longer shows up as bufferbloat on your line.
+
+## Monitoring
+
+- **Delete asks first** - in **Settings - Monitoring**, deleting a cellular modem, cable modem, ONT, or Starlink terminal takes a second click to confirm. Deleting the one open in **Edit** also closes its form instead of leaving it open.
+
+### ISP Health
+
+- **WAN Speed Tests feed Packet Loss and Loaded Loss** - each test's loss joins what Monitoring measures, which fills in Loaded Loss on a line Monitoring rarely catches under load.
+- **Smaller path shifts** - a routing change that moves several hops at once is now reported even when each hop only moves a little. One hop moving on its own still needs a bigger step.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview2
 
 > **On-Site Agent update (optional):** the v2.10.0-preview1 Agent, unchanged in preview2. If your On-Site Agent collects SNMP and you skipped preview1, upgrade it so a port's link speed keeps up when it renegotiates: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on v2.10.0-preview1, you're set.
