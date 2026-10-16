@@ -1,3 +1,68 @@
+## 2.10.0-preview4
+
+> **On-Site Agent update (optional):** the v2.10.0-preview3 Agent, unchanged in preview4. If you run WAN Speed Tests from an On-Site Agent, upgrade it to get packet loss testing. If your On-Site Agent collects SNMP and you skipped preview1, the same upgrade keeps a port's link speed current when it renegotiates. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on v2.10.0-preview3, you're set.
+
+Fourth preview of v2.10.0. See the [v2.10.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview3) for what came before.
+
+Automatic Blocking stops mistaking content networks and upstream routers for port scanners, a new alert catches a gateway WAN port that drops below its usual speed, and a Firmware Rollout fix for small sites, which could take every access point down in the same wave.
+
+## Threat Intelligence
+
+- **Blocking tab** - **Blocked Sources** moves off the bottom of Overview to its own tab, and each source links to its IP details.
+- **Fix: Automatic Blocking blocked content networks and ISP routers as port scanners** - late replies from servers your devices were using (Amazon, Google, Facebook, Microsoft) and traceroutes at your WAN address from nearby ISPs read as scan sweeps. Neither counts toward scan detection now, so they stop showing up in **Attack Patterns** and stop getting blocked.
+- **Fix: a LAN device read as a brute force** - a device whose connections to several web servers were blocked showed up as a brute force on port 443. A brute force now has to target a few hosts, as a real one does.
+- **Fix: a blocked address couldn't answer your own devices** - a gateway block now stops only new connections from it, so replies to connections your devices opened get through. Your existing blocklist policies are updated automatically; the optional outbound block still keeps devices from reaching the public lists.
+- **Fix: LAN devices filled Threat Intelligence with "outgoing blocked" flows** - those were UniFi Network's predefined **Block Invalid Traffic** dropping stray packets on connections that had already closed, and they're no longer collected. Internet traffic dropped at your gateway counts as incoming now too, where UniFi Network labeled some of it outgoing.
+- Also fixed: switching Automatic Blocking to **Detection Only** left the blocks it made in Blocking mode on your gateway until they expired; on a Multi-Site install, **Trusted Sources** in **Settings - Security & Alerts** showed a Site Admin every site and its public addresses, including sites they have no role on; and **Shared From Other Sites** named a site the viewer has no role on, along with who blocked the address there if it was blocked by hand (those blocks now read "Other site").
+
+## Alerts & Schedule
+
+- **WAN: Link Speed Degraded** - fires when a gateway WAN port negotiates below its usual speed or at half duplex (a gigabit line stuck at 100 Mbps), and **WAN: Link Speed Recovered** closes it when the port is back. Both are on by default. The usual speed is the fastest the port reached over the past week, or what your plan speed needs if that's higher.
+
+## Config Optimizer
+
+- **WAN Link Speed Keeps Dropping** - a WAN port that keeps falling below its usual speed gets a recommendation to set its link speed manually in UniFi Network, or to check the cable if it's already set. It reads the port's link speed history, which starts with this build, so it shows up once the port has dropped more than once since.
+
+## Monitoring
+
+- **Speed test history in InfluxDB** - with InfluxDB connected in Monitoring, saved WAN and LAN speed tests now go to your site's long-term bucket for Grafana, WAN packet loss included. Existing history is copied in once after the upgrade, so expect a short burst of InfluxDB writes; the [Storage README](https://github.com/Ozark-Connect/NetworkOptimizer/blob/release/2.10/src/NetworkOptimizer.Storage/README.md#speed-test-export) has the tags and fields (#1264, thanks @jimstrang).
+
+### Live View
+
+- **Fix: a client on a gateway port showed 10 Gbps in playback**, and Port Statistics showed today's link speed at every past instant.
+
+## Firmware Rollout
+
+- **UniFi auto-update warning on the Autopilot Configuration card** - the warning the wizard shows when UniFi Network's own auto-update can collide with a rollout now shows there too, with its **Turn Off** button.
+- **Fix: a small site could upgrade every access point at once** - a site with a few APs could put them all in one wave and lose Wi-Fi until they came back. A rollout now always leaves an access point up, even when one fails to come back.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview3
 
 > **On-Site Agent update (optional):** if you run WAN Speed Tests from an On-Site Agent, upgrade it to get packet loss testing. If your On-Site Agent collects SNMP and you skipped preview1, the same upgrade keeps a port's link speed current when it renegotiates. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
