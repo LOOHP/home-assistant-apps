@@ -1,3 +1,61 @@
+## 2.10.0-preview5
+
+> **On-Site Agent update (optional):** if your On-Site Agent runs on your UniFi gateway and you use Automatic Blocking, upgrade it so blocks apply on the gateway without reprovisioning it, and devices it stops from reaching a public block list show up in Threat Intelligence. If you run WAN Speed Tests from an On-Site Agent and skipped preview3, the same upgrade adds packet loss testing; if it collects SNMP and you skipped preview1, it keeps a port's link speed current when it renegotiates. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
+
+Fifth preview of v2.10.0. See the [v2.10.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview4) for what came before.
+
+Automatic Blocking stops reprovisioning your gateway with every block and picks its public block lists for what your site exposes, devices reaching a botnet's command server now raise an alert, and fewer false attack chains.
+
+## Threat Intelligence
+
+### Automatic Blocking
+
+- **Fix: every block and expiry reprovisioned the gateway** - Automatic Blocking rewrote its Network List in UniFi Network each time, so on a busy site (and on every site sharing its blocks) the gateway reprovisioned every few minutes and lost a round of SNMP polling each time. With an On-Site Agent on your gateway, blocks now apply there in seconds without a reprovision, and the Network List catches up overnight, or right away when you release a block or change a setting. If that agent goes offline, the Network List takes over.
+- **Blocking profiles** - **Turn On Recommended** now picks **Home** or **Self-Hosting** from your port forwards and turns on the public block lists that fit, with command servers blocked outbound. **Business** and **Lockdown** are in the picker beside **Public Block Lists**, which applies any profile to a site's lists.
+- **Fix: a source flagged in Detection Only wasn't blocked after switching to Blocking** - Automatic Blocking skipped it until its Detection Only entry ran out, even while it kept attacking. It gets a real block the next time it's flagged now.
+- Also fixed: saving one site's settings rewrote the Network List of every site sharing its blocks.
+
+### Public Block Lists
+
+- **More lists** - abuse.ch ThreatFox and Q-Feeds (each with your own free key), CINS Army, IPsum, and Tor exit relays, the attacker lists blocking inbound only. Without an On-Site Agent on your gateway, UniFi Network holds only part of the larger lists, and the card marks which.
+- **Public Block List alerts** - a device on your network reaching an address on a command-server list (Spamhaus DROP, ThreatFox, Q-Feeds, or Feodo Tracker) raises an alert: Critical if it connected, Warning if the attempt was blocked. A CyberSecure alert for the same device and address counts as the same contact, **Attack Sequences** lists every contact under **Public Block List Contacts**, and a listed address's details name its list.
+- **Outbound blocking in about a minute** - with **Also block devices from reaching the public lists (outbound)** on, the gateway's On-Site Agent blocks a newly listed address within a minute rather than at the next Network List update.
+
+### Attack Sequences
+
+- **Fix: late replies from servers your devices were using raised "Attack chain" alerts** - QUIC from Google and Facebook especially. On consoles that log allowed traffic, those replies no longer fill the timeline either.
+
+## Settings
+
+- **Save follows you down the page** - on desktop, a card's Save stays in view while you work through a long card, and shows whether the save went through. Leaving Settings with unsaved changes asks first.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview4
 
 > **On-Site Agent update (optional):** the v2.10.0-preview3 Agent, unchanged in preview4. If you run WAN Speed Tests from an On-Site Agent, upgrade it to get packet loss testing. If your On-Site Agent collects SNMP and you skipped preview1, the same upgrade keeps a port's link speed current when it renegotiates. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on v2.10.0-preview3, you're set.
