@@ -1,3 +1,54 @@
+## 2.10.0-preview6
+
+> **On-Site Agent update (optional):** the v2.10.0-preview5 Agent, unchanged in preview6. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence. If you skipped earlier previews, the same upgrade covers two more cases. On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.10.0-preview5, you're set.
+
+Sixth preview of v2.10.0. See the [v2.10.0-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview5) for what came before.
+
+netopt-waf fixes for two false positives (one could keep Network Optimizer itself from connecting) and for a detection the Windows build missed, the Firmware Rollout Started alert resolves itself, and Re-pair Uplink works on MLO mesh links.
+
+## Threat Intelligence - Web Application Firewall
+
+- **Fix: Network Optimizer couldn't connect through a WAF in Block when your browser fell back from WebSockets** - netopt-waf refused that fallback connection as a content type it doesn't allow, and lets it through now on every router.
+- **Fix: JSON keys such as `profileId` read as OS file access** - Seerr media requests carrying a quality profile raised an event, and a WAF in Block would refuse them. netopt-waf stops reading JSON key names as file names on every router; the values are still checked.
+- **Fix: the Windows WAF missed `/etc/passwd` and other OS file paths** - an upstream bug in the WAF engine on Windows only.
+- **All three fixes are in netopt-waf 1.0.3, which this build's MSI ships. If you run netopt-waf on Docker or macOS, update it on its own:** it doesn't update with Network Optimizer. The [NetworkOptimizer-Proxy README](https://github.com/Ozark-Connect/NetworkOptimizer-Proxy#updating) has the commands.
+
+## Firmware Rollout
+
+- **The Firmware Rollout Started alert resolves itself** when the rollout completes, so you don't have to.
+
+## Wi-Fi Optimizer - Overview
+
+- **Fix: Re-pair Uplink on an MLO mesh link said "Already on the best parent (signal unknown)"** - it never read the link's signal, and it stopped watching before the access point finished moving to a better parent. It now waits for the move and shows the signal it lands on.
+- **Fix: an access point with several mesh children crammed them side by side on its card** - they stack now, with arrows (or a swipe) to page through them.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview5
 
 > **On-Site Agent update (optional):** if your On-Site Agent runs on your UniFi gateway and you use Automatic Blocking, upgrade it so blocks apply on the gateway without reprovisioning it, and devices it stops from reaching a public block list show up in Threat Intelligence. If you run WAN Speed Tests from an On-Site Agent and skipped preview3, the same upgrade adds packet loss testing; if it collects SNMP and you skipped preview1, it keeps a port's link speed current when it renegotiates. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
