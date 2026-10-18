@@ -1,3 +1,58 @@
+## 2.10.0-preview7
+
+> **On-Site Agent update (optional):** the v2.10.0-preview5 Agent, unchanged in preview6 and preview7. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence. If you skipped earlier previews, the same upgrade covers two more cases. On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.10.0-preview5, you're set.
+
+Seventh preview of v2.10.0. See the [v2.10.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview6) for what came before.
+
+Live View playback shows a mesh access point's roam to another parent, Performance Tweaks support UniFi OS 6.0.13 EA on the UCG line, Security Audit stops recommending Lock Port to UniFi Device on switches that don't offer it, and the U7 Industrial and USW Industrial DIN switches are supported.
+
+## Monitoring - Live View
+
+- **Fix: playback didn't show a mesh access point moving to another parent** - its link speed followed the playhead, but the access point stayed under the parent it has now. On both maps it now follows the playhead to the parent it was on.
+
+## Firmware Rollout
+
+- **Fix: End Soak Early dropped after-upgrade numbers it could have had** - a device or Console whose comparison window had already closed showed a dash in the report's **CPU** and **Mem** columns.
+
+## Security Audit
+
+- **Fix: Lock Port to UniFi Device recommended on switches that don't offer it** - the US-16-XG, USW-Mission-Critical, and US-8 models, and a USW-Flex before switch firmware 7.6.7.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.13 EA on the UCG line** - supported, verified against the UCG-Fiber 6.0.13 firmware image.
+
+## Device Support
+
+- **U7 Industrial, USW Industrial DIN 8, USW Industrial DIN 8 PoE, and USW Industrial DIN 2.5G 8 PoE** support.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview6
 
 > **On-Site Agent update (optional):** the v2.10.0-preview5 Agent, unchanged in preview6. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence. If you skipped earlier previews, the same upgrade covers two more cases. On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.10.0-preview5, you're set.
