@@ -1,3 +1,71 @@
+## 2.10.0-preview8
+
+> **On-Site Agent update (optional):** the v2.10.0-preview8 Agent brings WAN Flood Protection to your UniFi Gateway. If you skipped earlier previews, the same upgrade covers three more cases. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence (preview5). On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself.
+
+Eighth preview of v2.10.0. See the [v2.10.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview7) for what came before.
+
+WAN Flood Protection keeps a flood of unsolicited traffic from taking your gateway down. Your sites share ThreatFox, Q-Feeds, and CrowdSec lookups now too, plus fixes for Trusted Sources lists that stopped updating, backups that failed on a large install, and a UniFi Network that stayed down after a UniFi OS update.
+
+## Threat Intelligence
+
+### WAN Flood Protection
+
+- **WAN Flood Protection** - a flood of unsolicited traffic can max out your gateway's CPU, stalling internet access, inter-VLAN traffic, and the UniFi apps it runs. The On-Site Agent on your gateway now finds a flood's sources within seconds and drops them at the WAN, before the firewall touches them. In testing on a UXG-Fiber, a 1 Gbps flood pushed latency past 3 seconds. With WAN Flood Protection on, latency stayed normal and CPU load dropped by about three quarters.
+- **What it covers** - UDP and TCP SYN floods from one source or many, reflection floods off DNS, NTP, memcached, and other amplification services, and floods aimed at a port forward, which are held back before they fill the gateway's connection table. Each drop lifts on its own once the flood stops, and a flood raises an alert that opens the **WAN Flood Protection** card on the **Blocking** tab.
+- **Start in Detection Only** - turn it on in **Settings - Security & Alerts**, and the **Blocking** tab shows what it would have dropped. Switch to **Protecting** once you're happy with it. **Protection Setup** on the Overview counts it as a step on sites with an On-Site Agent on the gateway.
+- **Leaves UniFi Network alone** - your firewall rules are untouched, it survives a provision (Smart Queues included), and it runs alongside Adaptive SQM. Anything that legitimately sends you a lot of traffic goes on the **Never limit or drop** list.
+- **A limit worth knowing** - a flood from a very large number of sources can still make the gateway refuse new connections from sources it hasn't seen before, until the flood drains.
+
+### Multi-Site
+
+- **ThreatFox and Q-Feeds without a key on every site** - when one of your sites has the key, the others can turn the list on without one, and it downloads once for all of them.
+- **CrowdSec CTI lookups shared between your sites** - an address looked up at one site shows its badge at all of them, using your daily quota once.
+- **Fix: "UniFi Network refused the request" under Trusted Sources** - a site whose gateway runs a VPN client stopped the Network Lists updating on your other sites.
+
+## Firmware Rollout
+
+- **Fix: UniFi Network stuck starting after a UniFi OS update** (sites with Gateway SSH) - some UniFi OS updates bring the Console back without UniFi Network, and starting it from the Console does nothing. Firmware Rollout now restarts UniFi Network, and reboots the Console only if that doesn't bring it back.
+- **Fix: a rollout stuck on Upgrading after the Console reconnected** - when a site's Console connection dropped and came back mid-rollout, the rollout stopped moving until Network Optimizer restarted, and Threat Intelligence stopped collecting for that site the same way.
+
+## Security Audit
+
+- **Fix: "Firewall: Missing 5G/LTE Access" with an internet allow for the modem** - a rule letting your 5G/LTE modem out to the internet by its MAC or IP only counted if it named carrier domains (#1283, thanks @jimstrang).
+
+## WAN Steering
+
+- **Fix: WAN Steering stopped right after deploying on the UDM line, EFG, and UDM-Beast** (thanks @fidiiioo for the platform dumps) - those gateways lack the kernel match our rules used. Rules at 100% now run on every gateway, and a Ratio below 100% uses the match UniFi's own load balancing uses. The page will ask you to redeploy once. **Running natively on Linux from source?** Rebuild the WAN Steering binary before that redeploy; the [Native Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/NATIVE-DEPLOYMENT.md) has the step.
+
+## Settings
+
+- **Fix: a large backup failed** - **Full Export** in **Data Management** stopped with "The JSON value ... is too large", and both buttons paused before their spinner showed.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview7
 
 > **On-Site Agent update (optional):** the v2.10.0-preview5 Agent, unchanged in preview6 and preview7. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence. If you skipped earlier previews, the same upgrade covers two more cases. On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.10.0-preview5, you're set.
