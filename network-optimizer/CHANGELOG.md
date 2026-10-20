@@ -1,3 +1,59 @@
+## 2.10.0-preview9
+
+> **On-Site Agent update (optional):** the v2.10.0-preview8 Agent, unchanged in preview9. It brings WAN Flood Protection to your UniFi Gateway. If you skipped earlier previews, the same upgrade covers three more cases. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence (preview5). On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.10.0-preview8, you're set.
+
+Ninth preview of v2.10.0. See the [v2.10.0-preview8 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0-preview8) for what came before.
+
+Follow-ups from preview2 feedback on Realtek ONT sticks attached to their SFP module, and a WAN detection fix for Adaptive SQM and WAN Speed Test.
+
+## Monitoring
+
+- **Fix: SFP Temp and ONT Temp showed the same reading** (Realtek ONT sticks attached to an SFP module) - the stick is its own SFP module, so both rows read one sensor. The Dashboard's ONT Stats card shows one temperature now, and **SFP Alert Thresholds** no longer offers a choice between the two (#1273, thanks @gpborges).
+- **Attached ONTs marked in ONT Device Monitoring** - in **Settings - Monitoring**, an ONT attached to an SFP module shows an **SFP** badge next to its provider, and its tooltip names the module and port (thanks @gpborges).
+
+## Threat Intelligence
+
+### Public Block Lists
+
+- **Fix: Public Block List alerts for your own latency targets** - a target in a listed range, such as an ISP transit hop on Spamhaus DROP, raised alerts, and with gateway blocking on its probes were blocked too (#1293, thanks @Don2349 for the report).
+
+## Multi-Site / On-Gateway Agent
+
+- **LAN speed test on your UniFi Gateway's Agent** - add `--lan-speed-test` to the **On a UniFi gateway** command under **Set up agent** in **Settings - Multi-Site** to host the LAN speed test on the gateway itself: up to 10 Gbps on the EFG and UDM-Beast, 2.5-5 Gbps on the UXG/UCG-Fiber class with IPS on, and 1-2.5 Gbps on the UDR7 and other IPQ5332 gateways. Put `AGENT_ASSETS_REF=release/2.10` before `bash` for the faster test below. If you run it on a UDM-series gateway, let us know what LAN speed test throughput you see.
+- **Faster Agent speed tests** - the page takes your location over HTTPS, then runs the test over plain HTTP on port 24080, which roughly doubles throughput on less capable hosts. Open 24080 alongside 24443 if the host has a firewall.
+
+## Fixes
+
+- **Fix: "No WAN Connections Detected" in Adaptive SQM** - on a site where two WAN networks in UniFi Network have the same WAN IP stored, Adaptive SQM found no WANs, and WAN Speed Test's gateway test said the UniFi Console was unreachable (#1291, thanks @silkybf for the report and logs).
+- **Fix: "failed to download Ookla speedtest (HTTP 000)" in Adaptive SQM** - when the gateway could not reach Ookla's download site, Adaptive SQM deployed without its speed test instead of trying the backup download. If you saw it, press **Deploy Settings** once (#1295, thanks @eroc1990 for the report).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. `release/2.10` is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.10 && git reset --hard origin/release/2.10 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.9.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.9.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview8
 
 > **On-Site Agent update (optional):** the v2.10.0-preview8 Agent brings WAN Flood Protection to your UniFi Gateway. If you skipped earlier previews, the same upgrade covers three more cases. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence (preview5). On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself.
