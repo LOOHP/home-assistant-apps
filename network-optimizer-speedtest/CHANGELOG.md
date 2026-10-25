@@ -1,3 +1,89 @@
+## 2.10.1
+
+> **On-Site Agent update (optional):** if the On-Site Agent on your UniFi Gateway enforces Automatic Blocking, update it to apply Exceptions. Until then, it keeps dropping the traffic an exception allows. If you skipped v2.10.0, its Agent also adds WAN Flood Protection (UniFi OS 6.0.x EA), blocking without reprovisioning, and LAN speed test hosting on the gateway, plus link speeds that follow a renegotiation (SNMP) and packet loss testing (WAN Speed Tests) on any Agent. Press **Run It for Me** under your site in **Settings - Multi-Site**, or run the upgrade command yourself.
+
+Exceptions to the public block lists for Automatic Blocking, a working ThreatFox list again, Performance Tweaks unlocked on UniFi OS 6.0.15 EA, and passwords an administrator sets for someone else now have to be changed at the next sign-in. Also fixes for Site Admins who could change settings for every site, the main site's Monitoring tabs blanking whenever its On-Site Agent reconnected, Xfinity gateway signal stats, and a handful of multi-site and per-user fixes. See the [v2.10.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.0) for what's new in v2.10.0+.
+
+Our hosted Network Optimizer service is live for beta testers. If you're interested in taking it for a spin, email me at tj@ozarkconnect.net.
+
+## Threat Intelligence
+
+### Automatic Blocking
+
+- **Exceptions** - let specific traffic through when a public block list catches something a site needs: Outbound or Inbound, narrowed to a device, a listed address, a protocol, and a port or range, with an optional expiry. Add one in **Settings - Security & Alerts - Automatic Blocking**, or press **Allow** on the new **Public Block List Drops** card on **Threat Intelligence - Blocking**, on an address's details, or on a device's drill-down. Exceptions cover the public lists only, so anything Automatic Blocking blocks on its own evidence stays blocked. In UniFi Network they show up as Allow policies named **Net. Opt. Exception**.
+- **Fix: abuse.ch ThreatFox stopped updating** - abuse.ch moved its ThreatFox export around October 21, so every download failed and the list kept its last copy. It now downloads from the new address with your existing Auth Key (#1312, thanks @ok2sh).
+- **Fix: ThreatFox left out servers for malware with more than one name** - Cobalt Strike, PureRAT, and other families ThreatFox lists under several aliases were dropped while reading the list, which was over 40% of what it should have blocked. They're all in now.
+### Client Names
+
+- **Fix: threat events on other sites showed the main site's client names** (Multi-Site) - or no names at all when the main site had no Console connected. Each site now names clients from its own Console.
+
+### WAN Flood Protection
+
+- **WAN Flood Protection is for UniFi OS 6.0.x EA** - UniFi OS 5.x is missing a kernel module it relies on, so a gateway on 5.x can't run it. The card said only "This gateway can't run WAN Flood Protection", and now names the version it needs and the one your gateway runs (#1300, thanks @RichardD012 for the report).
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.15 EA on the UCG line** - supported, verified against the UCG-Fiber 6.0.15 firmware image and live-verified on a UCG-Fiber.
+
+## Settings
+
+### Identity
+
+- **Fix: a password an administrator set for someone else never had to be changed** - a password set in **Settings - Identity** for a new user, or a reset of someone else's, stayed valid indefinitely. That user now has to replace it on the **Security** page at their next sign-in, and the **Users** card marks them **Must change**.
+- **Fix: the password change named the wrong problem** - on the **Security** page, a mistyped current password could be answered "has to be different" on every attempt. Each refusal now names the field that is wrong.
+
+### Site Admin Permissions
+
+- **Fix: a Site Admin could change settings that apply to every site** (Multi-Site) - the iperf3 defaults and **External Speed Test Servers** on **Settings - Speed Tests**, the Threat Intelligence collection interval and retention, the MaxMind and Mapbox credentials, and pre-release update notifications all saved for the whole install, with no Audit Log entry. They now need the Admin role and are audited, and a Site Admin sees them read-only. A custom InfluxDB bucket name in **Settings - Monitoring** is also checked against every site now, so one site can't take another site's bucket.
+
+## Security Audit
+
+- **Fix: Device fingerprint database unavailable on every site but the main one** (Multi-Site) - the audit always loaded the fingerprint database through the main site's UniFi Console. With that Console disconnected, every other site's audit raised this Critical issue, even with its own Console connected. Each site now loads it through its own Console.
+
+## Monitoring
+
+### On-Site Agent
+
+- **Fix: ISP Health and Network Performance went blank every time the main site's On-Site Agent reconnected** - each reconnect swapped the tabs for a "No agent for this site" banner, even though the Agent was only away for a moment. The tabs now keep their data through a reconnect (#1309, thanks @HirschBerge for the report).
+- **Reconnecting often** - an Agent whose tunnel keeps dropping and reconnecting (a reverse proxy's read timeout can do this) is now flagged in **Settings - Multi-Site** and **Monitoring - Setup**, with a link to the Agent README's reverse proxy section. A new **On-Site Agent: Connection Unstable** alert rule carries the same hint.
+
+### Cable Modem Stats
+
+- **Fix: Xfinity gateways showed the upstream OFDMA channel as SC-QAM and counted OFDM codeword errors twice** (XB8, XB10, CGA4332, and CGM4981) - the double count could pin billions of correctables on one SC-QAM channel. ISP Health now always scores these modems against DOCSIS 3.1 thresholds, and codeword totals drop once after the upgrade, with no spike or false alert.
+
+## Alerts & Schedule
+
+- **Fix: one On-Site Agent going offline read as the whole site going down** (Multi-Site) - with another Agent still connected, the alert said the site's monitoring, speed tests, and Console connection were all unavailable. It now names the Agent that went down and what runs on it, and mentions the Console only on a site that reaches its Console through the Agent.
+
+## Fixes
+
+- **Fix: one person's choices changed the page for everyone** - the **Did you know?** app-install banner on the **Dashboard**, the intro card in **Settings - Identity**, the channel disclaimer on **Wi-Fi Optimizer - Channels**, and the plan-speed hint on **Monitoring - ISP Health** each remembered a dismissal for the whole install, and so did the 2D/3D map order on **Monitoring - Live View** and the noise filters toggle on Threat Intelligence. Each user now keeps their own (the noise filters toggle per site), and whatever was set before upgrading stays in place until someone changes it.
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.0-preview9
 
 > **On-Site Agent update (optional):** the v2.10.0-preview8 Agent, unchanged in preview9. It brings WAN Flood Protection to your UniFi Gateway. If you skipped earlier previews, the same upgrade covers three more cases. On your UniFi Gateway with Automatic Blocking on, it applies blocks without reprovisioning the gateway and feeds device block events to Threat Intelligence (preview5). On an Agent that runs WAN Speed Tests, it adds packet loss testing (preview3). On an Agent that collects SNMP, it keeps a port's link speed current when the link renegotiates (preview1). Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command, or run the upgrade command yourself. If you updated on v2.10.0-preview8, you're set.
