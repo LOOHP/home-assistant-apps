@@ -1,3 +1,103 @@
+## 2.11.0-preview1
+
+> **Change Control is experimental at this point. Make a separate UniFi Network backup before you use any of its features.** If anything comes up during a migration, a config change, a roll back, or anything else, please report it in a [GitHub issue](https://github.com/Ozark-Connect/NetworkOptimizer/issues/new).
+
+> **On-Site Agent update (optional):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. An older agent still works; Network Optimizer reverts while it can reach the site, and **Review Plan** says when it couldn't.
+
+First preview of v2.11.0: Change Control. Every configuration change on your sites is recorded as it happens: who made it (an admin, Network Optimizer, or UniFi on its own), exactly which fields moved, what it did to your Security Audit, and what latency, throughput, and Wi-Fi clients did in the hour after. When something breaks, the incident lists the changes from the two hours before it, any one of them rolls back, and a change you apply that knocks a device offline reverts itself.
+
+On top of that history, edit any site's config in one place, save the networks, Wi-Fi, and firewall you got right as a template, and roll it out to your other sites or a brand new one, with the Security Audit impact shown before anything is written.
+
+## Change Control
+
+- **Change Control** - a new page that snapshots each site's configuration whenever UniFi Network's audit log or a device's provisioning shows a change, plus once a day. Each change names who made it: an admin, Network Optimizer, or UniFi itself after a Network app upgrade, and "No admin recorded" when nobody did.
+- **Site Health** - one hourly score per site: the share of user-time with good service across internet, device availability, Wi-Fi, and LAN, naming the top issue and what it cost. It backfills 90 days from history, alerts when it falls after a change, and shows on the timeline and each change.
+- **Overview** covers every site you can see: changes in the last 24 hours and 7 days, **Needs Attention**, plans in progress, and the last UniFi Network upgrade.
+- **Change Alerts** - a change that adds a Security Audit issue, a change with no admin recorded to the management path or other sensitive settings (Wi-Fi security, DNS policy, multicast), a Console admin added or removed, and one summary per UniFi Network upgrade.
+- **Alerts & Schedule - Incidents** lists the config changes from the two hours before an incident a config change could cause (a device offline, a reboot, Wi-Fi congestion), each with **Roll Back**.
+- **Firmware Rollout** pins a snapshot before every rollout and pauses one when the UniFi Network upgrade leaves a new Security Audit issue or a change with no admin recorded. After a firmware rollback, **Compare Config Snapshot** shows what moved.
+- **Snapshots and Retention** on the Settings tab sets how long snapshots and copies of UniFi's .unf backups are kept, and shows the disk space they use in Network Optimizer's data folder.
+
+### Changes
+
+- **A timeline per site** with loaded latency, change markers by who made them, and incident bands. Expand a site for WAN latency and loss, throughput, gateway CPU, and Wi-Fi clients and PHY rate by band, all on one time axis.
+- A change opens to what changed, the hour before and after it, and the incidents that followed, with **Roll Back**. Firmware and UniFi Network upgrades are on the timeline too, past ones from Firmware Rollout and reboot history included.
+
+### Snapshots
+
+- **Compare** two snapshots, or one against live: the Security Audit impact first, then field-by-field differences or a YAML diff, with **Roll Back To**, **Accept as Baseline**, and **Download Diff**. Drift from the Baseline is flagged.
+- **Templates** - save part of a site's config (networks, Wi-Fi, firewall), from live or from any snapshot, then apply it to another site or a new one, or make it that site's Baseline. A template apply creates and updates, never deletes.
+- **UniFi Console Backups** - hourly copies of UniFi Network's own autobackups, for Site Admins to download. Restoring one stays UniFi's job.
+
+### Edit
+
+- **A YAML editor for every config collection**, in UniFi's field names and a logical order with section headings, with completion from the site's own config (networks, zones, AP groups) and problems shown as you type. **Review Plan** turns the edit into a plan.
+- **Secrets stay masked** (Wi-Fi passphrases, PPSK, VPN keys): a Site Admin can **Show** one, which is audited, and anyone who can edit can type or generate a replacement.
+- **Templates are edited here too** - pick one under **Editing** for the same editor and checks, and **Save Template** in place of **Review Plan**.
+
+### Review Plan
+
+- **Every apply is a plan** (a roll back, an edit, a template, a migration): Security Audit impact first, the changes grouped with an acknowledgement for deletes, passphrase, and WAN changes, a lockout check for anything on a device's management path, and **When to Apply** with the quietest hour from the last 14 days of WAN traffic.
+- **Commit-confirmed** - a plan that touches the management or WAN path is watched after it applies. If a device that was online drops off, or the Console loses internet, the plan reverts on its own and the alert carries the recovery step. With **Approvals** on, a plan waits for a Site Admin.
+
+### Migrate
+
+- **Restore a Snapshot** from any of your sites onto this one, optionally removing what the snapshot lacks. **Write Device Config** covers devices adopted afterwards.
+- **Replace Device** - moves a device's config to new hardware, a different model included: ports mapped (uplink, LAG, PoE, and SFP first), AP radios fitted to the new model, a re-cabling sheet PDF, and **Forget Old Device** once the plan is confirmed. A replacement on older firmware links to Firmware Rollout's **Deploy Known Firmware** for that build.
+- **Set Up Zones** - group LAN networks into firewall zones by trust level from their Security Audit purposes, with named exceptions (casting, NVR access, printing), checked live by the Security Audit. Isolation findings in the Security Audit link here with **Fix with zones**.
+- **Translate Legacy Rules** - after UniFi Network moves a site to zone-based firewall, turns its legacy firewall rules into zone policies and lists any it can't translate for you to accept by name.
+- **Re-address Networks** - move LAN networks to new subnets by a pattern (`10.42.{vlan}.0/24`) or per network. Every address in them moves too (reservations, Local DNS, port forwards, firewall groups and policies, routes, device static IPs, and Network Optimizer's own settings); WAN and VPN far-side addresses stay put.
+- The Re-address dry run lists clients with their address set on the device and devices that need a new inform address. **Lower Lease Times** ahead of the move and **Reconnect Clients** after it get clients onto their new addresses within minutes.
+
+## Dashboard
+
+- **Sites** (Multi-Site) now says which site needs you and why: average Site Health and its trend, attention chips for unreachable sites, regressions, and approvals, and sites worst first. **More** adds a 24-hour sparkline and top issue per site.
+
+## Monitoring - Live View
+
+- **Fix: double-clicking a client on the map opened nothing** until a reload, for a client that appeared before its DHCP lease or from the AP Agent's live overlay.
+
+## Alerts & Schedule
+
+- **Device offline is confirmed by ping first.** A device that stops reporting to UniFi Network but still passes traffic (a Network restart, an inform URL change) raises **Device Not Reporting** after 5 minutes, not an offline alert. When most of a site's devices do it together, you get one **UniFi Network Not Hearing From Devices** alert instead.
+- **Fix: an alert open across a restart of Network Optimizer never closed** - a device, monitoring target, WAN, or On-Site Agent that came back while it was down stayed offline in Alerts and Site Health.
+
+## UniFi Console Connection
+
+- **Fix: a UniFi Console behind a reverse proxy showed as connected while it was down** - every page signed in to it again, enough to hit the Console's login attempt limit.
+
+## Security Audit
+
+- **Fix: acknowledging a firewall, DNS, or network finding hid every finding with that title** (#1314, thanks @Mancolt). Those dismissals come back once, to be acknowledged again one by one.
+- Also fixed: a network read as DHCP off on a console that stores the setting as text, which skipped its DHCP checks.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.1)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.1 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.1)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.10.1
 
 > **On-Site Agent update (optional):** if the On-Site Agent on your UniFi Gateway enforces Automatic Blocking, update it to apply Exceptions. Until then, it keeps dropping the traffic an exception allows. If you skipped v2.10.0, its Agent also adds WAN Flood Protection (UniFi OS 6.0.x EA), blocking without reprovisioning, and LAN speed test hosting on the gateway, plus link speeds that follow a renegotiation (SNMP) and packet loss testing (WAN Speed Tests) on any Agent. Press **Run It for Me** under your site in **Settings - Multi-Site**, or run the upgrade command yourself.
