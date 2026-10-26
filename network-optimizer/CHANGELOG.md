@@ -1,3 +1,82 @@
+## 2.11.0-preview3
+
+> **Change Control is experimental at this point. Make a separate UniFi Network backup before you use any of its features.** If anything comes up during a migration, a config change, a roll back, or anything else, please report it in a [GitHub issue](https://github.com/Ozark-Connect/NetworkOptimizer/issues/new).
+
+> **On-Site Agent update (optional, the v2.11.0-preview3 Agent):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on preview1, you need this one only if your agent never comes online on a host whose IPv6 doesn't work.
+
+Third preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview2) for what came before this one.
+
+Change Control on UniFi Network 11 upgrades, a way to leave items out of a plan, and fixes for restoring onto another site, sites with no UniFi gateway, and editing and uploading YAML, plus the v2.10.3 On-Site Agent fix for hosts whose IPv6 doesn't work. The Snapshots tab is now **Snapshots + Templates**, and Migrate is **Migrate / Restore**.
+
+## Change Control
+
+- **Network 11 upgrades** - an upgrade to UniFi Network 11 now records what it actually changed, not the new IDs and fields Network 11 writes into every object, and Needs Attention lists anything the upgrade deleted. We ran a real 10.6.109 to 11.0.97 upgrade through Firmware Rollout to get here: the record went from 376 changed objects to 38, and it caught Network 11 quietly dropping two disabled static routes whose WAN no longer existed.
+
+### Review Plan
+
+- **Untick any item to leave it out of the apply** - every row has a checkbox, ticked by default, and anything that uses an object an unticked item would create is left out with it.
+- **Fix: "Plan reverted" on a site with no UniFi gateway**, after a plan that touched the WAN path.
+- Also fixed: applying a plan waited on the Security Audit, most noticeably on a site with no UniFi gateway; and a list inside an object (a WLAN's mDNS proxy, a speed limit's targets) showed as "1 items to 1 items" here and in Changes.
+
+### Migrate / Restore
+
+- **Fix: "16 on one side and 16 on the other share the name"** on a Roll Back or Restore of a snapshot from before a Network 11 upgrade. Those plans now also leave alone what the older snapshot can't express on 11, such as client groups and a WAN's uplink password.
+- **Fix: a Restore or template dropped a WLAN's 6 GHz band**, and one onto another site overwrote that site's device management key.
+- **Re-address Networks** lists every address that moves as you type, asks you to lower lease times before Review Plan, and Reconnect Clients names the move it's for.
+- Also fixed: a Restore or template onto another site cleared settings its source never had; a restored object pointing at a deleted network failed with "api.err.IdInvalid"; and Re-address subnets typed on one site showed up on another.
+
+### Snapshots + Templates
+
+- **Set as Baseline** on any snapshot, and **Return to Baseline** applies in one click when there's nothing to review.
+- **Client groups** are now in snapshots, so a Restore or Roll Back brings a deleted group back with its members.
+
+### Changes
+
+- **Recompute** rebuilds a change from its two snapshots with the current version, for one an earlier preview recorded, such as a Network 11 upgrade.
+- **Fix: plans you applied were hidden** (the Network Optimizer filter started off). Filters now start with everything on and are kept per user.
+- Also fixed: a RADIUS profile change was recorded twice; editing a firewall group in UniFi showed a "source" change; Compare's YAML view ran onto one line; and Change Control alerts showed their source as "change_control".
+
+### Overview
+
+- **Needs Attention** items show when they happened and can be dismissed, a fixed regression clears itself, and saved drafts are listed under Plans.
+- Also fixed: a restart filled Needs Attention with console-offline items.
+
+### Edit
+
+- **Fix: "nothing is named ..." for an object the same edit creates**, such as a WLAN on a new network.
+- Also fixed: "Network Default is built into UniFi and cannot be deleted" after Upload YAML; "cannot be deleted while it is still referenced by: Setting ether_lighting" when deleting a network; and a "Setting super_identity: hostname" change after every UniFi OS Server container recreate.
+
+## Multi-Site
+
+- **Fix: "HttpClient.Timeout of 15 seconds elapsing" in an On-Site Agent's log** - the agent's host had IPv6 that doesn't work, and the agent never tried IPv4 (also in v2.10.3, thanks u/AggravatingBig6751 for the logs).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview2
 
 > **Change Control is experimental at this point. Make a separate UniFi Network backup before you use any of its features.** If anything comes up during a migration, a config change, a roll back, or anything else, please report it in a [GitHub issue](https://github.com/Ozark-Connect/NetworkOptimizer/issues/new).
