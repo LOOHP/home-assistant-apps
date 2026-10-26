@@ -98,12 +98,13 @@ Track signal quality on your cable modem, fiber ONT, and cellular modems over ti
 **Cable Modem (DOCSIS)** - Downstream/upstream power levels, SNR, and FEC error rates (correctable and uncorrectable) with per-channel charting.
 
 - **Netgear CM** - CM600, CM700, CM1000, CM1200, CM2050V
-- **ARRIS Surfboard** - SB8200, SB6183, T25, S33, S34
+- **ARRIS Surfboard** - SB8200, SB6183, SB6141, T25, S33, S34
 - **Motorola** - MB8611, MB8600, MB7621
-- **Xfinity / Cox / Comcast Business** - XB8, XB10 (Sercomm), CGM4981, CGA4332 (Technicolor)
+- **Xfinity / Cox / Comcast Business** - XB8, XB10 (Sercomm), XB7 (CGM4331), CGM4981, CGA4332 (Technicolor)
 - **Technicolor CGA series** - CGA437A, CGA4233VOO, CGA4322DE, CGA6444VF (shipped by VOO and Vodafone)
 - **Vodafone Station** - ARRIS TG3442DE
 - **Sagemcom** - F3896LG (Virgin Media Hub 5, Ziggo SmartWifi)
+- **FRITZ!Box Cable** - 6690 Cable (FRITZ!OS 8.40)
 
 ![Cable Modem Stats card with downstream SNR gauge, channel counts, power levels and FEC error counts](https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/docs/images/cable-modem-stats.png)
 
@@ -393,7 +394,7 @@ Business Source License 1.1
 
 **Commercial Use:** Use by managed service providers (MSPs), network installers, IT consultants, or any entity using this software in the delivery of paid services requires a commercial license.
 
-**Change Date:** January 1, 2028
+**Change Date:** Three years from the date each version is published. Versions published before this change keep January 1, 2028.
 
 **Change License:** Apache License 2.0
 

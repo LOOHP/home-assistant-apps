@@ -1,3 +1,56 @@
+## 2.11.0-preview2
+
+> **Change Control is experimental at this point. Make a separate UniFi Network backup before you use any of its features.** If anything comes up during a migration, a config change, a roll back, or anything else, please report it in a [GitHub issue](https://github.com/Ozark-Connect/NetworkOptimizer/issues/new).
+
+> **On-Site Agent update (optional, the v2.11.0-preview1 Agent, unchanged in preview2):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on preview1, you're set.
+
+Second preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control.
+
+Wi-Fi metrics on UniFi Network 11, three more cable modems, and the Wi-Fi lanes on the Change Control timeline read correctly when a site has no clients.
+
+## Change Control - Changes
+
+- **Fix: the Clients lane skipped hours with no Wi-Fi clients** - it drew a line straight across them, and a 7-day range that opened with none was blank on the left. Those hours plot as zero now, and the **Wi-Fi PHY** lane breaks where a band had no clients.
+- Also fixed: a change under two hours old said "No incidents in the 2 hours after"; it now says it's still watching, and until when.
+
+## Wi-Fi Optimizer
+
+- **Fix: no Wi-Fi metrics on UniFi Network 11** - **Metrics**, **Environment**, Client Performance's signal history from UniFi Network, and the history Channel Recommendation learns from were empty. Network 11 serves about the last month of this history.
+- **Metrics** charts now use the same hover as Monitoring.
+
+## Monitoring - Cable Modem Stats
+
+- **FRITZ!Box 6690 Cable** support (#1299, thanks @gmdfalk).
+- **ARRIS SURFboard SB6141** support (thanks Conlan for the HAR).
+- **Xfinity XB7 (CGM4331)** support (thanks @papisosa for the HAR), and port 443 now connects to the Xfinity, Comcast Business, and Cox gateways over HTTPS.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview1
 
 > **Change Control is experimental at this point. Make a separate UniFi Network backup before you use any of its features.** If anything comes up during a migration, a config change, a roll back, or anything else, please report it in a [GitHub issue](https://github.com/Ozark-Connect/NetworkOptimizer/issues/new).
