@@ -1,3 +1,63 @@
+## 2.11.0-preview4
+
+> **On-Site Agent update (optional, the v2.11.0-preview3 Agent, unchanged in preview4):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on preview1, you need this one only if your agent never comes online on a host whose IPv6 doesn't work.
+
+Fourth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview3) for what came before this one.
+
+Change Control now catches switch port edits UniFi Network doesn't log, reads every change in UniFi Network's own setting names, and shows plans under the person who applied them. A change's Security Audit effect is fixed for switch ports and for sites with Threat Intelligence blocking, Site Health runs up to the current hour, and two device replacement fixes land in Migrate / Restore.
+
+## Change Control
+
+### Changes
+
+- **Fix: switch port edits UniFi Network doesn't log were never recorded** - such as Port Mode or Tagged VLAN Management on UniFi Network 11, which applies them with no entry in its audit log. They're recorded now, as **Unattributed** (formerly No admin recorded).
+- **Changes read in UniFi Network's own names** - every setting and value as the port panel shows it (Port Mode: Infrastructure to Edge, Tagged VLAN Management: Allow All to Block All, Operation: Switching), including changes recorded before this build. A port moved onto a port profile shows the **Port Profile** change alone, not every setting the profile now covers.
+- **Plans show under the person who applied them**, and the **Network Optimizer** source filter now covers only its automatic changes.
+- **Fix: a change's Security Audit effect missed a switch port change's issues**, and on a site with Threat Intelligence blocking rules it listed **Firewall: Broad Rule** and **Firewall: Ineffective Allow Rule** issues the Security Audit doesn't show.
+- **Site Health runs to now** - the timeline and the latest health include the current hour, where the line used to end an hour or more behind.
+- **Fix: Site Health fell sharply during a Firmware Rollout**, even with clients still connected.
+- Also fixed: the **Clients** lane dropped to zero between readings on the 24h view; a Network app or Cloud Gateway UniFi OS upgrade run by Firmware Rollout showed as UniFi; a Roll Back or Return to Baseline that wrote a device showed as a person; and an unlogged edit on a client port raised a Critical management-path alert.
+
+### Snapshots + Templates
+
+- Also fixed: a snapshot taken by hand, around a plan or a Firmware Rollout, or daily showed no issue count, and **Now** went blank when one was the newest.
+
+### Migrate / Restore
+
+- **Fix: a device replacement onto a different switch model could swap two ports in a run**, when the later port was in use and the earlier one idle. On the same model, the run showed as "Ports 5, 4".
+- **Fix: Download PDF on the Re-cabling Sheet failed** with a QuestPDF license notice.
+
+## Threat Intelligence
+
+- **Fix: the Trusted Sources Network Lists were rewritten on every sync** on a site upgraded to UniFi Network 11 (also in v2.10.3). Their contents were always correct, and the rewrites didn't reprovision your gateway.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview3
 
 > **Change Control is experimental at this point. Make a separate UniFi Network backup before you use any of its features.** If anything comes up during a migration, a config change, a roll back, or anything else, please report it in a [GitHub issue](https://github.com/Ozark-Connect/NetworkOptimizer/issues/new).
