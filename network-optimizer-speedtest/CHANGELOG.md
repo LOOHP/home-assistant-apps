@@ -1,3 +1,71 @@
+## 2.11.0-preview5
+
+> **On-Site Agent update (optional, the v2.11.0-preview3 Agent, unchanged in preview4 and preview5):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on preview1, you need this one only if your agent never comes online on a host whose IPv6 doesn't work.
+
+Fifth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview4) for what came before this one.
+
+This build is mostly the Re-address Networks feature, after I moved my own home network onto a new IP scheme with it and it tripped over UniFi Network in more places than I'd like to admit. Those are fixed, along with a few that would have bitten the next run. Change Control also shows Network Optimizer's own changes by default now, and there's a Firmware Rollout fix and a WAN rate spike fix that will be in v2.10.3 too.
+
+## Change Control
+
+### Migrate / Restore
+
+- **Fix: Re-address Networks stopped part way, leaving the gateway half-moved** - on a site with honeypots ("api.err.HoneypotIpNotWithinSelectedNetwork", "api.err.HoneypotIpOutOfRange") or the built-in RADIUS profile ("api.err.CannotModifyDefaultRadiusProfile"). A re-address that fails now names the networks that moved.
+- **Re-address Networks keeps client reservations and their Local DNS names**, which UniFi Network drops when a subnet changes. A reservation UniFi Network refuses is listed for you to set by hand instead of failing the plan.
+- **Fix: a re-address that moved the UniFi Console's own network was rolled back** by the commit-confirmed watch. It alerts with "Devices offline after: ..." now and keeps watching.
+- Also: devices are written leaves first with the gateway last, and a network holding a device's static address moves after that device; a Roll Back of a re-address takes the same order; and the WAF URL, and on the main site the InfluxDB URL, now move with the site along with Network Optimizer's other settings.
+
+### Review Plan
+
+- **Fix: a plan writing two or more NAT rules failed at the second** with "api.err.NatRuleInvalidParameters", in an Edit, a Restore, a Roll Back, or a re-address.
+- **Fix: Review Plan showed Security Audit regressions a plan wouldn't cause**, such as **DNS: Invalid DNAT Translated IP** on every DNS DNAT rule and **Wired Subnet Mismatch** on every client for a re-address. A plan that edits a network is now audited against the network as the plan leaves it.
+
+### Changes
+
+- **Network Optimizer's own changes show by default** - **Show Network Optimizer's own changes by default** in Change Control - Settings is on for every site now, and each person follows it until they pick a **Source** filter themselves. The Settings tab also asks before you leave with unsaved edits.
+- **Fix: a switch left down by an aborted or failed Firmware Rollout counted as offline in Site Health** every hour since, as its Top issue.
+
+### Overview
+
+- **Fix: the Security regressions tile and the Dashboard's Sites panel kept counting a regression** after it was fixed or dismissed.
+
+## Firmware Rollout
+
+- **Fix: a device mid-upgrade when a rollout was aborted showed as Upgrading on that plan for good** (also in v2.10.3). It settles as **Aborted mid-upgrade** now.
+
+## Monitoring
+
+### SNMP
+
+- **Fix: a WAN rate spike just under link speed after Network Optimizer restarted** (also in v2.10.3), such as 2.3 Gbps on a 2.5 Gbps WAN.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview4
 
 > **On-Site Agent update (optional, the v2.11.0-preview3 Agent, unchanged in preview4):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on preview1, you need this one only if your agent never comes online on a host whose IPv6 doesn't work.
