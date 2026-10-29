@@ -1,3 +1,70 @@
+## 2.11.0-preview7
+
+> **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
+
+Seventh preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview6) for what came before this one.
+
+This build carries the v2.10.4 work: LAN Speed Test results under each device, with search and batch runs, a setting for a main site with no UniFi Console of its own, Managed SSH Key sign-in for cellular modems, and Firmware Rollout fixes for offline and re-meshing access points.
+
+## LAN Speed Test
+
+- **Results under each device** in **UniFi Device Speed Test** and **Other Device Speed Test**, with how long ago the test ran (also coming in v2.10.4, thanks @suburbazine for the suggestions and report). A result older than a day drops off its row.
+- **Search, a model filter, and Run Selected** in **UniFi Device Speed Test** (also coming in v2.10.4, thanks @suburbazine for the suggestions and report) - **Run Selected** tests the checked devices one after another.
+- **Fix: a failed test filled the alert with raw iperf3 output** (also coming in v2.10.4). It shows the error on one line now, with the raw output under **Raw output**.
+- Also fixed: the **USW-Pro-48-PoE** listed as a speed test target, though it ships without iperf3 (thanks @suburbazine); and both device tables scrolled sideways on a phone.
+
+## Multi-Site
+
+- **No UniFi Console at this site** (also coming in v2.10.4, thanks @suburbazine) - for an install whose main site only hosts your other sites, under the main site in **Settings - Multi-Site**. That site stops showing as disconnected or down, drops off the Dashboard's **Sites** card and its Site Health average, and leaves Change Control's **Overview** and **Needs Attention**.
+- **Fix: the On-Site Agent update banner offered v2.11.0, a release that doesn't exist** (installs built from source between previews, thanks @suburbazine), and upgrading never cleared it. It offers this preview line's Agent now.
+- **Fix: settings saved to the wrong site** (also coming in v2.10.4) - for a user with access to only some sites, or in a tab left on one site after another tab switched sites, Security Audit settings, the client speed test target, and the Dashboard layout saved against another site, usually the main site.
+- **Fix: a Site Admin couldn't save the Dashboard layout** (also coming in v2.10.4) from **Edit Layout** or Live View's **Add to Dashboard**, unless they were also an Admin of the whole install.
+
+## Monitoring - Cellular Stats
+
+- **Sign in with the site's Managed SSH Key** (also coming in v2.10.4) - tick **Use for this modem** under **Managed SSH Key** in a GL-iNet or MikroTik router's form (Settings - Monitoring - **Cellular Modem (5G/LTE)**), and install the public key on the router.
+
+## Firmware Rollout
+
+- **Fix: an offline device failed as Device Stuck Offline After Upgrade and dropped the rest of its model** (also coming in v2.10.4, thanks @suburbazine). A device still offline at its turn is skipped now, and each model's canary is a device that's online.
+- **Fix: a mesh access point that changed uplinks during the rollout failed its upgrade** (also coming in v2.10.4, thanks @suburbazine).
+- **Fix: a model could upgrade without its canary passing** (also coming in v2.10.4) - a second color of a model whose canary failed, or every device of a model whose canary was skipped.
+
+## Threat Intelligence
+
+- **Fix: ICMP traffic showed as port 0** (also coming in v2.10.4) in an IP's **Destinations Accessed** and **Sources Targeting This IP**. **Port Ranges** and **Services** name the protocol now, and so do GRE and other protocols without ports.
+
+## Fixes
+
+- **`:preview` pulled v2.10.3 instead of preview6** if you pulled after v2.10.3 shipped. A v2.10.x patch no longer moves `:preview` while a v2.11.0 preview is out.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview6
 
 > **On-Site Agent update (optional, the v2.11.0-preview6 Agent):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
