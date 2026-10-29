@@ -1,3 +1,77 @@
+## 2.11.0-preview6
+
+> **On-Site Agent update (optional, the v2.11.0-preview6 Agent):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
+
+Sixth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview5) for what came before this one.
+
+This build mostly carries the v2.10.3 fixes forward: On-Site Agents behind a reverse proxy and sites with two Agents, fewer false partial outage alerts, MikroTik cellular and Richerlink ONT support, and incidents that list their alerts. Change Control - Edit also gains a **Collection YAML** download, and an upload that would delete objects now says so first.
+
+## Change Control
+
+- **Collection YAML** on Edit downloads the open collection with your edits (secrets masked) to edit and upload back. An upload that leaves objects out of a collection warns in **Problems** that they will be deleted.
+- **Fix: AP Agent data stopped after Re-address Networks** (also in v2.10.3) - an access point whose IP address changed without a reboot left its AP Agent unreachable, so Client Performance, Live View, and the Wi-Fi Optimizer lost its data.
+- Also fixed: on Snapshots + Templates, a long trigger pushed a snapshot's actions out of line.
+
+## Multi-Site
+
+- **Fix: the UniFi Console sat "awaiting the agent" after a reverse proxy dropped the On-Site Agent's connection** (also in v2.10.3) - the faster reconnect needs this preview's Agent.
+- **Fix: a site with two On-Site Agents lost its UniFi Console when one Agent went dark** (also in v2.10.3), even with the other one healthy.
+
+## Monitoring
+
+### Network Performance
+
+- **Multi-WAN Monitoring - Vantages** follow your gateway's Agent (also in v2.10.3) - a vantage whose Agent is removed, or offline for 15 minutes, moves to the gateway's Agent on that WAN, and goes back when its Agent returns.
+- **Fix: Upstream Path Discovery marked transit hops "Different route"** on a Docker On-Site Agent (also in v2.10.3). Pull the new Agent image too.
+
+### ISP Health
+
+- **ISP Network score on regional ISPs** (also in v2.10.3) - a hop past where your ISP hands off to transit no longer costs the full distance penalty.
+
+### Cellular Stats
+
+- **MikroTik LTE routers on RouterOS 7** support (also in v2.10.3, #1271, thanks @kongkr-code for the output).
+
+### ONT Stats
+
+- **Richerlink RL821GWV-D (Airtel India FTTH)** support (also in v2.10.3, thanks Srinivas for the traces and his bridge script), not yet run against a live ONT.
+
+## Alerts & Schedule
+
+- **Fix: a Partial internet outage alert when a few endpoints of one provider went dark** (also in v2.10.3). A small, scattered partial outage now has to last a few minutes before it alerts.
+- **Incidents list their alerts** (also in v2.10.3) - an open alert opens on Active Alerts, ringed, and a resolved one shows its message in place; the Dashboard's **Active Alerts** card opens a clicked alert the same way, and links in alert messages are clickable.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.16 EA on the UCG line** (also in v2.10.3) - supported, verified against the UCG-Fiber 6.0.16 firmware image.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag. Set it once and future builds - previews and releases - arrive on pull. You no longer need to switch back to `:latest` when a release ships: `:preview` gets every release too, so you're always on the newest build.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview5
 
 > **On-Site Agent update (optional, the v2.11.0-preview3 Agent, unchanged in preview4 and preview5):** if you'll apply Change Control plans on a site behind an On-Site Agent, upgrade the agent so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on preview1, you need this one only if your agent never comes online on a host whose IPv6 doesn't work.
