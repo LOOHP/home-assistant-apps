@@ -392,6 +392,8 @@ See [CODING_STANDARDS.md](https://github.com/Ozark-Connect/NetworkOptimizer/blob
 
 If you find issues, report them via GitHub Issues. Include your UniFi device models and controller version. Sanitize credentials and IPs before attaching logs.
 
+Network Optimizer is source-available, not open source. Pull requests start with an issue: see [CONTRIBUTING.md](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/CONTRIBUTING.md).
+
 ## License
 
 Business Source License 1.1
