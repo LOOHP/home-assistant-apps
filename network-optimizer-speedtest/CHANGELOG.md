@@ -1,3 +1,88 @@
+## 2.11.0-preview8
+
+> **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7-8):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
+
+Eighth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview7) for what came before this one.
+
+Mostly Edit: add objects right in the editor, firewall policies grouped by zone pair with their order, and templates that apply to each site as a delta. Long pages also get an **On this page** index.
+
+## Change Control
+
+### Edit
+
+- **+ Add** for WLANs, networks, port profiles, firewall policies and zones, groups, and Local DNS records.
+- **Firewall policies grouped by zone pair**, each showing its place in the pair, with arrows to move it.
+- **Read-only** labels on UniFi's predefined objects and Network Optimizer's own, which can't be edited here.
+- Also fixed: a Firewall Policies edit on a large site never counted; Edit froze for seconds after an upload far down a large collection; and a subnet written as the network's own address (192.168.30.0/24) failed at apply.
+
+### Snapshots + Templates
+
+- **Templates apply as a delta**, matched to each site's own objects (a network by name before VLAN ID).
+- **Replace each site's PPSKs**, or add the template's PPSKs alongside each site's own.
+- **Fix: a template, or a Restore from another site, copied the source site's identity** (Site Magic keys, Console name).
+- Also fixed: a template failed on UniFi's predefined policies ("... share the name"); creating a WPA3 or 6 GHz WLAN failed; and **Compare**'s YAML view showed a one-field change as two WLANs swapped.
+
+### Changes
+
+- **Change detail** shows moved firewall rules with their neighbors, Security Audit impact first, and **Made by**.
+- **Fix: changes made in UniFi Network read Unattributed** - creating an SSID, or reordering firewall policies. An edit made there right after a plan was credited to the plan.
+- Also fixed: main-site alerts arrived twice; and a site with only firmware changes read "No changes recorded".
+
+### Migrate / Restore
+
+- **Fix: Replace Device was slow to open**, most of all on a UCG or UDR.
+
+### Review Plan
+
+- **The Security Audit runs after a plan applies**, so its page and score show the new config without a **Run Audit**.
+- **Set Up Zones' exceptions allow only their ports**, and IoT, Cameras, and Printers are blocked from the gateway's SSH and web UI, so its plan no longer flags "Firewall: Overly Permissive Rule" or "Firewall: Gateway Management Exposed".
+- **Fix: Set Up Zones failed with "NetworkCantBeRemovedFromDefaultZone"** when a network left Internal, and its Roll Back was refused ("cannot be deleted while it is still referenced by").
+- **Fix: a plan built right after a restart read "Nothing to write"** while the console was still reconnecting.
+- Also fixed: deleting or reordering a firewall policy could fail on its zone pair; a new policy with an ANY match, and Set Up Zones' policies, applied as Partial; Set Up Zones failed "IoT networks isolated from Internal" with IoT in its own zone; and a plan left open across a restart needed a refresh once the console was back.
+
+## On this page
+
+- **An index of the cards on long pages** (also coming in v2.10.4). Click a name to jump to its card.
+
+## Multi-Site
+
+- **Fix: Site Health read "No issues" through a short WAN outage** on a few targets.
+
+## Alerts & Schedule
+
+- **Fix: a WAN outage alert's link opened a Network Performance view where every target was up** (also coming in v2.10.4).
+
+## Monitoring - Cable Modem Stats
+
+- **Fix: Vodafone Station sign-in failed** (native macOS installs, also coming in v2.10.4, thanks @nexusct for the report).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview7
 
 > **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
