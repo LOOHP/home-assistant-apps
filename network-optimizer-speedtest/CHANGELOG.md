@@ -1,3 +1,69 @@
+## 2.11.0-preview9
+
+> **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7-9):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
+
+Ninth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview8 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview8) for what came before this one.
+
+Two Change Control attribution fixes after UniFi OS upgrades, plus the v2.10.4 fixes that landed after preview8: Security Audit and monitoring checks for a site behind an On-Site Agent run through the Agent now.
+
+## Change Control
+
+### Changes
+
+- **Fix: after a UniFi OS upgrade, a change on the gateway showed another network's CIDR, DHCP range, and VLAN**, with nothing changed in any network.
+- **Fix: what UniFi changed on a device during its firmware upgrade read Unattributed**, where it now reads "UniFi (likely)".
+- **Fixed and improved several cases around Set Up Zones** - now ready for real world testing, tested in a production environment with fairly complex Zones/Network segregation. Feature now correctly splits and migrates firewall rules and their destinations and sources to the new Zones, instead of just pausing them like in UniFi Network. Now also eliminates redundant firewall block rules that aren't needed after Zone segregation.
+- **Attribution of "Who"** on Changes is now correct on all tested UniFi Network updates, instead of leaving Unattributed.
+- **YAML downloads** now work from iOS / PWA
+
+## Security Audit
+
+- **Implement fixes with two clicks** - right from Security Audit results, now there's the option to make quick fixes for DNS blocking/redirection issues, taking you right to a Change Control plan with the fix, tailored to match your existing firewall rules if applicable.
+- **Fix: third-party DNS went undetected on a site reached through its On-Site Agent** (also in v2.10.4) - Pi-hole, AdGuard Home, Technitium, a custom management URL, and the NextDNS and ControlD checks run through the site's Agent now.
+
+## LAN Speed Test
+
+- **Fix: a device added by hostname kept showing an older failed test** in **Other Device Speed Test** after a newer test passed.
+
+## Multi-Site
+
+- **Fix: some checks ran from the Network Optimizer server instead of the site's On-Site Agent** (also in v2.10.4) - a custom OID's **Test** on a main site whose Agent handles its collection, and hostname lookups for a speed test's network path and a latency target's LAN check.
+
+## Monitoring - Setup
+
+- **Fix: a Monitoring Interfaces deploy blocked because the address was already in use gave no reason** (also in v2.10.4), and on a site reached through its On-Site Agent the check never blocked at all.
+
+## Wi-Fi Optimizer - Client Stats
+
+- **Fix: Client Stats broke on the 1W and 1M filters** (also in v2.10.4).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview8
 
 > **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7-8):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
