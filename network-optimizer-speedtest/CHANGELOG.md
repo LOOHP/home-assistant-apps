@@ -1,3 +1,88 @@
+## 2.11.0-preview10
+
+> **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7-10):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
+
+Tenth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview9 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview9) for what came before this one.
+
+DNS checks per network in Security Audit, with guest networks held to the same bar as the rest, zone plans that apply more cleanly on sites behind an On-Site Agent, and each site's Firmware Rollout on the Dashboard's Sites panel. Plus the v2.10.5 work: UDR-5G-Max cellular support, speed test alerts that watch both directions, and a fix for Settings going blank on some Consoles.
+
+## Change Control
+
+### Review Plan
+
+- **A Reorder step shows where policies move** - the same before-and-after neighbors **Changes** shows, and a policy the plan adds is shown where it lands. Plans saved before this build show the step as before.
+- Also fixed: no plan could be built on a UniFi Console whose firewall policy list repeats a policy; a reorder refused with "api.err.FirewallPolicyNotFound" when the plan also moved one of its policies; a **Return to Baseline** right after a zone apply that never finished its reorders; and a **Roll Back** built while the gateway was still provisioning (a plan that writes to the gateway waits for it now, and says so when it stays busy).
+
+### Migrate / Restore
+
+- **Set Up Zones mutes device offline and reboot alerts** while its zone writes apply. The Console's own alerts still come through.
+- **Fix: Set Up Zones read every per-zone copy of a gateway block as a lockout** on a site with an On-Site Agent on its gateway.
+- **Fix: the Re-address dry run left out a quiet client with its address set on the device** when it also had a reservation, so the plan never told you to change it.
+
+### Site Health
+
+- **Fix: a few minutes of packet loss sank Site Health for the whole hour** - during a big download, or when your LAN lost packets too, which was blamed on the ISP. Past hours recalculate in the background after the upgrade.
+- **Loss while your gateway is maxed out is the gateway's**, not the ISP's: the top issue names the WAN rate and the gateway's CPU at the time.
+
+### Changes
+
+- Also fixed: the timeline stopped at the moment you opened it instead of following Site Health as the current hour updated; and the **WAN Latency** and **WAN Loss** lanes put a full-rate download on the idle line.
+
+## Dashboard
+
+- **Sites** (Multi-Site) shows each site's Firmware Rollout - a pill ("Rollout running", "Rollout paused", "Rollout complete") on any site with a rollout scheduled or in progress, or one that finished in the last 24 hours. It opens Firmware Rollout on that site, or the finished rollout's report. A site with a rollout running or starting within 24 hours sorts above degraded sites.
+
+## Security Audit
+
+- **DoH is checked per network**, like DoT and DoQ - a block on one zone no longer counts for the whole site, the DoH row reads **Partially Blocked** with the networks it misses, and **Fix it for me** covers the gap.
+- **Guest and Hotspot networks get DNS control like any other network**, in the audit and in **Fix it for me**. UniFi's own Hotspot blocks only hold until a guest is authorized, so they don't count as DNS coverage. To leave guest networks out, turn on **Allow Guest / Hotspot Public DNS** in the **Security Audit** settings.
+- **Fix: Firewall: Gateway Management Exposed with no reason given** (also coming in v2.10.5) when a block rule covered the gateway's management ports on that network's own gateway address only (#1329, thanks @PDubya56). The finding names that rule and counts as Recommended with a smaller score impact.
+- Also fixed: **Fix it for me** added a redundant DNS block for a network with Internet Access off; and a network merely named like a guest network was treated as one.
+
+## Monitoring - Cellular Stats
+
+- **UDR-5G-Max** support (also coming in v2.10.5, #1336) - **Scan for Modems** finds its built-in modem, which polls with your **Gateway SSH** credentials. We built it from the UniFi OS firmware image rather than a live unit, so it hasn't been tested on real hardware yet: if you have one, please let us know how it goes on #1336.
+
+## Alerts & Schedule
+
+- **Fix: speed test regression alerts only watched one direction** (also coming in v2.10.5) - a To Device or upload drop never raised one.
+- **WAN Speed Test: Degradation turns itself on** at a site's first successful WAN speed test (also coming in v2.10.5), unless you turned it off or edited it. A **Client Speed Test: Regression** rule joins the defaults, off.
+
+## Multi-Site
+
+- **Fix: saw-tooth latency charts after every restart** (also coming in v2.10.5) on a site with two On-Site Agents, which both collected for about a minute. When the collecting Agent dropped, the other also took up to a minute to take over.
+
+## Fixes
+
+- **Fix: Settings went blank right after opening** on a UniFi Console whose firewall policy list repeats a policy (also coming in v2.10.5, #1333, thanks @chewthrudacord).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
 ## 2.11.0-preview9
 
 > **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7-9):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
