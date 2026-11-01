@@ -1,3 +1,64 @@
+## 2.11.0-preview11
+
+> **On-Site Agent update (optional, the v2.11.0-preview11 Agent):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
+
+Eleventh preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview10 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview10) for what came before this one.
+
+Path Localization on ISP Health, which traces the route to a degrading destination while it happens and says where the problem first shows up, and top issues on the Dashboard's Sites panel that open the page to investigate them. Adaptive SQM gets an experimental CAKE download shaper (thanks @Optic00). Plus the v2.10.6 work: a sign-out that ends the login on the server, and ControlD detection in Security Audit.
+
+## Monitoring - ISP Health
+
+- **Path Localization** (also coming in v2.10.6, #1334) - when one destination degrades while the rest of your connection stays clean, Network Optimizer traces the route to it every minute from the vantage that measures it, and says where the problem first shows on the way there, or that it's most likely on the return path into your ISP. A banner at the top names it while it's tracing and gives the verdict after. Each one is a **Path & Congestion Events** row with a hop table, a **Re-run** in Network Tools, and a link to the target on Network Performance, and the PDF carries them too.
+- **Path Congestion lowers Transit Health** (also coming in v2.10.6) - an episode across two or more destination networks now costs Transit Health by how long, how broad, and how deep it ran, and when. A nightly two-hour episode across half your networks costs about 15 to 18 points of Transit Health (about 6 overall), so a site with evening congestion will see its score drop. It shows as a **Path Congestion** row under Transit Health.
+- **Traceroute Result** in Network Tools reads like the hop table (also coming in v2.10.6): Network (the hop's ASN), Loss, RTT min / avg, and Return hops when the vantage reports them.
+
+## Dashboard
+
+- **Sites** (Multi-Site) - a site's top issue opens the page to investigate it, on that site: Internet issues on ISP Health, Wi-Fi on the Wi-Fi Optimizer, offline devices on Device Stats, and LAN loss on Network Performance with the LAN scope on.
+
+## Adaptive SQM
+
+- **CAKE download shaper (experimental)**, per WAN - replaces UniFi's download queue with CAKE for fair shares per device: in testing, a 1-flow device next to an 8-flow device went from 10% of the link to 37%. UniFi QoS rules don't apply to that WAN's download (its upload and other WANs keep them). (#1335, thanks @Optic00, who also worked out the CAKE options that let it run at full rate with hardware offload on.)
+- **Fix: Adaptive SQM's last rates kept shaping after Remove Adaptive SQM**, until UniFi happened to rebuild its queues. **Remove Adaptive SQM**, or a deploy that turns CAKE off or drops a WAN, now puts UniFi's own Smart Queues back. That drops packets on every WAN for about a second, and the first deploy after upgrading does it once.
+- **Steadier rate at a line's limit** - the latency loop no longer cuts and recovers every minute when the line is at its ceiling. A one-off spike still recovers on the next run.
+
+## Security Audit
+
+- **Fix: ControlD on the gateway was never detected** (also coming in v2.10.6, #1330, thanks @truffshuff), so the DoH finding didn't give it ControlD's neutral treatment.
+
+## Identity
+
+- **Signing out ends that login on the server** (also coming in v2.10.6), so a copy of the cookie stops working too. **Keep me signed in** now stays signed in while you use it, and ends after 30 days unused (was 14).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview10
 
 > **On-Site Agent update (optional, the v2.11.0-preview6 Agent, unchanged in preview7-10):** if you'll apply Change Control plans on a site behind an On-Site Agent, or the agent sits behind a reverse proxy that closes its connection, upgrade it so that it can automatically roll back a change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds: open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you updated on an earlier preview, this one only adds the faster reconnect (and the IPv4 fallback, if you updated on preview1 or preview2).
