@@ -1,3 +1,62 @@
+## 2.11.0-preview12
+
+> **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
+
+Twelfth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview11 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview11) for what came before this one.
+
+Change Control fixes for YAML uploads: a download uploaded back unchanged, or a file saved before the site's zones changed, no longer fails with errors that block Review Plan. Plus the v2.10.6 work so far: Throughput history on Client Performance.
+
+## Change Control
+
+### Edit
+
+- **Fix: errors blocked Review Plan on a Download YAML uploaded back unchanged** - 242 on one site.
+- **Fix: "managed by UniFi", "built into UniFi", or "creates return traffic only with action ALLOW" refused an older file** when the site's zones or subnets had changed since it was saved.
+- **Fix: "Port: None to <profile>" on every switch port with a port profile** after an unchanged upload, which also marked Settings, Devices, and Clients edited.
+- Also fixed: a port profile reference written as `port`, which read as the port number (it is `port_profile` now, and older files still upload); a plan that failed at apply with no reason given when a custom DoH server name had a space; and "still used by" warnings when one upload deleted a zone and the policies in it.
+
+### Review Plan
+
+- **Fix: "Partial: Not applied by UniFi" on a change that did apply**, such as a switch port rename.
+
+### Changes
+
+- **Fix: empty WAN Latency and WAN Loss lanes** on a site where Upstream Path Discovery found no ISP hop, such as behind CGNAT.
+- **Fix: hovering or clicking a Timeline marker in a tight bunch picked the one to its left.**
+
+## Client Performance - Speed
+
+- **Throughput history** (also coming in v2.10.6) - the Throughput card gets its own range next to Live, from 1h to 30d: average and peak, the measured WAN share, and the client's speed tests as marks that open their result in **Test Results**. **WAN** shows the WAN traffic alone. The page's time filter now heads **Speed Tests**, the only thing it ever applied to, and follows the card's range.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview11
 
 > **On-Site Agent update (optional, the v2.11.0-preview11 Agent):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
