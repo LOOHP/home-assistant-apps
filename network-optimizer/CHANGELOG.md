@@ -1,3 +1,51 @@
+## 2.11.0-preview15
+
+> **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12-15):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
+
+Fifteenth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview14 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview14) for what came before this one.
+
+A search for Change Control - Edit that covers every collection and takes the names you'd use for a setting, not only UniFi's field names. Plus a fix for a false **Possible lockout** on some gateway blocks.
+
+## Change Control
+
+### Edit
+
+- **Search** with the icon beside **Collections**: it finds field names and values in every collection as you type, shows each collection's matches in the list, and steps through them across collections, opening any folded object a match sits in.
+- **Search by the names you use**: VLAN finds networks, SSID finds WLANs, 5 GHz finds UniFi's na radio settings, DHCP reservation finds fixed_ip, and bw160 finds a 160 MHz channel width.
+
+### Review Plan
+
+- **Fix: "Possible lockout" on a block into the Gateway zone from a zone Network Optimizer doesn't manage from** (IoT or Cameras, say), sourced every address except a group. Set Up Zones' copies of such a block raised it, and so did a rename in Edit, including when the Network Optimizer host has an address on that zone's network.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview13
 
 > **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12 and preview13):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
