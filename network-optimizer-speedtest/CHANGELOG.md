@@ -1,3 +1,77 @@
+## 2.11.0-preview13
+
+> **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12 and preview13):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
+
+Thirteenth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview12 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview12) for what came before this one.
+
+Change Control's editor marks your edits and can forget a client, and its safety checks and Restore get fixes. Plus the v2.10.6 work so far: a Console Access check in Security Audit and a Client Speed Test fix.
+
+## Change Control
+
+### Edit
+
+- **Edited lines are marked** in the gutter and along the scrollbar, and the **N edited** badge steps through them.
+- **Removing a client forgets it in UniFi Network**, and so does a Roll Back or Return to Baseline to before it had a name, note, or fixed IP. Restore never forgets a client.
+- **Fix: Back from Review Plan lost every edit** in the editor.
+- Also fixed: Tab below a Read-only object pulled the line into it, with no Shift+Tab to undo it.
+
+### Review Plan
+
+- **Type the site's name to confirm a lockout**, once per plan, instead of every device's name.
+- **A firewall change that cuts a network off the internet needs acknowledging**, since the commit-confirmed watch can't catch it.
+- **Fix: "Commit-confirmed: 5 minutes" with only non-WAN items ticked** - an unrelated internet blip could revert the apply.
+- Also fixed: a false "Firewall: Ineffective Allow Rule" regression when a plan added a policy next to an allow, such as Threat Intelligence's exceptions; "Partial: Not applied by UniFi: Dev ID Override, Fingerprint Override" when a plan set a client's device type; networks set to Auto in UniFi Network turning Manual after a plan that wrote a firewall zone (Set Up Zones, Roll Back, Return to Baseline); and "Network X: Setting Preference did not land" after a Roll Back recreated a network.
+
+### Migrate / Restore
+
+- **Fix: Re-address Networks reverted itself while network devices moved** to their new management network addresses. It alerts instead now, as it already did for the UniFi Console's own network.
+- **Fix: "api.err.NetworkCantBeRemovedFromDefaultZone"** when a Restore or Return to Baseline ran on a site with a network added since the snapshot.
+
+### Changes
+
+- Also fixed: "No incidents in the 2 hours after" above a listed WAN incident; a change made in UniFi Network minutes after a Network Optimizer apply could go unrecorded; and a plan's policy delete or client edit was credited to "Network Optimizer", not the plan.
+
+### Overview
+
+- Also fixed: a deleted network kept a DNS: Inconsistent Configuration regression in Needs Attention.
+
+## Security Audit
+
+- **Console Access** (also coming in v2.10.6, #1342) - flags API Keys and Local Admin accounts unused for 7+ days, Critical after 30. It runs only when your UniFi Console Connection can read them.
+
+## Client Speed Test
+
+- **Fix: a false New High Score after a device's IP address changed** (also coming in v2.10.6).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview12
 
 > **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
