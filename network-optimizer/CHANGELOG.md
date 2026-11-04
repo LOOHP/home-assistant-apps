@@ -1,3 +1,105 @@
+## 2.11.0-preview18
+
+> **On-Site Agent update (optional, the v2.11.0-preview18 Agent):** for a Multi-WAN site with an On-Site Agent on its UniFi gateway, upgrade it so traces from each WAN vantage run (Path Localization's included) without traceroute installed on the gateway. On an Agent older than preview11 the update also gives Path Localization's traces 5 probes per hop (an older Agent still traces, at 3), and from before preview6 it lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
+
+Eighteenth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview17 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview17) for what came before this one.
+
+Date & Time is new in this one: pages read each site's own time zone, you can pick your own zone and format, and alerts carry the site's time, labeled. It also picks up the fixes coming in v2.10.7.
+
+## Date & Time
+
+- **Times on each site's own clock** - pages read each site's time zone from its UniFi Console, where before they followed the server's. Charts follow it too, with time axes labeled at an even spacing that always names the day or month change.
+- **Your own time zone and format** - choose a time zone, 12- or 24-hour time, and month or day first on your account's **Security** page. A Global Admin sets the **Default time zone**, **Default time format**, and **Default date format** for everyone in **Settings - Application**.
+- **Alerts carry the site's time, labeled** - alerts, digests, Firmware Rollout alerts, and the stored Security Audit PDF name the zone they print, and alerts and digests use the default time and date format.
+- **Fix: site schedules ran on the server's clock** - on an install whose time zone differs from a site's, Adaptive SQM's scheduled speed tests counted against ISP Health, and Data Usage billing cycles started at the server's midnight.
+
+## Firmware Rollout
+
+- **Clear to Deploy?** (also coming in v2.10.7) - while a rollout waits for its start, who is using the WAN right now, across every WAN, so you can decide on **Deploy Now** right there.
+- **Fix: the Firmware Rollout Scheduled alert kept the original start after Postpone 24h or Set Time** (also coming in v2.10.7) - and so did an open Firmware Rollout Starting Soon alert.
+- **Fix: a critical alert already open when a rollout was scheduled postponed it every window** (also coming in v2.10.7) - until someone acknowledged or resolved it.
+
+## Monitoring
+
+### Device Stats
+
+- **WAN Throughput** - select only your gateway and a **WAN Throughput** chart appears below Memory, with download and upload summed across every WAN.
+
+### ISP Health
+
+- **Access latency reads every access hop** (also coming in v2.10.7) - one access hop's slow replies no longer dip your ISP score, and **ISP Network** shows the result as an **Access floor** row. Site Health takes the same floor, so its past hours rescore once.
+- **Fix: a route change showed twice in Path & Congestion Events** (also coming in v2.10.7) - as its Path shift and as a Congestion row that lowered Transit Health.
+- Also fixed (also coming in v2.10.7): a long Path & Congestion Events episode opened again after a restart; and an episode that only got slower read as lost packets.
+
+### SFP Stats
+
+- **Device events on the charts** (also coming in v2.10.7) - with only one device's modules shown, the charts mark its reboots, health check actions, and alerts, as on Device Stats.
+
+### Starlink Stats
+
+- **Fix: "dish reports a fault" alerts for lower_signal_than_predicted long after the weather had passed** (also coming in v2.10.7) - while loss, outages, obstruction, and signal all read normal. A Starlink alert you had resolved also came back as new after every Network Optimizer restart.
+
+### Traceroute
+
+- **Fix: "Source-bound traceroute needs the native traceroute binary (Linux/macOS)"** (also coming in v2.10.7) - on every trace from a Multi-WAN vantage on a UniFi gateway's On-Site Agent, Path Localization's included. It needs the v2.11.0-preview18 Agent.
+
+## Threat Intelligence
+
+### Blocking
+
+- **Fix: a Critical "reached a listed address" alert for traffic an exception allows** (also coming in v2.10.7) - a connection that an Automatic Blocking exception lets through to an address on a public block list still raised the Critical Public Block List alert.
+
+### Web Application Firewall
+
+- **Fix: a page sometimes stayed blank behind the Web Application Firewall in Block** (also coming in v2.10.7) - for example right after switching sites. netopt-waf 1.0.4 fixes it, and the Web Application Firewall page offers the update.
+
+## UniFi Console Connection
+
+- **Fix: a UniFi Console that stopped answering stayed disconnected until Network Optimizer restarted** (also coming in v2.10.7) - on a site with Monitoring turned off, connected directly rather than through an On-Site Agent.
+
+## AP Telemetry
+
+- **AP Agent updates go out across a large site in one pass** (also coming in v2.10.7) - several access points at a time, and a busy site no longer holds up the others.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.17 EA on the UXG line** (also coming in v2.10.7) - supported, live-verified on a UXG-Fiber and verified against the UXG-Max 6.0.17 firmware image.
+
+## Fixes
+
+- **Fix: password managers filled your login into Settings forms** (also coming in v2.10.7) - such as the InfluxDB, modem, and sign-in provider fields, and Identity's add-user and reset-password fields.
+- **Go and Alpine security updates** (#1345, also coming in v2.10.7) - the Go binaries we ship move to Go 1.27, and the speed test image picks up Alpine's brotli, curl, and expat fixes. Your access points get the rebuilt AP Agent once after the upgrade.
+- Also fixed (also coming in v2.10.7): **Disconnect** in UniFi Console Connection left its session open on a UniFi OS Console until it expired; a reload or a site switch brought back the time window or investigation a Network Performance link had opened, after you had moved off it; switching sites (Multi-Site) carried the old site's WAN, device, or client selection onto the new one; a server restart during an AP Agent update left that access point without its AP Agent until the next pass; and alert times in a **Webhook** digest carried no UTC marker, so a receiver could read them as local time.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview17
 
 > **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12-17):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
