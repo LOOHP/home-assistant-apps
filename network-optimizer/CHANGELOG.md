@@ -1,3 +1,64 @@
+## 2.11.0-preview17
+
+> **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12-17):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
+
+Seventeenth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview16 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview16) for what came before this one.
+
+A fast follow to preview16: the update notice named v2.11.0-preview9 as the newest preview, and On-Site Agents on preview9 or preview10 were never offered their upgrade. Below are preview16's notes with that fix added, plus a clearer Security Audit finding for an allow matched only by its source port.
+
+## Fixes
+
+- **Fix: "Preview Available: v2.11.0-preview9" on newer builds** - with **Receive pre-release update notifications** on (the default), preview9 read as newer than preview10 and every preview after it.
+
+## Multi-Site
+
+- **Fix: an On-Site Agent on v2.11.0-preview9 or preview10 was never offered the upgrade** - **Settings - Multi-Site** shows **Update available** for it now.
+
+## Monitoring - ISP Health
+
+- **Fix: Path Localization episodes opened on a Starlink WAN's own swings** (also in v2.10.6) - when the Starlink link itself rose (peak load, a PoP change), a few targets crossed their line before the access hop did, and an episode opened as though the problem were out on the path.
+- **The hop table reads each trace** (also in v2.10.6) - **RTT (normal → during)** has a bar per trace, amber where the hop was slower, so a slowdown that comes and goes shows where it starts instead of reading as no change. When only hops slowing in the same traces as the destination place the start, the verdict says it could be on the return path.
+- Also fixed: on a site with an On-Site Agent, a restart during an episode's first minutes traced from the Network Optimizer server instead of the Agent (#1343); a hop's normal RTT could read above most of its own traces on a jittery link; and an episode that had used its traces still said it was tracing.
+
+## Security Audit
+
+- **Fix: false firewall findings from a Block Invalid rule or an ICMP-only allow** (also in v2.10.6) - a block on invalid packets only made every allow below it between the same zones a **Firewall: Ineffective Allow Rule** finding, and one toward the internet could raise the **Firewall: Missing** findings for UniFi cloud, firmware download, and AFC access. An ICMP or ICMPv6 allow into the Gateway zone above a broader block also read as a **Firewall: Rule Order Issue**.
+- **Fix: a scheduled Security Audit saved a low score when the UniFi Console connection dropped partway through** (also in v2.10.6) - the firewall rules and port profiles it couldn't read were scored as missing, so the score stayed down until the next run. An audit that loses the connection now saves nothing, and a scheduled one tries again a few times before it reports a failure.
+- **A Firewall: Rule Order Issue on an allow matched only by its source port says what it lets past** (also coming in v2.10.7) - such as an mDNS reply rule from port 5353 into the Gateway zone, which admits any port and protocol from that port. It now says to set the allow's protocol and destination port (UDP, destination port 5353 for mDNS), and costs 2 points instead of 5, since the sender has to know the port.
+
+## Performance Tweaks
+
+- **UniFi OS 6.0.17 EA on the UCG line** (also in v2.10.6) - supported, verified against the UCG-Fiber 6.0.17 firmware image.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview15
 
 > **On-Site Agent update (optional, the v2.11.0-preview11 Agent, unchanged in preview12-15):** upgrade it so that Path Localization's traces from an On-Site Agent use 5 probes per hop (an older Agent still traces, at 3): open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command. If you haven't updated since before preview6, this one also lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection.
