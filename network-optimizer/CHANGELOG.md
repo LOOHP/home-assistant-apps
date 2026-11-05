@@ -1,3 +1,67 @@
+## 2.11.0-preview19
+
+> **On-Site Agent update (optional, the v2.11.0-preview19 Agent):** for an On-Site Agent on a UniFi gateway, upgrade it so Automatic Blocking's rules are hooked into the gateway's firewall exactly once (an older Agent could add a second copy; blocking still worked). From before preview18 it also lets traces from each WAN vantage on a Multi-WAN site run (Path Localization's included) without traceroute installed on the gateway. On an Agent older than preview11 the update also gives Path Localization's traces 5 probes per hop (an older Agent still traces, at 3), and from before preview6 it lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
+
+Nineteenth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview18 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview18) for what came before this one.
+
+Signal history is new in this one: the last 24 hours behind the Dashboard's Cable Modem, ONT, and Cellular Stats readings, and the last hour behind Live View's tiles. Live View's ISP numbers now read the access floor, as ISP Health does, and the Security Audit checks that your gateway enforces the firewall configuration UniFi Network shows.
+
+## Dashboard
+
+- **Signal history behind Cable Modem Stats, ONT Stats, and Cellular Stats** - the last 24 hours of downstream SNR, Rx optical power, or signal quality sits faintly behind the reading, on the gauge's own scale and colors. Hover the card and the gauge slides right, with the line running into it at the reading's level.
+- **RSRP history in the 5G NR and LTE boxes** - hover either box for that connection's last 24 hours of RSRP.
+- **Cellular Stats' lit signal bars take the signal's grade color** - where they were always green.
+- **The ONT Stats gauge spans the readings a working link shows** - -28 to -6 dBm on PON (was -34 to -2), so a change of under a dB shows on the gauge and in its history. The colors sit where they did, and a reading past either end pins there.
+
+## Monitoring
+
+### Live View
+
+- **Last-hour history behind the ISP, Transit, and Gateway tiles** - RTT, loss, CPU, memory, and temperature sit faintly behind each tile's value; hover to bring the line forward. The RTT and loss tiles also open Network Performance on the last hour now, where they opened on 15 minutes.
+- **ISP RTT and ISP Loss read the access floor, as ISP Health does** - the lowest RTT across your access hops, so one hop's slow replies no longer raise them. The WAN live chart's RTT and Loss lines take the same floor for their ISP half.
+
+### ONT Stats
+
+- **Fix: an ONT reboot left no mark on the ONT Stats charts** - nor on SFP Stats for that ONT's module.
+
+## Security Audit
+
+- **Gateway Firewall** (Gateway SSH) - the audit reads the gateway's own firewall and checks it against UniFi Network: each WAN and network sits in its zone, every enabled firewall policy is on the gateway, and disabled ones are gone. It also notes a WAN whose UniFi Network settings name a firewall zone that does not exist, and says whether the gateway still treats it as External.
+- **Automatic Blocking on the gateway** - where an On-Site Agent on the gateway runs Automatic Blocking, the same check confirms its rules are hooked in once, unchanged, and holding the blocklist.
+
+## Fixes
+
+- **Fix: Review Plan showed "WAN ... changes on a site reached through the On-Site Agent" for a WAN that carries no traffic** - editing UniFi Network's unused default WAN profile on an agent site asked you to confirm a Lockout it cannot cause. A change that can move traffic onto that WAN (enabling it, its failover priority or load balancing) is still a Lockout.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview18
 
 > **On-Site Agent update (optional, the v2.11.0-preview18 Agent):** for a Multi-WAN site with an On-Site Agent on its UniFi gateway, upgrade it so traces from each WAN vantage run (Path Localization's included) without traceroute installed on the gateway. On an Agent older than preview11 the update also gives Path Localization's traces 5 probes per hop (an older Agent still traces, at 3), and from before preview6 it lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
