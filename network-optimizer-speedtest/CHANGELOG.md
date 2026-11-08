@@ -1,3 +1,92 @@
+## 2.11.0-preview20
+
+> **On-Site Agent update (optional, the v2.11.0-preview19 Agent, unchanged in preview20):** for an On-Site Agent on a UniFi gateway, upgrade it so Automatic Blocking's rules are hooked into the gateway's firewall exactly once (an older Agent could add a second copy; blocking still worked). From before preview18 it also lets traces from each WAN vantage on a Multi-WAN site run (Path Localization's included) without traceroute installed on the gateway. On an Agent older than preview11 the update also gives Path Localization's traces 5 probes per hop (an older Agent still traces, at 3), and from before preview6 it lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
+
+Twentieth preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview19 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview19) for what came before this one.
+
+This one is mostly Wi-Fi Optimizer: recommendations that say what to do about a busy radio and are fair to a 2.4 GHz band that is busy everywhere, and your own APs moved out of Neighboring Networks onto a card of their own. Upstream Path Discovery stops pausing good targets after a run on a busy WAN, and a route change no longer scores as Path Congestion.
+
+## Wi-Fi Optimizer
+
+### Overview
+
+- **One busy-radio issue per radio, judged on the last hour** - it says how busy the radio was on average and at its peak, how much of that was other networks and how much its own clients, and gives one action for the cause: a quieter channel from the Channel Recommendation, or moving fixed devices to a less busy AP with **Lock to AP** in UniFi Network. A radio with no clients raises none, and it links to that radio's utilization for the hour.
+- **Channel Health scores a radio against the quietest channel it could use** - a 2.4 GHz band that is busy on every channel no longer costs points, so expect **Wi-Fi Health** to rise on sites where it is. Co-channel overlap on 2.4 GHz counts only past what three channels force.
+
+### Channel Recommendation
+
+- **Score colors are set per band** - a score that is ordinary on a crowded 2.4 GHz band no longer reads as poor, 5 GHz turns yellow later, and 6 GHz is held to a stricter bar. Each color matches the score as shown.
+
+### RF Environment
+
+- **Site Access Points** - your own APs as your other APs hear them, on a card of their own, with mesh backhaul and UniFi Auto-Link named; they no longer show in Neighboring Networks or count toward channel load. A neighbor's UniFi AP now counts as a neighbor, so Channel Recommendations can change where one is in range.
+- **Click an AP name to see only what that AP hears** - in Neighboring Networks and Site Access Points, with a chip on the card to clear it.
+- **Recommendations count what your AP on that channel hears** - **Channel {ch} is congested** counts only networks that AP hears loud enough to slow it, and names a quieter channel only when one exists; **Wide channel usage detected** shows only for one of your 80 MHz or wider radios that strong neighbors overlap, and links to the Channel Recommendation.
+- Also fixed: the Overview's **Channel Recommendations** card kept the plan from before **Apply Recommended Channels**.
+
+## Monitoring
+
+### Network Performance
+
+- **Fix: Upstream Path Discovery paused good targets after a run on a busy WAN** - automatic runs now wait for a quiet WAN, and a manual run warns first ("The WAN is busy right now ...") with **Run Anyway**. A target that stops answering is paused only after three automatic runs, and resumes when it answers again.
+
+### ISP Health
+
+- **Fix: a route change scored as Path Congestion** - a rise in RTT with no loss and steady jitter is a **Path shift** now, with no score impact, including a second target whose step came later in the episode. Path shifts shade blue on the charts and hide with the **Path shift** filter.
+- **Acknowledge a recurring path finding that can't be pinned on a hop** (Site Admin, one destination network) - it moves to an **Acknowledged** tab on **Findings** and stays scored, and its episodes stop raising the banner at the top of ISP Health and leave **Path & Congestion Events** and the chart for an **Acknowledged** filter. It shows again if another target joins it, its last clean router changes, or it starts costing points; degradation across several networks never offers it.
+- **Fix: heavy WAN load blamed on your ISP's nearest hop** - when every path slowed together under your own load but one far path slowed more, ISP Health showed **Congestion** on the ISP's nearest hop and said other paths "stayed clean". It reads as **Loaded Latency** now.
+
+## Firmware Rollout
+
+- **Fix: a UniFi Network update failed with "curl: (22) The requested URL returned error: 404"** - on a Console not itself offering that Early Access build. A Network update is planned only when a download for that Console's platform is known, and otherwise ends as not installed, which the **Firmware Rollout Complete** alert now says.
+- **History pages** - every rollout is listed, 20 to a page, where it stopped at the newest 20. A rollout you stopped reads **Stopped** there and on its steps, and its report says so instead of claiming it is still soaking.
+
+## Change Control
+
+- **Site Health weighs Wi-Fi by the hour's wireless clients** - one poor client among four costs about half what it did, and stored hours are rescored.
+
+### Review Plan
+
+- **A WAN change on a site without an On-Site Agent is a possible Lockout** - its type, address, VLAN, zone, or whether it carries traffic shows on the Impact card and asks for the site's name, where it read "No security regressions or lockout risks". A plan that moves a WAN out of the External zone is refused.
+- Also fixed: renaming a network listed each of its Security Audit issues as a fix and a regression to accept; **No gateway provision** shown on every network write; labels that read "Lte" or "Ssid" where UniFi Network says LTE and SSID; a template, restore, or Migrate from another site could write that site's LTE/5G backup modems; and the **WAN Latency** and **WAN Loss** lanes broke on windows between idle and loaded.
+
+## Date & Time
+
+- **ISO 8601 dates** - 2026-11-03 is a third choice under **Your date format** and **Default date format**, and tables, alerts, charts, and PDFs follow it.
+
+## Security Audit
+
+- **Fix: firewall checks on a WAN whose zone does not exist** - where a WAN's UniFi Network settings name a firewall zone that does not exist (the **Gateway Firewall** check notes it), the firewall checks now treat that WAN as External.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview19
 
 > **On-Site Agent update (optional, the v2.11.0-preview19 Agent):** for an On-Site Agent on a UniFi gateway, upgrade it so Automatic Blocking's rules are hooked into the gateway's firewall exactly once (an older Agent could add a second copy; blocking still worked). From before preview18 it also lets traces from each WAN vantage on a Multi-WAN site run (Path Localization's included) without traceroute installed on the gateway. On an Agent older than preview11 the update also gives Path Localization's traces 5 probes per hop (an older Agent still traces, at 3), and from before preview6 it lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
