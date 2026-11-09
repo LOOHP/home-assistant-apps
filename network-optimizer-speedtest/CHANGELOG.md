@@ -1,3 +1,85 @@
+## 2.11.0-preview21
+
+> **On-Site Agent update (optional, the v2.11.0-preview19 Agent, unchanged in preview20 and preview21):** on an On-Gateway Agent, it hooks Automatic Blocking's rules into the Gateway's firewall exactly once (an older Agent could add a second copy; blocking still worked). It also carries every Agent fix and improvement since v2.10.0. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Twenty-first preview of v2.11.0. See the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1) for all of the details on Change Control, and the [v2.11.0-preview20 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview20) for what came before this one.
+
+Re-address Networks now gets Network Devices back to the Console after a move, and the Add a site wizard can connect a Console through an On-Site Agent. Also in this one: Peter-Pon GPON stick support, and fixes for Firmware Rollout's SSH installs, AP Telemetry on a new Site, and the Netgear CM1000.
+
+## Change Control
+
+### Re-address Networks
+
+- **Network Devices that don't reconnect get set-inform over SSH** - after the move, and an Alert gives the command for any Network Optimizer could not reach. The dry run names the Devices that may need it, where it used to ask you to point the Inform Host first.
+- **A UniFi OS Server's Inform Host override follows the Console** - with the override off, the Plan turns it on at the Console's new IP, just before the Console's Network moves.
+- Also fixed: the Default Network showed as "Untagged" where it is VLAN 1.
+
+### Snapshots
+
+- **Fix: with the Console unreachable, Compare against Now showed every object deleted** - Compare, Take Snapshot, a Template from the live config, and every other action that reads it (Re-address Networks and Set Up Zones included) now say "Could not read the live config." instead.
+- Also fixed: an action's error showed at the bottom of the tab or in the error bar, where it now shows next to its button; and on UniFi Network 11.1 the YAML view showed an unchanged value as removed and re-added.
+
+### Review Plan
+
+- Also fixed: switching Sites on Review Plan opened a different Plan, or none, where it now opens Change Control on the new Site.
+
+## Multi-Site
+
+- **Connect Through an Agent** - the Add a site wizard's Console step can set up the Site's On-Site Agent first and then sign in to the Console through it, for a Console Network Optimizer cannot reach directly.
+- **Fix: "The SSL connection could not be established"** (Multi-Site Agent) - while a Site's Agent tunnel was reconnecting, which takes a second or two.
+
+## Firmware Rollout
+
+- **Fix: an SSH install recorded the UniFi Network update as refused while it installed** - every SSH start waited out its 60-second timeout. The page now shows **Rollout Starting** once the start passes its checks, where it sat on **Clear to Deploy?**.
+- Also fixed: when the backup before an SSH install failed, the rollout's note promised UniFi's own backup, which an SSH install skips.
+
+## Monitoring
+
+### ISP Health
+
+- Also fixed: the **Tracing now** banner showed for an Acknowledged finding's Target while it traced.
+
+### Cable Modem Stats
+
+- **Fix: "Could not reach" on a Netgear CM1000 with firmware V7.01.01** - that firmware signs in through the Netgear Genie form, so the modem's username and password are needed now (#1369, thanks @tweexter for the traces).
+
+### ONT Stats
+
+- **Peter-Pon GPON firmware (FS.com GPON-SFP-ONT-MAC-I, Huawei MA5671A, and other Lantiq PEB98035 sticks)** support (#1368, thanks @micallan17 for the provider spec and the web UI capture, and turboleak1482 for the firmware).
+
+## AP Telemetry
+
+- **Fix: AP Telemetry saved no per-client Wi-Fi data on a Site whose InfluxDB buckets were never set up** - turning it on now creates them, or AP Telemetry and Wi-Fi Optimizer warn with a link to Monitoring.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build. The branch is rebuilt when a release ships, so the reset is what keeps a later update from stopping on a diverged branch - it discards local changes to the checkout:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview20
 
 > **On-Site Agent update (optional, the v2.11.0-preview19 Agent, unchanged in preview20):** for an On-Site Agent on a UniFi gateway, upgrade it so Automatic Blocking's rules are hooked into the gateway's firewall exactly once (an older Agent could add a second copy; blocking still worked). From before preview18 it also lets traces from each WAN vantage on a Multi-WAN site run (Path Localization's included) without traceroute installed on the gateway. On an Agent older than preview11 the update also gives Path Localization's traces 5 probes per hop (an older Agent still traces, at 3), and from before preview6 it lets the agent automatically roll back a Change Control change that inadvertently cuts the site off from Network Optimizer, and reconnect within seconds behind a reverse proxy that closes its connection. Open **Settings - Multi-Site**, expand your site, and press **Run It for Me** under the upgrade command.
