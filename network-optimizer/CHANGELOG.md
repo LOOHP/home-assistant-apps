@@ -1,3 +1,50 @@
+## 2.11.1-preview2
+
+> **On-Site Agent update (optional):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to v2.11.1-preview2 to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Second preview of v2.11.1. See the [v2.11.1-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview1) for all of the details on Live Traffic.
+
+More of your traffic named in Live Traffic, including the long streams UniFi Network's DPI leaves unnamed and the content your ISP serves from caches inside its own network, plus a hover card for every Client and filter presets you can come back to.
+
+## Monitoring - Live Traffic
+
+- **ISP cache** - a destination served from a content cache inside your ISP's network (Google Global Cache, Netflix Open Connect, Meta FNA, Akamai) carries a badge naming the ISP and its ASN, and searching "ISP cache" lists all of it. It needs the MaxMind GeoLite2 databases (**Settings - Security & Alerts**, **MaxMind GeoIP**), except for Netflix, whose embedded nodes name themselves.
+- **More of your traffic named** - a long stream UniFi Network's DPI never named takes the name it gave other connections to the same address, so a YouTube stream reads YouTube rather than HTTPS. Clients on your UniFi VPN Server or on Tailscale read as **VPN Client** or **Tailscale**, and Claude, Backblaze, Ookla Speedtest servers, ICMP, LG webOS TV control, and Network Optimizer's own traffic are recognized.
+- **Client hover card** - hover a Client in **Flows**, **Where It Goes**, or a Client filter chip for how it connects, its address, and a link to its Client Performance page.
+- **Filter presets** - save the filters, search, and grouping to **1 2 3** beside the filter chips, and the last one you loaded comes back the next time you open Live Traffic.
+- **HTTPS keeps its apps** - filtering App to HTTPS keeps the flows on 443 that are named for their app (Apple, Netflix), and takes in QUIC.
+- **Fix: a burst of inflated WAN rates right after opening Live Traffic** - on Gateways that don't track connection start times (the On-Gateway Agent update above).
+- Also fixed: an empty refresh when you came back to Live Traffic; a Site switch from Live Traffic bringing back a filter you had already cleared, or carrying one that named the old Site's Clients, WANs, or LAN devices; YouTube, FaceTime, Xbox, WoW, AirPlay, and SharePoint spelled as their owners spell them (Client Performance's **Applications** table too); and the **Right Now** app chips on Client Performance - Data / Apps running off the card's edge.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.1-preview1
 
 > **On-Site Agent update (optional):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
