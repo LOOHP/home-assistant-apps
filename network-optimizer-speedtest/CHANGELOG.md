@@ -1,3 +1,61 @@
+## 2.11.1-preview3
+
+> **On-Site Agent update (optional, the v2.11.1-preview2 Agent, unchanged in preview3):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Third preview of v2.11.1. See the [v2.11.1-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview1) for all of the details on Live Traffic, and the [v2.11.1-preview2 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview2) for what came before this one.
+
+More of your traffic named in Live Traffic: the video your ISP serves from its own caches, HomeKit to an IKEA hub, and a WireGuard VPN Client's route from the start. Plus fixes to Change Control's schedule setting, decimal readings on systems set to a comma-decimal region, and Client Performance.
+
+## Monitoring - Live Traffic
+
+- **More ISP cache traffic named** - a stream to a cache node your device looked up before Live Traffic was open reads as its app (YouTube on a Google Global Cache) with the **ISP cache** badge, rather than HTTPS.
+- **HomeKit** - a home hub's (Apple TV, HomePod) session to an IKEA DIRIGERA hub reads HomeKit, where UniFi Network's DPI called it Web File Transfer.
+- **Fix: a VPN Client route showing as `wgclt1`** - on a Site with a WireGuard VPN Client, until UniFi Network reported one of the tunnel's flows.
+- Also fixed: an app UniFi Network's DPI names two ways, like "Apple" and "Apple.com" (Akamai, Adobe, and MSN too), showing as two apps in App and as two rows in Client Performance's **Applications** table; and no Client hover card on **Live DNS** rows.
+
+## Client Performance
+
+- **Live DNS** on **Data / Apps** shows the filters it is narrowed by, and a **Live DNS** link beside the **Live Traffic** card's title jumps down to it.
+- Also fixed: on **Data / Apps**, the **Live Traffic** card cutting the rank to "..." from 10 up, and the **Live Traffic** and **Live DNS** cards staying tall with blank rows after a burst; and on **Connection**, roams in the same minute reading out of order (the Time column now shows seconds).
+
+## Change Control
+
+- **Fix: Schedule applies in showed blank and would not save "A time I choose"** (#1376, thanks @Mancolt for the report and the diagnosis) - on **Settings**. The setting is now **Default schedule time**, with **None, I pick a time per plan**, since all it does is pre-fill the **Time** field in Review Plan.
+- Also fixed: pressing **Schedule** in Review Plan with a time in the past incorrectly applying the Plan immediately; and date and time fields, like **Daily full snapshot at**, running past the card's edge on an iPhone.
+
+## Fixes
+
+- **Fix: decimal readings wrong on a system set to a comma-decimal region** (#1375, thanks @Bastika07) - on a Windows or macOS install whose region writes decimals with a comma (Germany, for one), Cellular Stats signal values, **Float** Custom OIDs, Client Speed Test results, Cloudflare WAN Speed Test latency, Adaptive SQM's status readings, and **Usage Adjustment (GB)** on Data Usage read wrong. Readings already stored keep the values they were saved with.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.1-preview2
 
 > **On-Site Agent update (optional):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to v2.11.1-preview2 to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
