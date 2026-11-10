@@ -1,3 +1,63 @@
+## 2.11.1-preview1
+
+> **On-Site Agent update (optional):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+**This build also carries Change Control, coming in v2.11.0.** Every configuration Change on your Sites is recorded as it happens, with who made it, which fields moved, and what it did to your Security Audit, and any one of them can be rolled back. The Networks, Wi-Fi, and firewall you got right save as a Template you can roll out to your other Sites. If you're coming from v2.10, start with the [v2.11.0-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0-preview1).
+
+Preview of what's coming in the next patch. See [v2.10.7](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7) for the latest release.
+
+UniFi Network writes a flow's record when the flow ends, so its traffic log can tell you what used your internet, but not what's using it right now. Live Traffic does: every flow through your Gateway, ranked by what's moving now, with where it's going, the DNS lookup behind it, and the Firewall Policy that let it through. Client Performance gets the same view for one Client on a renamed **Data / Apps** tab.
+
+## Monitoring - Live Traffic
+
+- **Live Traffic** - a new page under Monitoring for every flow through your Gateway, traffic between your VLANs included. **Where It Goes** follows each Client to its apps and out its WAN or VPN, and **Flows** opens any connection to a two-minute chart and the DNS lookup behind its destination; click any Client, app, route, or destination to filter the whole page to it. Where UniFi Network's DPI has no name for a flow, the app is named by the domain it went to, and a phone's Wi-Fi Calling, Google Cast, and Midea appliances are recognized from their traffic.
+- **Allowed by** - the Firewall Policy that let a flow through. UniFi Network names it once the flow ends; for a flow that is still live, Network Optimizer works it out from your Site's Firewall Policies, domain, Client, and region policies included, and says it can't tell rather than guess when a policy ahead of the match can't be judged.
+- **Live DNS** - lookups as they happen, with blocked answers (NXDOMAIN, or the 0.0.0.0 a DNS blocker returns) called out. A Client that goes around your DNS to an outside resolver, DoH, or DoT is flagged as a bypass, and one your Gateway redirects back to your own resolver shows the attempt and where it ended up. **Hide Local** leaves out lookups for names on your own Networks.
+- **History** - UniFi Network's own flow records for about the last hour, with a **Timeline** of allowed and blocked flows to pick a window from. It works without the On-Gateway Agent.
+- **Live View** - the Bandwidth Hogs card is now **Live Traffic**. With the On-Gateway Agent, **By** splits your WAN by Client, App, Destination, or Route, and a Client's row opens to its flows.
+
+## Client Performance
+
+- **Data / Apps** - the Data tab is now **Data / Apps**, with the Client's own **Live Traffic**, the apps it's using right now at the top of **Applications**, and its **Live DNS**. Without the On-Gateway Agent, Live Traffic shows the Client's History from UniFi Network.
+- **Speed** - **Live Throughput** says what the Client is moving through your Gateway, with a link to Data / Apps.
+
+## Threat Intelligence
+
+- **Fix: busy Sites missed flows past the first 1,000 in each collection** - also after downtime, when one collection catches up on many minutes. You may see more blocked flows now, and on a busy Site each collection asks your Console for more.
+
+## Fixes
+
+- **Fix: a stream of lookups for names with your search domain appended** - Network Optimizer's reverse DNS lookups sent them to your resolver, where they showed in its logs.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.10.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.10.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.0-preview21
 
 > **On-Site Agent update (optional, the v2.11.0-preview19 Agent, unchanged in preview20 and preview21):** on an On-Gateway Agent, it hooks Automatic Blocking's rules into the Gateway's firewall exactly once (an older Agent could add a second copy; blocking still worked). It also carries every Agent fix and improvement since v2.10.0. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
