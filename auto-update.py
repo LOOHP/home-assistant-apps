@@ -12,7 +12,7 @@ import requests
 from packaging.version import InvalidVersion, Version
 from ruamel.yaml import YAML
 
-SEMVER_RE = re.compile(r"^v?\d+\.\d+\.\d+([\-+].+)?$")
+SEMVER_RE = re.compile(r"^v?\d+\.\d+\.\d+$")
 GITHUB_REPO_RE = re.compile(r"^https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?/?$")
 
 
@@ -115,9 +115,12 @@ def latest_semver(tags: List[str]) -> Optional[str]:
         if tag == "latest" or not SEMVER_RE.match(tag):
             continue
         try:
-            versions.append((Version(tag.lstrip("v")), tag))
+            parsed = Version(tag.lstrip("v"))
         except InvalidVersion:
-            pass
+            continue
+        if parsed.is_prerelease:
+            continue
+        versions.append((parsed, tag))
     if not versions:
         return None
     versions.sort(key=lambda x: x[0])
@@ -226,7 +229,7 @@ def rewrite_relative_urls(md: str, repo_full: str, ref: str, source_path: str) -
             url = to_raw(url)
         return f'{m.group(1)}"{url}"'
 
-    md = re.sub(r'(<img[^>]*?\ssrc=)"([^"]+)"', repl_img, md, flags=re.I)
+    md = re.sub(r'(<img[^>]*?\ssrc=")([^"]+)"', repl_img, md, flags=re.I)
 
     def repl_a(m: re.Match) -> str:
         url = m.group(2)
@@ -234,7 +237,7 @@ def rewrite_relative_urls(md: str, repo_full: str, ref: str, source_path: str) -
             url = to_blob(url)
         return f'{m.group(1)}"{url}"'
 
-    md = re.sub(r'(<a[^>]*?\shref=)"([^"]+)"', repl_a, md, flags=re.I)
+    md = re.sub(r'(<a[^>]*?\shref=")([^"]+)"', repl_a, md, flags=re.I)
 
     def repl_md_img(m: re.Match) -> str:
         alt, url, tail = m.group(1), m.group(2), m.group(3) or ""
@@ -370,7 +373,7 @@ def update_config(path: Path) -> Tuple[bool, bool]:
     tags = list_ghcr_tags(repo)
     latest = latest_semver(tags)
     if not latest:
-        print(f"SKIP   {path} (no semver tags)")
+        print(f"SKIP   {path} (no stable semver tags)")
         return False, False
 
     new_version = latest.lstrip("v")
