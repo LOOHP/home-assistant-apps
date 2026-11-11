@@ -1,3 +1,64 @@
+## 2.11.1-preview4
+
+> **On-Site Agent update (optional, the v2.11.1-preview2 Agent, unchanged in preview3 and preview4):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Fourth preview of v2.11.1. See the [v2.11.1-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview1) for all of the details on Live Traffic, and the [v2.11.1-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview3) for what came before this one.
+
+Custom Apps lets you name the traffic UniFi Network's DPI only knows by its port, the **PON Status** table shows whether your OLT encrypts your downstream traffic, odi-oss GPON stick support, and a round of security fixes. Plus Live Traffic no longer locks up when you come back to a tab left in the background for a long time.
+
+## Monitoring
+
+### Live Traffic
+
+- **Custom Apps** - name the traffic UniFi Network's DPI does not recognize, by protocol and port, and optionally where it goes or a remote domain or address (Site Admin). An App that is only a bare port, like UDP 21324, is drawn dotted: hover it and **Name This App** fills in the form from that flow.
+- **AirPlay** - live flows on TCP 7000 to a Device whose MAC vendor is Apple are named AirPlay.
+- **Fix: Live Traffic locking up when you came back to it** - after its tab sat in the background for a long time.
+- Also fixed: a **Where It Goes** node moving out from under the pointer before you could click it; the **Flows** card jumping up and down while **Live DNS** filled in; the WAN cards reading 0 bps until the first rates arrived; History naming every Device's mDNS answer to the Gateway "OTHER"; a destination or Client card left at the top left of the next page after following its **Threats** or Client Performance link; a filter preset left unlit when the filters matched it, such as from a link; and a Client's History on Client Performance's **Data / Apps** taking a long time to load on a Site without an On-Gateway Agent.
+
+### ONT Stats
+
+- **AES DS** on the **PON Status** table (SFP Stats and ONT Stats) - whether the OLT encrypts the downstream traffic to your ONT, with two new Alert rules for when that changes: **ONT: AES Encryption Enabled** (Warning) and **ONT: AES Encryption Disabled** (Error). It needs a **Network Optimizer Custom (HTTP JSON)** endpoint that reports AES state.
+- **odi-oss GPON firmware (ODI DFP-34X-2C2, Luleey LL-XS2510, and other RTL9601/RTL9602 sticks)** support (#1372, thanks @Optic00). It reads the stick's own Prometheus exporter, so it needs only the stick's address, and it brings in the GPON line counters (BIP, FEC, and HEC) as well as the optics.
+
+## Multi-Site
+
+- **Removing a Site also deletes its floor plans, report PDFs, and InfluxDB buckets** (not a custom bucket name you gave it), and the **Remove** dialog lists them. Anything left behind by a Site removed before this build stays where it is, so remove it by hand.
+
+## Fixes
+
+- **Security hardening** - several fixes in On-Site Agent requests, InfluxDB queries, sign-in sessions, and floor plan images.
+- **Fix: "Connection reset by peer" in the log every hour for a UPS Tower, USP-Plug, or USP-Strip** (#1240, thanks @jakerobb for the report) - Network Optimizer kept trying to SSH into these power Devices, which have no SSH, for a reboot reason.
+- Also fixed: a chart for an interface or port whose name has a parenthesis in it drawing empty.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.1-preview3
 
 > **On-Site Agent update (optional, the v2.11.1-preview2 Agent, unchanged in preview3):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
