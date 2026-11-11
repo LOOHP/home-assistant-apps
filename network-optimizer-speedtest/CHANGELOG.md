@@ -1,3 +1,68 @@
+## 2.11.1-preview5
+
+> **On-Site Agent update (optional, the v2.11.1-preview5 Agent):** With the Tailscale connection configured, an On-Site Agent whose host runs Tailscale reads that host's Tailscale too (see **Tailscale** below). It also carries preview4's Live Traffic and Change Control Agent changes. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Fifth preview of v2.11.1. See the [v2.11.1-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview1) for all of the details on Live Traffic, and the [v2.11.1-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview4) for what came before this one.
+
+Tailscale support: connect your tailnet (Tailscale or Headscale) and its devices are named in Client Performance, Live Traffic, and speed test results, along with whether each one connects directly or through a DERP relay. Plus a top-destinations card on **Where It Goes**, UniFi app sessions named in Live Traffic, and a fix for WAN speed tests marked Invalid still raising a degradation alert.
+
+## Tailscale
+
+- **Tailscale (Optional)** card in **Settings - Connection** - reads your tailnet from Tailscale, with an OAuth credential that has Devices Core read (made under Settings - Trust credentials in the Tailscale Admin console), or from a Headscale server. It's read-only: Network Optimizer never changes the tailnet.
+- **Client Performance** - a Tailscale Client shows its tailnet name, OS, and owner (or its tags), and whether it connects Direct or Relayed through a DERP region. The client selector lists the Site's Tailscale devices, the **Open in Live Traffic** button opens Live Traffic filtered to the device, and a LAN Client that is the tailnet's exit node or subnet router is labeled as one.
+- **Live Traffic** - Tailscale Clients and flows are named by the device, and a device's busiest flow reads **Direct** (the rest read **Path probe**). Flows to Tailscale's relay servers are named by region, such as Tailscale DERP (Dallas), and read **DERP relay** or **STUN**. Filtering to the Tailscale app keeps everything Tailscale devices send or receive, along with the tunnel itself.
+- **Speed test results** - Client Speed Test, LAN Speed Test, and the **Speed / Coverage Map** name Tailscale results by the device's tailnet name, earlier results included, and the path trace's Tailscale hop says Direct or Relayed. A Client on tailnet IPv6 now reads as Tailscale instead of a LAN Client, with or without the Tailscale connection configured.
+- **On-Site Agent** - with the Tailscale connection configured, an On-Site Agent whose host also runs Tailscale (a Linux server or Raspberry Pi that is your subnet router or exit node, for example) adds the exact path to each device and its traffic counters, and, when that host routes for the tailnet, Live Traffic shows the Tailscale device behind each connection instead of the host. Needs the preview5 Agent.
+
+## Monitoring
+
+### Live Traffic
+
+- **UniFi WebRTC** - a UniFi app's live session to a UniFi Console on your LAN (Protect live view, for one) is named UniFi WebRTC instead of a bare UDP port.
+- **Top destinations** on **Where It Goes** - hover a route node for its busiest destinations (**Top LAN hosts** on the LAN route), with the same site and ISP cache badges as the **Flows** table.
+- **Trace** - the destination hover card has a **Trace** link beside **Threats** that opens Network Tools with the address filled in.
+- Also fixed: a flow to a Client showing its address instead of its name, whether the Client was offline or on (an LG TV, for one); an amazonaws.com host reading Amazon.com instead of AWS; a flow to tailscale.com reading DNS over HTTPS; DNS over QUIC (UDP 853) reading DNS over TLS; and UniFi Network's long names for web protocols (World Wide Web HTTP, for one) and SSL/TLS on port 443, which read HTTP, HTTPS, or HTTP/3 now.
+
+## Multi-Site
+
+- **Rename an On-Site Agent** - in **Settings - Multi-Site**, with the same pencil as the Site name.
+
+## Fixes
+
+- **Fix: "Speed tests aren't available at this site" on the main Site** (Client Performance, Client Speed Test) - with an On-Site Agent collecting for the main Site and none hosting the LAN speed test, the main Site lost its own speed test.
+- **Fix: a WAN speed test marked Invalid still raised a WAN degradation alert** - and an incident on Change Control's Site Health chart. Invalid results no longer count toward the degradation average either.
+- **Fix: "Gateway Firewall: Zone Policies Not Reached" on a Zone with no Networks** (Security Audit) - the finding told you to restart the Gateway, for a Zone nothing can reach.
+- Also fixed: an edit to Teleport's server_ip on Change Control's **Edit** tab being refused, and one to subnet_cidr doing nothing (both are read-only now); and the Security Audit's DNS over HTTPS checks reading a CleanBrowsing, Twingate, or Vercel address as ControlD.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.1-preview4
 
 > **On-Site Agent update (optional, the v2.11.1-preview2 Agent, unchanged in preview3 and preview4):** Live Traffic's live flows and Live DNS come from the On-Gateway Agent, so upgrade it to see them (History works without it). It only sends flow detail while someone has Live Traffic open. It also carries what Change Control needs from the Agent: it can automatically roll back a Change that inadvertently cuts the Site off. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
