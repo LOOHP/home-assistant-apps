@@ -1,3 +1,64 @@
+## 2.11.1-preview6
+
+> **On-Site Agent update (optional, the v2.11.1-preview5 Agent, unchanged in preview6):** With the Tailscale connection configured, an On-Site Agent whose host runs Tailscale reads that host's Tailscale too (see the [v2.11.1-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview5)). It also carries preview4's Live Traffic and Change Control Agent changes. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Sixth preview of v2.11.1. See the [v2.11.1-preview1 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview1) for all of the details on Live Traffic, and the [v2.11.1-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview5) for what came before this one.
+
+A per-Site switch to turn off Live Traffic's flow and DNS capture, with the Live Traffic card in Live View still ranking Clients by usage, and filters that take more than one Client, App, or Destination at a time. Plus Flows and Live DNS as tabs on a phone, firewall blocks counted on the page, Wi-Fi Optimizer Health Issues that link to the AP, Radio, or Client they name, and a Firewall: Rule Order Issue that no longer scores a one-port exception like a broad hole.
+
+## Monitoring
+
+### Live Traffic
+
+- **Enable Live Traffic flow and DNS capture** - a per-Site switch on the new **Live Traffic** card in **Settings - Monitoring**, on by default. Turned off, the On-Gateway Agent sends no flows or DNS lookups, Monitoring - Live Traffic offers History from UniFi Network's own flow records, and the **Live Traffic** card in Live View still ranks Clients by usage. Either way, Network Optimizer keeps flows, apps, and DNS lookups in memory only: see [What Live Traffic Stores](https://github.com/Ozark-Connect/NetworkOptimizer/blob/release/2.11/docker/DEPLOYMENT.md#what-live-traffic-stores).
+- **Coming back to Live Traffic** within a minute of leaving picks up where it left off, instead of waiting on the Gateway's first samples again. For that, the On-Gateway Agent keeps sending for up to a minute after you leave (turning capture off still stops it immediately).
+- **Filters with more than one value** - values of one kind share a chip ("Client Laptop or TV") and match any of them. Click a chip to tick more from a list with counts, which also lists what's quiet (offline Clients, unused routes, values your other filters hide), or start one with **+ Filter**. Presets now go to **5** on a desktop.
+- **Clients bypassing** on the **DNS** tile - a click shows only those Clients, with Live DNS on **Bypass**.
+- **Flows and Live DNS are tabs on a phone**, with the tab bar above and below, so Live DNS no longer moves while the Flows list grows.
+- **Firewall blocks** on the **Active flows** tile - your Clients' connections the Gateway blocked in the last 10 minutes, which Live never sees. A click opens History filtered to **Blocked**.
+- **Hover cards** - only one shows at a time now, and a card with links to click has a small X to close it.
+- **Open in Client Performance** - the magnifier on an expanded flow opens its Client there.
+- Also fixed: a port cut off under a Client or Destination with no ellipsis, so UDP 41641 could read as UDP 4164; an expanded History row closing when History refreshed; Tailscale's direct traffic (UDP 41641) reading as STUN, WireGuard, or a bare port in History; a second, whole-page scrollbar appearing while a hover card stayed open; UniFi Devices (an Access Point, a Switch) showing their address in History instead of their name; STUN on UDP 3478 reading as a bare port when DPI did not name it; DNS over HTTPS to a NextDNS server reading as plain HTTPS; the Gateway's own DNS over HTTPS or TLS upstream (Cloudflare, for one) counting as a bypass; and SSL/TLS on a named port other than 443 reading SSL/TLS instead of its service (IMAPS on 993, RDP on 3389).
+
+## Wi-Fi Optimizer - Overview
+
+- **Health Issues link to what they name** - each AP, Radio, or Client under **Affected** opens where you'd look next: High TX Retry Rates opens that AP's Clients on that band in Client Stats, Co-Channel Interference opens Channels on that channel, Raised Noise Floor opens that Radio's Metrics, and a Client opens in Client Stats.
+- **Fix: High 2.4 GHz Concentration recommended what you already have** - it suggested Band Steering on an SSID that has it, or an IoT SSID when the Site has one, and its count of Clients that support higher bands included 5 GHz Clients that could use 6 GHz.
+
+## Security Audit
+
+- **Fix: Firewall: Rule Order Issue on a one-port exception** - an allow rule that carves one port out of a deny (TCP/UDP 53 ahead of an all-protocol block, for one) read as "may subvert" the deny and scored like a broad hole. The finding now names the traffic the allow takes, or says it covers the whole deny, and an exception of up to three ports no longer costs points.
+- **Fix: a cellular WAN listed as a Network** - on a UDR 5G Max, the built-in cellular WAN showed in **Network Reference** as a VLAN 1 Network and was audited like one, which lowered the score (#1384, thanks @twolf218 for the report).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.0 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.1-preview5
 
 > **On-Site Agent update (optional, the v2.11.1-preview5 Agent):** With the Tailscale connection configured, an On-Site Agent whose host runs Tailscale reads that host's Tailscale too (see **Tailscale** below). It also carries preview4's Live Traffic and Change Control Agent changes. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
