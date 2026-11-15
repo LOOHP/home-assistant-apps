@@ -1,3 +1,71 @@
+## 2.11.3-preview1
+
+> **On-Site Agent update (optional):** Upstream Path Discovery on a Site served by an On-Site Agent on Linux (every On-Gateway Agent included) could come back with most traces as "No reply" and every hop Unreachable; the v2.11.3-preview1 Agent fixes it (see **Network Performance** below). Skipped v2.11.1? The same upgrade brings Live Traffic's live flows and Live DNS on the On-Gateway Agent, plus its Tailscale paths. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Preview of what's coming in the next patch. See [v2.11.2](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.2) for the latest release.
+
+An Upstream Path Discovery that proposes far fewer wrong hops (and no longer comes back "No reply" on Sites served by an On-Site Agent), cleaner SNMP interface rates, and a Transit RTT that one noisy router no longer drags around.
+
+## Monitoring
+
+### Network Performance
+
+- **Fix: Upstream Path Discovery came back mostly "No reply"** - on a Site served by an On-Site Agent on Linux, with every hop Unreachable. It needs the v2.11.3-preview1 Agent.
+- **Fix: ISP RTT near 0 ms, or ISP Health's Packet Loss and ISP Network scores pulled down by the wrong hops** (thanks @micallan17 for the report) - **Upstream Path Discovery** proposed the container's own bridge as an ISP hop on a Docker install with bridge networking, and the whole path (CDN, DNS, and AWS endpoints included) on a run whose network lookups failed. **If your ISP RTT reads near 0 ms, or Access ISP hops lists CDN or DNS hosts, re-run discovery and commit:** the wrong Targets are paused or moved to the right type, keeping their history.
+- **Upstream Path Discovery proposes fewer wrong hops** - your ISP's gateway in IP passthrough or router mode comes up unchecked as **Customer premises** instead of as an ISP hop (re-run and commit to pause one you already monitor). A transit router far slower than the rest (200+ ms among routers at 20 to 30 ms) comes up unchecked too, and an access hop you uncheck, or pause in **Latency Targets**, stays that way on the next run.
+- Also fixed: a Target discovered on a WAN whose discovery you later removed listing under your primary WAN unlabeled (**Latency Targets** now shows a badge naming that WAN); and a reload after picking LAN as the scope opening an empty chart.
+
+### ISP Health
+
+- Also fixed: one dark Target reading as its whole network going unreachable ("AT&T went fully unreachable" when only one AT&T Target did); and a degraded Target's hop table on an Agent Site reading "0 traces from this server" before its first trace.
+
+### Live View
+
+- **One noisy router no longer drags Transit RTT** - a transit router answering pings slowly counts less in the **Transit RTT** tile and its sparkline, and a real slowdown on any hop still shows.
+
+### SNMP
+
+- **Fix: a few hundred Mbps on a quiet Gateway port after its SNMP service restarted** - seen after turning SNMP off and on, or a Gateway re-provision.
+- **Fix: a phantom multi-Gbps rate on a WireGuard, GRE, Smart Queues shaper, or Access Point `wifi0` interface** - the interfaces UniFi reports no link speed for.
+- **Fix: a line-rate transfer charted a dip at its peak** - a 10 Gbps transfer on a 2-second SNMP poll.
+
+## Alerts & Schedule
+
+- **Fix: a "Device Restarted" alert for a device that never restarted** - turning SNMP off and on, or a Gateway re-provision, restarted its SNMP service and alerted "Power loss" with the reason from its last real reboot. A device Network Optimizer reaches over SSH (as reboot reasons already do) is checked now; one without SSH can still alert.
+
+## Multi-Site
+
+- Also fixed: the Dashboard's Sites panel drawing a degraded stretch of the 24-hour health line green.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.2)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.2 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.2)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.2
 
 > **On-Site Agent: you can disregard this one.** These notes first said the SNMP fix below needs the v2.11.2 Agent, and Network Optimizer offers that Agent as an update. Both were mistakes: the fix runs in Network Optimizer itself, so you can ignore the Update available notice. Skipped v2.11.1? Upgrading the Agent brings Live Traffic's live flows and Live DNS on the On-Gateway Agent, plus its Tailscale paths. Open **Settings - Multi-Site**, expand your Site, and press **Upgrade**.
