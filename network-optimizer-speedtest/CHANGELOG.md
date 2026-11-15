@@ -1,3 +1,77 @@
+## 2.11.2
+
+> **On-Site Agent: you can disregard this one.** These notes first said the SNMP fix below needs the v2.11.2 Agent, and Network Optimizer offers that Agent as an update. Both were mistakes: the fix runs in Network Optimizer itself, so you can ignore the Update available notice. Skipped v2.11.1? Upgrading the Agent brings Live Traffic's live flows and Live DNS on the On-Gateway Agent, plus its Tailscale paths. Open **Settings - Multi-Site**, expand your Site, and press **Upgrade**.
+
+A refreshed look across the whole app that's a lot easier on the eyes, faster first page loads after a restart, a Wi-Fi Optimizer shortcut from signal strength to the Clients behind it, and fixes for SNMP readings, Change Control Snapshots, and the Dashboard's Sites panel. See the [v2.11.1 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1) and the [v2.11.0 release notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.0) for what's new in v2.11.0+.
+
+## A Refreshed Look
+
+- **Easier on the eyes, and one design language throughout** - the bright solid fills and gradients on bars, buttons, and selected tabs are toned down, and the grays lean toward a slate that sits better with the brand blue. The gauges, score rings, and meters on the Security Audit, the Wi-Fi Optimizer, ISP Health, and everywhere else now share one style, numbers read in one typeface with figures that line up, and the font-based glyphs left in the app are consistent drawn icons now.
+
+## Traceroute on On-Gateway Agents
+
+- **Workaround: traces from an On-Gateway Agent coming back empty** - UniFi OS ships without `traceroute`, so an ISP Health incident on a Site served by an On-Gateway Agent showed no completed trace, and a Traceroute in Network Tools from that Agent came back empty. Re-run the Agent install script (**Settings - Multi-Site**, expand your Site, press **Upgrade**), or SSH in to the gateway and run `apt-get update && apt-get install -y traceroute`.
+
+## Faster First Page Loads
+
+- **Pages open faster the first time after a restart** - Network Optimizer ships precompiled now, so the first visit to each page after a restart or upgrade no longer waits on the server to compile it (Settings was the one you'd notice). That covers Docker, the Windows MSI, and native macOS installs. On a native Linux install, the publish command in the [Native Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/NATIVE-DEPLOYMENT.md) carries the change. The Windows MSI grows from 175 MB to 230 MB.
+
+## Monitoring
+
+### SNMP
+
+- **Fix: a false rate spike or a stopped fan after a Gateway re-provisions** - the Gateway restarts its SNMP service, which answers zeros for a few polls, and those zeros could read as a multi-Gbps spike on a WireGuard, GRE, or Smart Queues shaper interface (Adaptive SQM uses the same one), or as a fan at 0 rpm. A single 0 rpm after a spinning fan now waits for the next reading to agree. It's a server fix, so it covers a Site whose SNMP is collected by an On-Site Agent too, with no Agent upgrade.
+
+### Live View
+
+- **Every interface behind a shared switch port** - a hypervisor or server with several interfaces on one switch port shows each interface on its own row in the **Live Traffic** card's WAN view, which opens to its flows, instead of one row for the port. It needs the On-Gateway Agent, which measures WAN per interface.
+- Also fixed: the **Live Traffic** card truncating Client names on a phone once a Client dropped off the list.
+
+## Wi-Fi Optimizer
+
+- **Signal Strength Distribution opens the Clients behind it** - on **Power & Coverage** (formerly Power / Coverage), click a bar and **Client Stats** opens filtered to that signal range, online Clients only, as the chart counts them.
+- Also fixed: **Band Steering** and **Airtime** showing a Client's raw protocol code (ng) instead of its Wi-Fi protocol name.
+
+## Change Control
+
+- **Client custom icons** - the custom icon you give a Client in UniFi Network, generated or uploaded, is part of its configuration in Change Control now. It's captured in Snapshots, **Edit** can copy it to another Client (which UniFi Network has no way to do) or clear it, and a Change to it reads as one **Custom Icon** row.
+
+## Multi-Site
+
+- **Fix: the Dashboard's Sites panel counted a reachable Site as down** - a Site with a low health score read as "1 down". Down now means unreachable, and a low score on a reachable Site counts as unhealthy.
+
+## Fixes
+
+- **Fix: the macOS installer failing after an earlier install run with sudo** (native macOS installs) - the Go build stopped with "permission denied" under `~/Library/Caches/go-build`, and a user with a NOPASSWD sudo rule failed the cleanup step without being asked for a password.
+- Also fixed: the Client Performance **Connection** tab's Network Path showing only the band and signal for a Wi-Fi Client, and its Wi-Fi tooltip closing on every refresh; the speed test path trace running past its card at tablet widths; and Steam traffic in Live Traffic reading as HTTPS (it's named **Valve Steam** now).
+
+## Installation
+
+**Windows**: Download the MSI installer below
+
+**Docker (Upgrade)**:
+```bash
+docker compose pull && docker compose up -d
+```
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop):
+```bash
+git clone https://github.com/Ozark-Connect/NetworkOptimizer.git && cd NetworkOptimizer && ./scripts/install-macos-native.sh
+# or if you already have it cloned
+cd NetworkOptimizer && git pull && ./scripts/install-macos-native.sh
+```
+
+**Proxmox**:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ozark-Connect/NetworkOptimizer/main/scripts/proxmox/install.sh)"
+# or if you just need to update
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && docker compose pull && docker compose up -d && docker image prune -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Need a hand with an install or upgrade, or something not working right? Ask on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.1-preview6
 
 > **On-Site Agent update (optional, the v2.11.1-preview5 Agent, unchanged in preview6):** With the Tailscale connection configured, an On-Site Agent whose host runs Tailscale reads that host's Tailscale too (see the [v2.11.1-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.1-preview5)). It also carries preview4's Live Traffic and Change Control Agent changes. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
