@@ -1,3 +1,74 @@
+## 2.11.4-preview1
+
+> **On-Site Agent update (optional; the v2.11.3 Agent, unchanged in v2.11.4-preview1):** if you skipped v2.11.3, its Agent fixes Upstream Path Discovery coming back mostly "No reply" on a Site served by an On-Site Agent on Linux. It also carries every Agent fix and improvement since v2.11.0. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.11.3 or v2.11.3-preview1, you're set.
+
+Preview of what's coming in the next patch. See [v2.11.3](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.3) for the latest release.
+
+Traceroutes that place each hop in a city and draw the route on a map, a much smoother 2D map, hover cards on the external addresses in Network Performance and Threat Intelligence, and fixes for Channel Recommendation, an impossible ping time, and a false Critical in the Security Audit.
+
+## Monitoring
+
+### Live View
+
+- **A much smoother 2D map** - it runs at a higher frame rate now, without skipping as you pan and zoom. The Dashboard's **Live View** card and the **Firmware Rollout** map get it too.
+- **Scrolling past a map** - the mouse wheel zooms a map only after the pointer rests on it for a moment, or after a click, so a page scroll no longer stops at a map and zooms it. Every map has it; a fullscreen map zooms right away.
+
+### Network Performance
+
+- **Hover cards on external hosts** - hover a host's chip on the chart or in the statistics table, a **Latency Targets** address, or an **Upstream Path Discovery** hop for the card Live Traffic shows for a destination: the address to copy, and **Trace**. The hop table in an ISP Health episode has it too.
+- **Fix: a Target's RTT Mean and Max reading an impossible round trip** - one corrupted ping reply can print a time of years, and it set the Target's RTT Mean and Max in the statistics table (and scaled its chart) for every window that included it. It's dropped now, whether an On-Site Agent or the server sent the ping (no Agent update needed); a value already stored stays.
+
+### Network Tools
+
+- **Location on each traceroute hop** - the **Traceroute Result** table shows each hop's flag, city, and country. A transit router is placed by the city its name gives (Dallas for `dllstx14`), where an IP location database would put it wherever its network is registered; other hops are placed by a hop a few ms away, or by GeoLite2 City when installed. Hover a location for where it came from.
+- **Route Map** - below the **Traceroute Result** table, the path is drawn on a map, city to city, starting from your WAN's location when its address is public. Each point is marked by what placed it (hostname, nearby hop, or GeoLite2). Click a hop to find it on the map, or a point on the map to find its hops.
+
+### ISP Health
+
+- **Location in the hop table** - on desktop, an episode's hop table shows each hop's location, read the same way as in Network Tools, and an open hop table now uses the full width of the event.
+
+## Threat Intelligence
+
+- **Hover cards on external addresses** - hover an address or host name anywhere in Threat Intelligence, the blocked sources and public block list drops, or a Web Application Firewall event's source IP for the address to copy, and **Trace**.
+
+## Wi-Fi Optimizer
+
+- **Fix: Channel Recommendation counting one neighbor's SSIDs as several interferers** - a neighbor radio broadcasting several SSIDs (hidden ones included) weighed once per SSID on its channel, and counts once now. RF Environment's **Neighboring Networks** and **Channel Density** still list each network.
+- **SSID in Client Stats** - each Client's SSID, as a sortable column in the table (on desktop) and in the Client details.
+
+## Security Audit
+
+- **Fix: a WAN on a disabled port flagged Critical** - **Gateway Firewall: WAN Not in External Zone** flagged a WAN still assigned to a port you disabled in UniFi Network, which carries no traffic. A disabled port the Gateway still puts in the wrong Zone is still flagged.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.3)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.3 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.3)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.3-preview1
 
 > **On-Site Agent update (optional):** Upstream Path Discovery on a Site served by an On-Site Agent on Linux (every On-Gateway Agent included) could come back with most traces as "No reply" and every hop Unreachable; the v2.11.3-preview1 Agent fixes it (see **Network Performance** below). Skipped v2.11.1? The same upgrade brings Live Traffic's live flows and Live DNS on the On-Gateway Agent, plus its Tailscale paths. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
