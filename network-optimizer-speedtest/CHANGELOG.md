@@ -1,3 +1,63 @@
+## 2.11.5-preview3
+
+> **On-Site Agent update (optional; new in v2.11.5-preview3):** adds telemetry and a mitigation for an out-of-memory error on EFG and UDM-Beast class gateways while feeding Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Preview of what's coming in the next patch. See [v2.11.4](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.4) for the latest release.
+
+A signal meter and smoother layout changes on the Live View map, plus Recent columns and a couple of fixes in Live Traffic.
+
+## Monitoring
+
+### Live View
+
+- **Signal meter on mesh APs, Device Bridges, and cellular modems** - on the 2D map, a meter down the right edge of the card shows a mesh AP's or UniFi Device Bridge's uplink signal (not a Building Bridge's 60 GHz link), and a UniFi cellular modem's Signal Quality with the modem set up in **Cellular Stats**. It follows playback, and an MLO mesh AP's tooltip lists the signal on each link.
+- **Layout changes slide into place** - a client joining, leaving, or roaming, a device added or removed, or a filter toggled now moves the 2D map smoothly instead of jumping. After you pan or zoom, the map fits itself to the layout again once it has been left alone for 30 seconds and still shows nearly all of it.
+- **Double-click an Access Point or a cellular modem** - on both maps, an Access Point opens Wi-Fi Optimizer's **Client Stats** filtered to its clients, and a cellular modem set up in **Cellular Stats** opens its charts there.
+- Also fixed: double-clicking a Switch or Gateway on the Dashboard's **Live View** card doing nothing (it now opens **Port Statistics** on Monitoring - Live View with that device picked); a client's rate label covering its name on the left-to-right layout when the client has a device icon; and client names sitting a few pixels low under their icons on an iPhone.
+
+### Live Traffic
+
+- **Recent ↓ and Recent ↑** - each flow's data in each direction over the last 5 minutes, on the **Flows** table (summed per group when grouped) and on a client's **Live Traffic** in Client Performance. Click either one to list the busiest flows first.
+- **Fix: Live Traffic stopping with an error** - when a flow the Gateway's conntrack reads had missed came back and then ended again. Seen on a UDR7.
+- **Fix: "Reconnecting often" while Live Traffic is open on EFG and UDM-Beast class gateways** - after about a day of uptime, the On-Gateway Agent hit out-of-memory errors until it was restarted by hand. It now restarts itself when that happens, and logs the detail needed to find the cause. Needs the Agent update above.
+
+### ISP Health
+
+- Also fixed: a long place name with the **Set** pill running into the Loss column of an episode's hop table.
+
+## Dashboard
+
+- Also fixed: issues on the **Wi-Fi Optimizer** card sitting in a box with no padding, with the description running under the icon.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.5-preview2
 
 > **On-Site Agent update (optional; the v2.11.3 Agent, unchanged in v2.11.4, v2.11.5-preview1, and v2.11.5-preview2):** if you skipped v2.11.3, its Agent fixes Upstream Path Discovery coming back mostly "No reply" on a Site served by an On-Site Agent on Linux. It also carries every Agent fix and improvement since v2.11.0. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.11.3-preview1 or later, you're set.
