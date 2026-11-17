@@ -1,3 +1,51 @@
+## 2.11.5-preview2
+
+> **On-Site Agent update (optional; the v2.11.3 Agent, unchanged in v2.11.4, v2.11.5-preview1, and v2.11.5-preview2):** if you skipped v2.11.3, its Agent fixes Upstream Path Discovery coming back mostly "No reply" on a Site served by an On-Site Agent on Linux. It also carries every Agent fix and improvement since v2.11.0. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.11.3-preview1 or later, you're set.
+
+Preview of what's coming in the next patch. See [v2.11.4](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.4) for the latest release.
+
+A fix for a UniFi Express used as an Access Point, and some Change Control fixes for new WLANs and Re-address Networks.
+
+## Monitoring
+
+- **Fix: a UniFi Express used as an Access Point showing up as a second Gateway** (thanks @micallan17 for the report and the captures) - behind another UniFi Gateway, it was badged Gateway on **Setup**, left WAN Download and Upload blank on the Dashboard's **Live View**, and sat under the WAN globe on the map.
+
+## Change Control
+
+- **Fix: a WLAN on an AP Group showing no Broadcasting APs in UniFi Network** - when Change Control created it (from the **Edit** tab or a Roll Back) on any AP Group other than All APs. **If you created one before this build, choose Group under Broadcasting APs for it in UniFi Network.**
+- **Fix: "overlaps 192.168.0.0/16, reached over the Vpn zone" in Re-address Networks** - a Firewall Policy matching a private range from the VPN or External Zone refused every pattern into that range (and a move out of it could leave addresses behind).
+- **Fix: Automatic Blocking exceptions left behind by Re-address Networks** - an exception for a Device on a moved Network stopped applying after the move.
+- Also fixed: "Partial: Not applied by UniFi: PMF, Security, Security" on a new WLAN with WPA3 or 6 GHz, though the WLAN ended up exactly as planned.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.4)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.4 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.4)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.4-preview1
 
 > **On-Site Agent update (optional; the v2.11.3 Agent, unchanged in v2.11.4-preview1):** if you skipped v2.11.3, its Agent fixes Upstream Path Discovery coming back mostly "No reply" on a Site served by an On-Site Agent on Linux. It also carries every Agent fix and improvement since v2.11.0. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.11.3 or v2.11.3-preview1, you're set.
