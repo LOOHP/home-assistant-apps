@@ -1,3 +1,58 @@
+## 2.11.6-preview2
+
+> **On-Site Agent update (optional; the v2.11.6-preview1 Agent, unchanged in preview2):** if you skipped preview1, its Agent on your UniFi Gateway times each connection's round trip for Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you updated on v2.11.6-preview1, you're set.
+
+Preview of what's coming in the next patch. See [v2.11.5](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5) for the latest release.
+
+A much smoother Live View (most of all on phones), last-hour sparklines on the WAN tiles, a WAN Test and a new Connection History on Client Performance, and Device names that follow the UniFi Console.
+
+## Monitoring
+
+### Live View
+
+- **Much smoother Live View** - the WAN chart and Client Performance's **Live Throughput** glide as time passes instead of stepping, live and in playback at any speed. On a phone the difference is biggest: the 2D map keeps its frame rate with the WAN chart on screen, and pages with tabs lose a once-a-second hitch.
+- **WAN Download and WAN Upload sparklines** - the last hour behind both tiles: hover to read any moment, and click to take Live View there, from the Dashboard's **Live View** card too.
+- Also: every tile's sparkline follows playback, ending at the playhead; the WAN chart's RTT line holds steady instead of rescaling at every spike; a click on the WAN chart in the Dashboard's **Live View** card opens Live View at that moment; and a Client's flows in **Bandwidth Hogs** carry the same Site, **Trusted**, and **ISP cache** tags as Live Traffic.
+
+### Latency Targets
+
+- **Device names follow the UniFi Console** - renaming a Device in the UniFi Console renames its Target in **Latency Targets**, **Device Stats**, and **Port Statistics**. **A name you gave a Device's Target in Network Optimizer is replaced by its UniFi Console name, once**; Targets you added yourself keep theirs.
+
+## Client Performance
+
+- **WAN Test** - with a WAN speed test server configured, the **Speed** tab runs a Client WAN Test from your own device, and every WAN test the Client ran lists in **Test Results** beside its LAN tests.
+- **Connection History timeline** - a lane per Access Point, a bar for each stretch the Client spent on it in its band's color, and gaps where it was offline, with a count of disconnects, roams, and the longest time offline.
+- Also fixed: the **Network Path** taking up to a minute to return after a Client reconnected; and **Back** after switching Clients showing the newer Client.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.6-preview1
 
 > **On-Site Agent update (optional; new in v2.11.6-preview1):** the Agent on your UniFi Gateway now times each connection's round trip for Live Traffic (see **Live Traffic** below). Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**.
