@@ -1,3 +1,75 @@
+## 2.11.6-preview1
+
+> **On-Site Agent update (optional; new in v2.11.6-preview1):** the Agent on your UniFi Gateway now times each connection's round trip for Live Traffic (see **Live Traffic** below). Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**.
+
+Preview of what's coming in the next patch. See [v2.11.5](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5) for the latest release.
+
+Round trips for every connection in Live Traffic, a Security Audit check for a Gateway open to the internet, quieter Change Control alerts, and fixes for Live Traffic, the LAN maps, and single sign-on.
+
+## Monitoring
+
+### Live Traffic
+
+- **RTT** - a sortable **RTT** column on the **Flows** table (desktop) and a Client's **Live Traffic** shows each connection's round trip, timed at the Gateway. Needs the Agent update above, and Gateway firmware that reports connection events (the UDR7's does not).
+- **Fix: long-running connections showing as just started** - a connection that opened while nobody had Live Traffic open, or one the Gateway briefly lost track of, showed a recent **Started** time. The first case needs the Agent update above.
+- Also: **Where It's Going** draws larger on a narrow screen, like a phone in portrait.
+- Also fixed: app icons in **Where It's Going** piled up in a corner on an iPhone or iPad.
+
+### Live View
+
+- **Fix: no ISP logo on a WAN globe** - on both maps, for a WAN with no traced route to its ISP or with its ISP Targets paused.
+
+## Wi-Fi Optimizer
+
+- **Speed Map or Signal Map on Overview** - switch between them in place below the cards.
+- **Fix: Roaming failures suggested fast roaming on IoT SSIDs** - and where every SSID already had it on; it now names only the non-IoT SSIDs that have it off.
+
+## Security Audit
+
+- **Firewall: Gateway Management Open to Internet** - a new Critical Finding for **Direct Remote Connection**, or a Firewall Policy that opens the Gateway's management to the internet.
+
+## Dashboard
+
+- **Quicker cards** - the Dashboard's cards fill in without waiting on the **Wi-Fi Health** score, which could hold them for several seconds on a Site connected through an On-Site Agent.
+- Also fixed: **Recent Security Findings** kept showing the previous Security Audit until you reloaded the Dashboard.
+
+## Alerts & Schedule
+
+- **Quieter Change Control alerts** - a Change and the Security Audit it triggers share one Incident, and notify you once per Finding.
+
+## Single Sign-On
+
+- **Fix: a misconfigured OIDC provider broke sign-in** (#1411, thanks @Optic00) - when an enabled provider's Authority was not an https:// URL, every page errored. Saving or enabling such a provider is now refused, and one already saved no longer blocks local sign-in.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.5-preview3
 
 > **On-Site Agent update (optional; new in v2.11.5-preview3):** adds telemetry and a mitigation for an out-of-memory error on EFG and UDM-Beast class gateways while feeding Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
