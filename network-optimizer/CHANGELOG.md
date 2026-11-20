@@ -1,3 +1,54 @@
+## 2.11.6-preview4
+
+> **On-Site Agent update (optional; the v2.11.6-preview1 Agent, unchanged in preview2-preview4):** if you skipped preview1, its Agent on your UniFi Gateway times each connection's round trip for Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you updated on v2.11.6-preview1, you're set.
+
+Preview of what's coming in the next patch. See [v2.11.5](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5) for the latest release.
+
+Your UniFi InnerSpace floor plans and LiDAR scans come onto the Signal Map, wall segments merge, and the Live View maps run edge to edge on a phone.
+
+## Wi-Fi Optimizer
+
+### Signal Map
+
+- **Import from InnerSpace** - a LiDAR scan, a floor plan drawn in InnerSpace, or a Design Center project imported there comes in with its walls, windows, doors, floors, and APs, as a new building or as new or replaced floors of one you already have. Needs a UniFi Console connection with a username and password, and Full Admin access to InnerSpace for that account.
+- **Merge** - select wall segments that run in one straight line and press **Merge** to make them one segment.
+- Also fixed: a segment deleted from a building outline and drawn back the other way showed inside out in 3D; and a deleted floor left its floor plan image on the map.
+
+## Monitoring
+
+### Live View
+
+- Also: on a phone, the maps run to the edges of their card, and the 2D map fits a portrait screen when you go fullscreen, no **Fit all** needed.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.6-preview3
 
 > **On-Site Agent update (optional; the v2.11.6-preview1 Agent, unchanged in preview2 and preview3):** if you skipped preview1, its Agent on your UniFi Gateway times each connection's round trip for Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you updated on v2.11.6-preview1, you're set.
