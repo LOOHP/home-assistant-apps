@@ -1,3 +1,68 @@
+## 2.11.6-preview3
+
+> **On-Site Agent update (optional; the v2.11.6-preview1 Agent, unchanged in preview2 and preview3):** if you skipped preview1, its Agent on your UniFi Gateway times each connection's round trip for Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you updated on v2.11.6-preview1, you're set.
+
+Preview of what's coming in the next patch. See [v2.11.5](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5) for the latest release.
+
+How busy your whole PON is, read from an odi-oss stick, a Connection Check for every monitored ONT, a toolbox and multi-wall editing on the Signal Map, and clearer On-Site Agent installs.
+
+## Monitoring
+
+### ONT Stats
+
+- **Whole-PON downstream load** (#1383, thanks @Optic00) - an odi-oss stick reads how busy your OLT port is for everyone on your splitter tree, with your own traffic beside it, and **PON Load by Hour** maps its busiest hours across the week. When the evening gets slow, you can see whether it's the whole neighborhood.
+- **Path Loss, Link Downtime, and more for odi-oss sticks** (#1383) - **Path Loss**, **Link Downtime**, **Upstream Grants**, **Laser Bias Current**, **ONT CPU Load**, and **Provider Activity**, plus two opt-in path loss alerts. **ONT CPU Load** and the equalization delay need odi-sfp-exporter v1.10.0 or newer.
+- **Connection Check** - a row of checks on **SFP Stats** and **ONT Stats** for every monitored ONT, from **Light** to **Traffic**, each read from the latest poll; hover one to see what it was read from.
+- Also: a **Network Optimizer Custom (HTTP JSON)** endpoint can feed the same cards from any ONT, with the fields in [the contract](https://github.com/Ozark-Connect/NetworkOptimizer/blob/release/2.11/docs/features/netopt-custom-pon-contract.md#what-each-card-needs).
+
+### Live Traffic
+
+- Also fixed: on a phone, a tap held the rows in their old order until you tapped somewhere else; on a phone, an expanded row moved with every refresh; and an open row closed itself as its connections came and went, a ping for one.
+
+### Network Performance
+
+- Also fixed: a Device that changed address showed a second, empty row under its name in **Statistics**.
+
+## Wi-Fi Optimizer
+
+### Signal Map
+
+- **Signal Map Toolbox** - **Pan**, **Select**, **Draw Layout**, **Undo**, and AP placement under the zoom buttons. With **Select**, drag a box over walls and click one to change all their materials at once; right-click an AP to **Move** or **Remove** it.
+- **Draw Layout keeps your materials** - it starts on the building's outline material until the floor's outline closes, then on the last interior material you used in that building.
+
+## On-Site Agent
+
+- **Clearer installs** - the install scripts check the connection to your server before installing and name what is wrong; when the Gateway does not trust your server's certificate, **Run It for Me** offers **Accept a self-signed certificate (--insecure)**.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.6-preview2
 
 > **On-Site Agent update (optional; the v2.11.6-preview1 Agent, unchanged in preview2):** if you skipped preview1, its Agent on your UniFi Gateway times each connection's round trip for Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you updated on v2.11.6-preview1, you're set.
