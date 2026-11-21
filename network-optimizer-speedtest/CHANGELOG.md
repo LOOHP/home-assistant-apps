@@ -1,3 +1,68 @@
+## 2.11.6-preview5
+
+> **On-Site Agent update (optional; new in v2.11.6-preview5):** on the UDM-Beast, EFG, EF-Core, and UXG-Enterprise, the Agent on your UniFi Gateway builds on v2.11.5's out-of-memory mitigation (only the Agent is affected; your Gateway and UniFi OS keep running normally), so those errors should come far less often with Live Traffic open, and Automatic Blocking's public block lists no longer empty after one (see **Live Traffic** and **Threat Intelligence** below). It also carries preview1's Live Traffic round trips. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you installed v2.11.6-oomtest1, you're set.
+
+Preview of what's coming in the next patch. See [v2.11.5](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5) for the latest release.
+
+Fewer Agent out-of-memory errors on the UDM-Beast, EFG, EF-Core, and UXG-Enterprise, distant transit hops left out of your Transit figures, and fixes for Site Health and Roaming failures.
+
+## Monitoring
+
+- General navigation UX improvements.
+
+### Live Traffic
+
+- **Fewer Agent out-of-memory errors with Live Traffic open on the UDM-Beast, EFG, EF-Core, and UXG-Enterprise** (thanks @RichardD012 for the testing on a UDM-Beast) - the On-Gateway Agent (only the Agent is affected; your Gateway and UniFi OS keep running normally) does much less memory work as it samples connections, so the errors (and the restarts v2.11.5 added for them) should come far less often. We're still investigating the root cause, which is specific to these gateways' 64K memory page size. Needs the Agent update above.
+
+### Latency Targets
+
+- **Far transit Targets** - a Transit Target far beyond your others, such as a distant handoff, shows **Far** in **Latency Targets** and keeps its own chart line, but no longer lifts the Transit tiles, the WAN chart, or ISP Health's grades, so expect Transit Health to rise on Sites that have one.
+
+## Site Health
+
+- **Fix: a Gateway restart counted against your ISP in Site Health** - it scored as a WAN outage, and reads as a **LAN / Gateway outage** now; stored hours are rescored.
+
+## Wi-Fi Optimizer
+
+- General navigation UX improvements.
+
+### Roaming
+
+- **Fix: Roaming failures went Critical on one failed roam, or on one Client's** - one failure on an AP pair with few roams no longer counts, and failures that all come from one Client are a Warning that names that Client, so expect **Wi-Fi Health** to rise on Sites that had either.
+
+## Threat Intelligence
+
+- **Fix: Automatic Blocking's public block lists emptying on the UDM-Beast, EFG, EF-Core, and UXG-Enterprise** (thanks @RichardD012 for the report and the logs) - the out-of-memory error above stopped the Agent from applying them, so they emptied as their entries expired and the Security Audit reported **Automatic Blocking: Gateway Blocklist Empty**. The Agent now restarts itself when that happens and applies them again. Needs the Agent update above.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.11 && git reset --hard origin/release/2.11 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.5 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.5)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.6-preview4
 
 > **On-Site Agent update (optional; the v2.11.6-preview1 Agent, unchanged in preview2-preview4):** if you skipped preview1, its Agent on your UniFi Gateway times each connection's round trip for Live Traffic. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you updated on v2.11.6-preview1, you're set.
