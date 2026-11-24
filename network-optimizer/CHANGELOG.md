@@ -1,3 +1,85 @@
+## 2.12.0-preview1
+
+> **On-Site Agent update (optional):** for LAN Health, the Agent on your UniFi Gateway now reads link drops and error counters for the Gateway's own LAN ports, which UniFi Network doesn't keep, and an Agent that collects SNMP now sends when each interface last changed state (see **Monitoring - LAN Health** below). Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+First preview of v2.12.0, and its headline is LAN Health. UniFi Network tells you a port is up. It doesn't tell you that an AP's uplink has been dropping for three seconds at a time, a few times a day, since Tuesday, that the errors are only on the AP's end, or that a mesh backhaul is running soft. LAN Health scores every link between your UniFi Devices and every wired port, puts what the UniFi Console, SNMP, your fabric probes, the AP Agent, and the On-Site Agent each saw into one record per link, and tells you when the trouble started and which end it's on.
+
+Normal things (a reboot, an upgrade, a Change Control Change, a PC asleep on its port) are explained instead of scored, and Site Health's LAN factor now comes from LAN Health. Also new: restart a Device from its Dashboard card, now, at a time you choose, or at the quietest hour in the next 24 hours.
+
+## Monitoring
+
+### LAN Health
+
+- **Why it sees more than UniFi Network** - on one Site, an AP's uplink to its Gateway dropped for about three seconds a few times a day, while UniFi Network showed the port as up, with no drop count, no errors on screen, and no Port Anomalies or alerts. With the AP Agent and the On-Gateway Agent every drop is caught, and LAN Health matches them into one incident per drop, shows the impact since an attempted fix picked up by Change Control, and makes suggestions as to which actions to take next.
+- **LAN Health** - a new tab right of **ISP Health** that scores every fabric link (wired uplinks and mesh backhauls) and every wired access port, weighted by the Clients behind each. **Findings** name the link, what was seen, and when it started, and **Explained** lists everything that looked wrong but has a cause.
+- **What it catches** - a link that drops for seconds and comes back, errors on one end only, a speed downshift or duplex mismatch, a link whose speed keeps dropping, a broadcast storm or loop, a wired Client hopping between Switch ports, an SFP module losing light, a Device rebooting from PoE power loss, unusual load on a trunk, and a mesh backhaul running soft. It also checks STP, VLANs, Jumbo Frames and Flow Control, LACP, and multicast.
+- **View Link** - **Both Ends** side by side, **What Each Source Saw**, a **Timeline**, and **Next Steps**, from a port swap test that tells a bad port from a bad AP or cable, and an EEE test when Energy Efficient Ethernet is on, to whether the drops stopped after a Change Control Change. A port UniFi Network flags with a port anomaly gets a note too.
+- **Across Network Optimizer** - Site Health's LAN factor now comes from LAN Health, so expect it to move on a Site with a flapping link; Live View gets a **LAN Health** tile and score badges on the 2D and 3D maps; Firmware Rollout holds a start while a fabric link is far below its own normal score, and **Link Problems After Upgrade** fires when an upgrade leaves a clean link dropping (power cycle the Device before rolling back); and five new link Alerts cover flapping, speed downshifts, errors, broadcast storms (a loop raises a Critical **Network Loop**), and unusual utilization.
+- **Exclusions** (Site Admin) - **Mute alerts** or **Exclude from score** for a port, its Port Profile, a Device, or every access port, for ports where churn is expected, like guest rooms.
+- **What it needs** - the AP Agent's part needs AP Telemetry on. On first start LAN Health builds the last 14 days of history from what Network Optimizer already recorded, so expect InfluxDB to be busier while it does.
+
+### Live View
+
+- **Port Statistics** - a **PoE** column with each port's draw, matching UniFi Network, live and when you scrub back.
+- **Gateway RTT and Gateway Loss** - hidden when the only Agent probing the Gateway runs on it.
+
+## Dashboard
+
+- **WAN Speed Test and LAN Speed Test cards update as tests finish** - a result shows as soon as it's saved, a Client Speed Test from your phone included, with no reload.
+
+### Device Status - Restart a Device
+
+- **Restart a Device** (Site Admin) - the button in each card's corner restarts it now, at a time you choose, or at the quietest hour in the next 24 hours, over SSH when it's set up, else through the UniFi Console. The same button sits beside each end on a LAN Health link page.
+- **PoE power-cycle** - a Device powered from a Switch or Gateway port can be power-cycled instead, and a hung one gets a power-cycle as its last attempt.
+- **Restarts that don't collide** - several close together run once each, top of the network first, and wait out firmware upgrades, provisioning, a Firmware Rollout, and a Change Control Plan being applied.
+- **Restarting often?** - the restart sheet's link opens the Device's Health Check in Monitoring - Setup with **Reboot the device** as its remedy.
+- **The restart reason says who and how** - a planned restart raises no offline Alerts, and **Device: Restart Failed** alerts when one doesn't complete.
+
+## Change Control
+
+- **UniFi Network 11.1** - an object a Site Manager Fabric pushes to your Site carries a **Fabrics** badge, and a Plan never edits a locked one or deletes one Site Manager would put back at the next sync; it says so instead. Port Automations are recorded, a change to a WAN's Passthrough VLANs counts as a possible lockout, and **Return to Baseline** from before 11.1 no longer stops on a WAN with Passthrough VLANs.
+- **Fix: Your own edits after a Network app upgrade read as the upgrade's** - they, and the port profile updates UniFi makes when you add or remove a network, now go to whoever made them, and the upgrade's window is down to the 10 minutes its migration takes.
+- **Fix: Add Network on UniFi Network 11.1** - a Network added in **Edit** applied as Partial ("Not applied by UniFi: DHCPv6, mDNS"); it now applies clean.
+- **Fix: A false "still used by" warning when you delete a Network in Edit** - it named UniFi's own Etherlighting colors, which UniFi clears itself, and said Review Plan would refuse the delete when it didn't.
+- **Fix: the Settings tab jumping around** - on laptop-width windows, the **On this page** links flipped between the two columns several times a second (#1427, thanks @bondskin for the video).
+
+## Security Audit
+
+- **WAN: Passthrough VLANs Bypass the Firewall** and **Port Automation: Trusted Network by Vendor or MAC OUI** - two Network 11.1 checks: ISP VLANs passed straight to your LAN, which UniFi's firewall doesn't filter, and a Port Automation that hands a trusted network to any device claiming a vendor or MAC OUI.
+
+## Fixes
+
+- Also fixed: Client names in the Security Audit, Threat Intelligence, the Wi-Fi Optimizer, and speed test results falling back to the hostname instead of UniFi Network's name for the Client; on a phone, network names and AS numbers in the traceroute tables breaking mid-word; and in **WAN Speed Test** and **Client WAN Test**, clicking a point on any Test History chart opens that result, not only on **Speed**.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.12 && git reset --hard origin/release/2.12 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.11.6-preview5
 
 > **On-Site Agent update (optional; new in v2.11.6-preview5):** on the UDM-Beast, EFG, EF-Core, and UXG-Enterprise, the Agent on your UniFi Gateway builds on v2.11.5's out-of-memory mitigation (only the Agent is affected; your Gateway and UniFi OS keep running normally), so those errors should come far less often with Live Traffic open, and Automatic Blocking's public block lists no longer empty after one (see **Live Traffic** and **Threat Intelligence** below). It also carries preview1's Live Traffic round trips. Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and press **Run It for Me**. If you installed v2.11.6-oomtest1, you're set.
