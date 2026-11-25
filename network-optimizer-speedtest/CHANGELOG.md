@@ -1,3 +1,64 @@
+## 2.12.0-preview5
+
+> **On-Site Agent update (optional, the v2.12.0-preview1 Agent, unchanged in preview2, preview3, preview4, and preview5):** if you skipped preview1, upgrade it so LAN Health can see link drops and errors on your Gateway's own LAN ports, and when each interface an Agent polls over SNMP last changed state. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview1, you're set.
+
+Fifth preview of v2.12.0. See the [v2.12.0-preview4 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.12.0-preview4) for what came before.
+
+A phone scrolls past maps now, LAN Health explains drops during a Gateway's UniFi OS update, and fixes for Live Traffic, Upstream Path Discovery, and Network Tools.
+
+## Monitoring
+
+### LAN Health
+
+- **Fix: A Gateway's UniFi OS update left LAN Health drops unexplained** - drops on the links below the Gateway during a UniFi OS update from **Firmware Rollout** now show the update, and stored hours recompute.
+- **Fix: Network Performance links opened beside the moment** - the **Timeline** links and the probe links now open **Network Performance** centered on the event.
+
+### Network Performance
+
+- **Fix: Two transit hops with the same name after a rediscovery** (also in v2.11.7) - in **Upstream Path Discovery**, a new hop with no reverse DNS could take a saved hop's name ("AT&T 1"); it now takes a suffix ("AT&T 1-1").
+
+### Live Traffic
+
+- **Fix: Live Traffic waited forever with Monitoring off** (also in v2.11.7, thanks Samfisher for the report) - it now says Monitoring is off and links **Monitoring - Setup**.
+
+### Network Tools
+
+- **Fix: No SFP data for a PPPoE WAN** (also in v2.11.7, #1434, thanks @Optic00) - **Inspect a Gateway Interface** now reads **SFP Module** from the port the PPPoE session runs over.
+
+## Fixes
+
+- **Fix: A phone could not scroll past a map** - one finger now scrolls the page on every map; a tap, a short hold, or a sideways swipe arms the map (it shows a ring) so that finger moves it, and two fingers always do.
+- Also fixed: on a phone, page tab arrows that left a gap before the first tab; a tab strip that jumped while it scrolled; and a tapped tab that took up to a second to slide into view.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.12 && git reset --hard origin/release/2.12 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.12.0-preview4
 
 > **On-Site Agent update (optional, the v2.12.0-preview1 Agent, unchanged in preview2, preview3, and preview4):** if you skipped preview1, upgrade it so LAN Health can see link drops and errors on your Gateway's own LAN ports, and when each interface an Agent polls over SNMP last changed state. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview1, you're set.
