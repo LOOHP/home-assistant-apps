@@ -1,3 +1,48 @@
+## 2.12.0-preview4
+
+> **On-Site Agent update (optional, the v2.12.0-preview1 Agent, unchanged in preview2, preview3, and preview4):** if you skipped preview1, upgrade it so LAN Health can see link drops and errors on your Gateway's own LAN ports, and when each interface an Agent polls over SNMP last changed state. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview1, you're set.
+
+Fourth preview of v2.12.0. See the [v2.12.0-preview3 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.12.0-preview3) for what came before.
+
+A fix for devices and SNMP data going missing with some switch firmware, and a Managed SSH Key that no longer takes your own key off the Gateway.
+
+## Managed SSH Key
+
+- **Fix: Remove from gateway took your own key with it** - with a key you already had on the Gateway as the managed key, **Remove from gateway**, or removing the stored key, took it out of authorized_keys too. A key that was there before Network Optimizer installed it now stays.
+
+## Fixes
+
+- **Fix: Device Status and SNMP charts empty with some switch firmware** - since v2.12.0-preview1, a site with those switches got no devices from the UniFi Console, so the Dashboard's **Device Status** and every SNMP chart stayed empty (thanks u/anwoke8204 for the logs).
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.6)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.12 && git reset --hard origin/release/2.12 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.6 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.6)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.12.0-preview1
 
 > **On-Site Agent update (optional):** for LAN Health, the Agent on your UniFi Gateway now reads link drops and error counters for the Gateway's own LAN ports, which UniFi Network doesn't keep, and an Agent that collects SNMP now sends when each interface last changed state (see **Monitoring - LAN Health** below). Open **Settings - Multi-Site**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
