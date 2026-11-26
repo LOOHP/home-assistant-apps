@@ -1,3 +1,58 @@
+## 2.12.0-preview7
+
+> **On-Site Agent update (optional, the v2.12.0-preview6 Agent, unchanged in preview7):** if you skipped preview6, upgrade the On-Gateway Agent on a UCG-Fiber so LAN Health can read the Gateway's own LAN ports. It also carries preview1's Agent changes if you skipped them. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview6, you're set.
+
+Seventh preview of v2.12.0. See the [v2.12.0-preview6 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.12.0-preview6) for what came before.
+
+Links to Client Performance now open the Client itself, asleep or long gone, its Network Path shows the Client's RTT live, and Port Statistics names a port's Client when UniFi Network stops listing it. Plus fixes for Firmware Rollout and the Live View sparklines.
+
+## Client Performance
+
+- **Links open the Client, not its old IP** - from the 2D and 3D maps, LAN Health, Port Statistics, and speed test results, an asleep or departed Client opens as itself, even after its IP went to another device.
+- **Live ping on Network Path** - on the **Connection** tab, Network Optimizer pings the Client every 5 seconds while you watch, and its RTT shows next to the path's max speed. Hover it to see where the ping came from: the Network Optimizer server, or the Site's On-Site Agent.
+- **Fix: Protect devices showing their name squashed together** - on the maps and Client Performance, a Protect device whose name reaches UniFi Network with its spaces and punctuation stripped ("[Camera] Front Door" as "CameraFrontDoor") shows the name you gave it again.
+- Also: the "10/100 Mbps link detected" note on a Client's own port now shows only when that port linked faster with the Client in the last 30 days, so a device that only does 100 Mbps (an IoT hub, a smart TV) no longer gets it. On Client Performance and speed test results.
+
+## Monitoring
+
+### Live View
+
+- **Port Statistics names an asleep or unlisted Client** - a port whose Client UniFi Network no longer lists (a TV in standby, a PC asleep behind a Wake-on-LAN port) shows it as LAN Health does, live and when you scrub back, linked to Client Performance even without a current IP. A port several Clients share shows how many.
+- Also fixed: clicking a spike on a tile's sparkline (**WAN Download**, **Gateway RTT**, and the rest) moving Live View up to a minute away from it.
+
+## Firmware Rollout
+
+- **Fix: A rollout that changed the Site's update channel started minutes behind schedule** - it waited for the Console to stage a build it already had a download link for.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.12 && git reset --hard origin/release/2.12 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.12.0-preview6
 
 > **On-Site Agent update (optional, the v2.12.0-preview6 Agent):** on a UCG-Fiber, upgrade the On-Gateway Agent so LAN Health can read the Gateway's own LAN ports (see **LAN Health** below). It also carries preview1's Agent changes if you skipped them. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
