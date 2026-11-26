@@ -1,3 +1,72 @@
+## 2.12.0-preview8
+
+> **On-Site Agent update (optional, the v2.12.0-preview6 Agent, unchanged in preview7 and preview8):** if you skipped preview6, upgrade the On-Gateway Agent on a UCG-Fiber so LAN Health can read the Gateway's own LAN ports. It also carries preview1's Agent changes if you skipped them. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview6, you're set.
+
+Eighth preview of v2.12.0. See the [v2.12.0-preview7 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.12.0-preview7) for what came before.
+
+This one is mostly the Signal Map: walls you can select with a finger, a trimmed toolbar on a phone, every antenna for the U7 Industrial, and a batch of fixes. Plus personal Sites that keep the free tier beside a license key, and U7 Mesh Wall and USW LR Switch 8 PoE support.
+
+## Wi-Fi Optimizer - Signal Map
+
+- **U7 Industrial with every antenna** - place it or plan it on **Built-in**, **Omni** (external), **Narrow**, or **Wide**, and an AP's **Antenna** setting now offers every mode its model has.
+- **Fix: the UK Ultra's Panel antenna couldn't be picked** - its **Antenna** toggle offered only Directional and Omni, and now offers **Built-in**, **Omni**, and **Panel**.
+- **On a phone** - **Select** in the toolbox selects walls with a finger instead of panning, the toolbar drops the buttons the toolbox already has, and the scale bar fits beside the **Signal (dBm)** legend.
+- **Fullscreen and fit on the map** - under the address search, and leaving fullscreen keeps your place on the page instead of jumping to the top.
+- Also: a search box on the **Add Planned APs** list; radio power and antenna gain for the U7 Mesh Wall, U7 Industrial, and E7 Campus Indoor; the black UWB-XG on the UWB-XG's antenna pattern; and the U7 Industrial, UK Ultra, UWB-XG, AC Mesh, AC Mesh Pro, and FlexHD starting on a wall mount.
+- Also fixed: the heatmap staying off after deleting a building or floor mid-draw; a strip of the map left without heatmap as you panned; the toolbox disappearing after the page reconnected to the server; the **Signal Data** time slider hidden in fullscreen, or covered by the map after leaving it; and thin dark lines between map tiles at some zoom levels, on every map with dark streets.
+
+## Monitoring
+
+### Live View
+
+- **Open Signal Map from the 3D map** - a button beside **Fit all** opens the Signal Map, where you set the floor plans and AP placements the 3D map draws.
+
+### LAN Health
+
+- **Fix: a LAN Health Alert you resolved by hand came back after each restart** - while its fault still stood.
+
+## Licensing
+
+- **Personal Sites keep the free tier beside a license key** (Multi-Site) - activating a key asks once whether any of your Sites are personal, and up to three of those run free beside the keyed ones.
+- **Fix: a Site Coverage dropdown showing the wrong key after you activated a second one** - the Site stayed on its own key, and only the dropdown read wrong.
+
+## Fixes
+
+- **Fix: the Settings tabs disappearing on a phone** (since preview5) - the tab row collapsed to nothing beside the search box, and on desktop the right scroll arrow sat on the search box.
+
+## Device Support
+
+- **U7 Mesh Wall and USW LR Switch 8 PoE** support.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.12 && git reset --hard origin/release/2.12 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.12.0-preview7
 
 > **On-Site Agent update (optional, the v2.12.0-preview6 Agent, unchanged in preview7):** if you skipped preview6, upgrade the On-Gateway Agent on a UCG-Fiber so LAN Health can read the Gateway's own LAN ports. It also carries preview1's Agent changes if you skipped them. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview6, you're set.
