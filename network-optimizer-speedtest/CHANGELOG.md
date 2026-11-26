@@ -1,3 +1,71 @@
+## 2.12.0-preview6
+
+> **On-Site Agent update (optional, the v2.12.0-preview6 Agent):** on a UCG-Fiber, upgrade the On-Gateway Agent so LAN Health can read the Gateway's own LAN ports (see **LAN Health** below). It also carries preview1's Agent changes if you skipped them. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you).
+
+Sixth preview of v2.12.0. See the [v2.12.0-preview5 notes](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.12.0-preview5) for what came before.
+
+LAN Health gets a Mesh Backhaul card for mesh and UDB links, the speed tests that crossed each link, and a way in from the maps, Client Performance, speed test traces, and Port Statistics. It also sees a UCG-Fiber's own LAN ports and knows a sleeping client on a Gateway port. Plus a Security Audit false positive and a few fixes.
+
+## Monitoring
+
+### LAN Health
+
+- **Fix: No Gateway port readings on a UCG-Fiber** - LAN Health got no link drops or CRC errors from the Gateway's own LAN ports; with the On-Gateway Agent upgraded, it does.
+- **Fix: A client asleep on a Gateway port showed as Outages** - a console or PC that sleeps on one of the Gateway's own LAN ports now reads as asleep, not as Outages and Drops.
+- **Fix: Capacity Trend reported growth on a mesh link** - weeks from before its traffic was measured counted as idle.
+- **Mesh Backhaul** - a mesh link's page (UDB and UDB-Switch links too) shows each band's signal, link speed, and channel, the MLO links side by side, and the window's retries, drops, and re-associations.
+- **Link ends open where you'd look next** - on a link page, a switch or Gateway opens its **Port Statistics**, an AP its clients, and a client **Client Performance**, now with the client's UniFi Network icon.
+- **Speed Tests** - a link page lists the latest speed tests across the link, each against what similar paths normally get, with a jump to the result.
+- **Open a link from anywhere** - double-click a link on the 2D or 3D map, or click one in **Network Path** or a speed test trace (or the path's max speed, for its bottleneck), to open its LAN Health page; a wired client's Client Performance header shows its port's LAN Health, and each **Port Statistics** row links to its port's.
+
+### Live View
+
+- **Fix: Opening one device in Port Statistics replaced your saved filter** - a jump from the map or a LAN Health link now lasts for that visit, as in **Device Stats**.
+- **Client Performance opens on Speed from the maps** - double-clicking a client on the 2D or 3D map lands on **Speed**, not **Signal**.
+- Also fixed: Port Statistics tooltips closing at each live update; and an armed map's ring covering the top bar on a phone.
+
+## Adaptive SQM
+
+- **Fix: Old dates on the Adaptive SQM card after a power cut** - the last speed test and ping adjustment could stay stuck from before the cut, and new errors went unshown (thanks Srinivas for the report).
+
+## Security Audit
+
+- **Fix: A false "Gateway Management Open to Internet" from Identity Sync** (#1429, thanks @PDubya56) - UniFi's predefined Identity Sync policy read as opening the Gateway's management ports.
+
+## Fixes
+
+- **Fix: LAN speed tests marked Teleport** - a Client Speed Test from a 192.168.x.x network the site no longer has showed **Teleport** in **Source**.
+- **Fix: Back on Client Speed Test always went to LAN Speed Test** - it and **Client WAN Test** now use the app's Back button, so Back returns to where you came from.
+
+## Installation
+
+Preview builds use a rolling `:preview` tag that always gets the latest features and fixes. Set it once and future builds arrive on pull.
+
+**Docker** (assuming you've installed already through the normal procedures listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```yaml
+image: ghcr.io/ozark-connect/network-optimizer:preview
+image: ghcr.io/ozark-connect/speedtest:preview
+```
+```bash
+docker compose pull && docker compose up -d
+```
+
+**Windows**: download the MSI installer below
+
+**macOS** (native, recommended for accurate speed tests vs Docker Desktop). Same command for every preview build:
+```bash
+cd NetworkOptimizer && git fetch origin && git checkout release/2.12 && git reset --hard origin/release/2.12 && ./scripts/install-macos-native.sh
+```
+
+**Proxmox** (assuming you've already installed via the LXC script listed in [v2.11.7 or other releases](https://github.com/Ozark-Connect/NetworkOptimizer/releases/tag/v2.11.7)):
+```bash
+pct exec <CT_ID> -- bash -c 'cd /opt/network-optimizer && sed -i -e "s#network-optimizer:latest#network-optimizer:preview#" -e "s#speedtest:latest#speedtest:preview#" docker-compose.yml && docker compose pull && docker compose up -d && docker image prune -a -f'
+```
+
+For other platforms (Synology, QNAP, Unraid, native Linux) or new installations, see the [Deployment Guide](https://github.com/Ozark-Connect/NetworkOptimizer/blob/main/docker/DEPLOYMENT.md).
+
+Something broke on this preview, or need a hand switching to it? Tell me in `#previews` on the [Network Optimizer Discord](https://discord.gg/pHrmzbBCY3). Confirmed bugs and feature requests go to [GitHub Issues](https://github.com/Ozark-Connect/NetworkOptimizer/issues).
+
 ## 2.12.0-preview5
 
 > **On-Site Agent update (optional, the v2.12.0-preview1 Agent, unchanged in preview2, preview3, preview4, and preview5):** if you skipped preview1, upgrade it so LAN Health can see link drops and errors on your Gateway's own LAN ports, and when each interface an Agent polls over SNMP last changed state. Open **Settings - Multi-Site / Agents**, expand your Site, press **Upgrade**, and run the command for your install (on an On-Gateway Agent, **Run It for Me** runs it for you). If you updated on v2.12.0-preview1, you're set.
